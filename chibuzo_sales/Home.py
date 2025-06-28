@@ -51,6 +51,8 @@ with col1:
     image_path = "priscomac_blacktransparent_logo_rockyart.png"
     image = Image.open(image_path)
     img = ImageOps.exif_transpose(image)
+    # Manually rotate the image 180 degrees
+    img = img.rotate(180, expand=True)
 # Resize the image (set new width & height)
     resized_image = img.resize((200,100)) # Adjust size as needed
 # Display in Streamlit
