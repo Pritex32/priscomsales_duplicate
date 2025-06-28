@@ -48,7 +48,7 @@ col1,col2=st.columns([1,3])
 # Load the image
 with col1:
    
-    image_path = "chibuzo_sales/priscomac_blacktransparent_logo_rockyart.png"
+    image_path = "priscomac_blacktransparent_logo_rockyart.png"
     image = Image.open(image_path)
     
     # Manually rotate the image 180 degrees to rotate the image
