@@ -16,7 +16,7 @@ import importlib.util
 import requests
 import numpy as np
 import matplotlib.pyplot as plt
-from streamlit_cookies_manager import EncryptedCookieManager
+
 from streamlit_extras.switch_page_button import switch_page
 from PIL import Image
 
