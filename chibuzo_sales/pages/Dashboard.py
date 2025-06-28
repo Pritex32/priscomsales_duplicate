@@ -674,7 +674,7 @@ elif choice == 'Login':
                             st.success(f"✅ Welcome {employee_name} (Employee)! Redirecting to Sales...")
 
                         time.sleep(2)
-                        switch_page("sales")
+                        switch_page("Sales")
 
         # ❗ Login validation warnings
         if login_type == "MD" and not st.session_state.get("logged_in"):
