@@ -12,7 +12,7 @@ import os
 import numpy as np
 from storage3.exceptions import StorageApiError
 import uuid
-from streamlit_cookies_manager import EncryptedCookieManager
+
 from fpdf import FPDF
 import base64
 import jwt
