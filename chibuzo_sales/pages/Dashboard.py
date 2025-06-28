@@ -66,12 +66,18 @@ def restore_login_from_jwt():
                 st.session_state.username = user_data["username"]
                 st.session_state.role = user_data["role"]
                 st.session_state.user_email = user_data.get("email")
+                st.session_state.user = user_data 
 
                 # ✅ This is the critical fix
                 if user_data["role"] == "employee":
                     st.session_state.employee_user = {"name": user_data["username"]}
 
-
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+if "username" not in st.session_state:
+    st.session_state.username = ""
+if "page" not in st.session_state:
+    st.session_state.page = "Login"
 
 restore_login_from_jwt()
 
@@ -228,7 +234,7 @@ def login_user(email, password):
             if stored_password_hash == hashlib.sha256(password.encode()).hexdigest():
                 return user
             if user:
-                token = generate_jwt(user["id"], user["username"])
+                token = generate_jwt(user["id"], user["username"],user["email"])
                 st.session_state.logged_in = True
                 st.session_state.user_id = user["id"]
                 st.session_state.username = user["username"]
@@ -316,6 +322,7 @@ def login_employee(email, password):
     jwt_token = generate_jwt(
     user_id=md_user_id,
     username=user_data.get("name"),
+    email=user_data.get["email"],
     role=user_data.get("role", "employee")
 )
 
@@ -412,7 +419,7 @@ def login_md(email, password):
 
 
     # ✅ Generate and store JWT in localStorage using JS
-    jwt_token = generate_jwt(user_id=user_id, username=user.get("username") or user["email"], role=role)
+    jwt_token = generate_jwt(user_id=user_id, username=user.get("username") or user["email"],email=user["email"], role=role)
 
     st_javascript(f"""localStorage.setItem("login_token", "{jwt_token}");""")
 
@@ -738,18 +745,22 @@ CALLBACK_URL = "https://priscomac-com.onrender.com//payment-success"  # Optional
 
 def initialize_payment(email, amount, user_id):
     headers = {
-        "Authorization": f"Bearer {paystack_key}",
+        "Authorization": f"Bearer {paystack_key",
         "Content-Type": "application/json"
     }
+    
+    unique_ref = f"{user_id}-{int(amount)}-{datetime.now().strftime('%Y%m%d%H%M%S')}"
     data = {
         "email": email,
         "amount": amount * 100,  # Convert to kobo
-        "reference": f"{user_id}-{int(amount)}",
+        "reference":  unique_ref,
         "callback_url": CALLBACK_URL
     }
     st.write(data)
     response = requests.post("https://api.paystack.co/transaction/initialize", json=data, headers=headers)
+    st.write("Paystack Response:", response.json()) 
     return response.json()
+    
 
 # Simulated user info — in production, this should come from your auth/session
 if "user_id" not in st.session_state or "user_email" not in st.session_state:
@@ -801,19 +812,22 @@ def save_transaction(user_id, reference, amount, status):
 
 
 
-query_params = st.query_params
-reference = query_params.get("reference", [None])[0]
+#
 
+# ✅ 3. Handle Paystack payment verification
+query_params = st.query_params
+reference = query_params.get("reference")
 if reference:
+    reference = reference[0]
+    st.write("✅ Payment reference received:", reference)
+
     result = verify_payment(reference)
-    if result['status'] and result['data']['status'] == "success":
+    if result["status"] and result["data"]["status"] == "success":
         user_id = extract_user_id(reference)
         activate_subscription(user_id)
-        st.success("🎉 Payment successful! Your Pro subscription is active.")
+        st.success("🎉 Payment successful! Your Pro subscription is now active.")
     else:
         st.error("❌ Payment failed or could not be verified.")
 else:
-    st.warning("No payment reference found.")
-
-
+    st.info("ℹ️ No payment reference in URL.")
 
