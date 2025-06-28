@@ -22,13 +22,13 @@ from PIL import Image
 
 import json
 import os
-
+from dotenv import load_dotenv
 import jwt
 import streamlit.components.v1 as components
 
 ## 🔐 Same secret key must be used across all pages
 
-
+load_dotenv()
 
 jwt_SECRET_KEY = "4606"  # Use env vars in production
 ALGORITHM = "HS256"
@@ -93,7 +93,7 @@ col1,col2=st.columns([1,3])
 # Load the image
 with col1:
    
-    image_path = r"C:\Users\USER\Documents\vscode\chibuzo_sales\IMG-20250531-WA0006 (2).jpg"
+    image_path = "IMG-20250531-WA0006 (2).jpg"
     image = Image.open(image_path)
 # Resize the image (set new width & height)
     resized_image = image.resize((200,100) ) # Adjust size as needed
@@ -745,12 +745,12 @@ if st.session_state.get("logged_in") and st.session_state.get("role") == "md":
 import requests
 
 # Use your Paystack **SECRET** key here (starts with sk_live...) — not the PUBLIC key
-PAYSTACK_SECRET_KEY = "sk_live_900f5349babb63500e48860ad8692da4b95be90b"  # Replace with your real secret key
+paystack_key = os.getenv("PAYSTACK_SECRET_KEY")  # this is to hide the real key from public eyes
 CALLBACK_URL = "https://priscomac-com.onrender.com//payment-success"  # Optional, can be your app URL
 
 def initialize_payment(email, amount, user_id):
     headers = {
-        "Authorization": f"Bearer {PAYSTACK_SECRET_KEY}",
+        "Authorization": f"Bearer {paystack_key}",
         "Content-Type": "application/json"
     }
     data = {
