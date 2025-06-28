@@ -11,11 +11,9 @@ import io
 import os
 import plotly.express as px
 import numpy as np
-from streamlit_cookies_manager import EncryptedCookieManager
 from storage3.exceptions import StorageApiError
 import tempfile
 import mimetypes
-# Initialize Cookie Manager
 import uuid
 from datetime import datetime, timedelta
 import streamlit.components.v1 as components
