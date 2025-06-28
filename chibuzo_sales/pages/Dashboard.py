@@ -741,7 +741,7 @@ import requests
 
 # Use your Paystack **SECRET** key here (starts with sk_live...) — not the PUBLIC key
 PAYSTACK_SECRET_KEY = "sk_test_b4d6bbad64ad55d65008808f70cf8ba74ff830d7"   # this is to hide the real key from public eyes
-CALLBACK_URL = "https://priscomac-com.onrender.com//payment-success"  # Optional, can be your app URL
+CALLBACK_URL = "https://priscomac-sales-software.onrender.com/Dashboard"  # Optional, can be your app URL
 
 def initialize_payment(email, amount, user_id):
     headers = {
