@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 from streamlit_option_menu import option_menu
 from datetime import datetime,timedelta ,date
-from streamlit_cookies_manager import EncryptedCookieManager
+
 
 import json
 import time
