@@ -93,7 +93,7 @@ col1,col2=st.columns([1,3])
 # Load the image
 with col1:
    
-    image_path = "IMG-20250531-WA0006 (2).jpg"
+    image_path = "chibuzo_sales/IMG-20250531-WA0006 (2).jpg"
     image = Image.open(image_path)
 # Resize the image (set new width & height)
     resized_image = image.resize((200,100) ) # Adjust size as needed
