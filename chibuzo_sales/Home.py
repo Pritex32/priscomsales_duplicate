@@ -12,7 +12,7 @@ from streamlit_option_menu import option_menu
 from datetime import datetime
 import json
 import time
-from streamlit_cookies_manager import EncryptedCookieManager
+
 from PIL import Image
 import hashlib
 import uuid
