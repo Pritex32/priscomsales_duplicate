@@ -92,7 +92,7 @@ if st.sidebar.button("📩 Contact Developer"):
 
 col11,col22=st.columns([7.5,1])
 with col11:
-    st.title("Grow Your Buisness With Priscomac")
+    
     st.markdown("""
 ### Empowering You to Run a Smarter Business  
 At **Priscomac**, we provide powerful tools to help you record sales, manage inventory, forecast growth, and generate daily reports — all from one easy-to-use platform.
