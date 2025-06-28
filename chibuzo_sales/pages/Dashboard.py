@@ -772,12 +772,25 @@ email = st.session_state["user_email"]
 
 if st.button("Upgrade to Pro (₦1000)"):
     result = initialize_payment(email, 1000, user_id)
-    if result['status']:
-        auth_url = result['data']['authorization_url']
-        st.success("Redirecting to Paystack...")
-        st.markdown(f"[Click here to complete your payment]({auth_url})", unsafe_allow_html=True)
+    st.write("🔍 Paystack Init Result:", result)  # DEBUG
+
+    if result.get("status") and "data" in result:
+        auth_url = result["data"].get("authorization_url")
+
+        if auth_url:
+            # ✅ Show the URL link (ALWAYS)
+            st.markdown(f"[Click here to pay with Paystack]({auth_url})", unsafe_allow_html=True)
+
+            # ✅ Also redirect automatically (optional)
+            st.markdown(f"""
+                <script>
+                    window.location.href = "{auth_url}";
+                </script>
+            """, unsafe_allow_html=True)
+        else:
+            st.error("❌ No authorization URL returned.")
     else:
-        st.error("Failed to initialize payment. Please try again.")
+        st.error("❌ Failed to initialize payment.")
 
 # to verify is payment is recieved
 def verify_payment(reference):
