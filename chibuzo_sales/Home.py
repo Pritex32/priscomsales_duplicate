@@ -46,8 +46,7 @@ def get_supabase_client():
 supabase = get_supabase_client() # use this to call the supabase database
 col1,col2=st.columns([1,3])
 # Load the image
-with col1:
-   
+with col1:  
     image_path = "priscomac_blacktransparent_logo_rockyart.png"
     image = Image.open(image_path)
     
