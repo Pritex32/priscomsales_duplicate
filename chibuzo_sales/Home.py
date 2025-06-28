@@ -13,7 +13,7 @@ from datetime import datetime
 import json
 import time
 
-from PIL import Image
+from PIL import Image, ImageOps
 import hashlib
 import uuid
 from datetime import date, timedelta
@@ -50,8 +50,9 @@ with col1:
    
     image_path = "priscomac_blacktransparent_logo_rockyart.png"
     image = Image.open(image_path)
+    img = ImageOps.exif_transpose(image)
 # Resize the image (set new width & height)
-    resized_image = image.resize((200,100) ) # Adjust size as needed
+    resized_image = img.resize((200,100)) # Adjust size as needed
 # Display in Streamlit
     st.image(resized_image)
 with col2:
