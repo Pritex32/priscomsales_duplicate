@@ -745,7 +745,7 @@ CALLBACK_URL = "https://priscomac-com.onrender.com//payment-success"  # Optional
 
 def initialize_payment(email, amount, user_id):
     headers = {
-        "Authorization": f"Bearer {PAYSTACK_SECRET_KEY},
+        "Authorization": f"Bearer {PAYSTACK_SECRET_KEY}",
         "Content-Type": "application/json"
     }
     
