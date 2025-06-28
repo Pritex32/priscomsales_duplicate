@@ -89,18 +89,7 @@ def get_supabase_client():
 
 # Initialize Supabase client
 supabase = get_supabase_client() # use this to call the supabase database
-col1,col2=st.columns([1,3])
-# Load the image
-with col1:
-   
-    image_path = "chibuzo_sales/IMG-20250531-WA0006 (2).jpg"
-    image = Image.open(image_path)
-# Resize the image (set new width & height)
-    resized_image = image.resize((200,100) ) # Adjust size as needed
-# Display in Streamlit
-    st.image(resized_image)
-with col2:
-   st.title('Priscomac Business Console')
+
 
 
 # contact developer
