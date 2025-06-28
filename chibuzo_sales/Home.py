@@ -50,15 +50,15 @@ with col1:
    
     image_path = "priscomac_blacktransparent_logo_rockyart.png"
     image = Image.open(image_path)
-    img = ImageOps.exif_transpose(image)
-    # Manually rotate the image 180 degrees
+    
+    # Manually rotate the image 180 degrees to rotate the image
     img = img.rotate(270, expand=True)
 # Resize the image (set new width & height)
     resized_image = img.resize((200,100)) # Adjust size as needed
 # Display in Streamlit
     st.image(resized_image)
 with col2:
-   st.title('Priscomac')
+   st.title('Sales Hub')
 
 
 # contact developer
@@ -91,7 +91,7 @@ if st.sidebar.button("📩 Contact Developer"):
 
 col11,col22=st.columns([7.5,1])
 with col11:
-    st.title("Priscomac Sales Hub")
+    st.title("Grow Your Buisness With Priscomac")
     st.markdown("""
 ### Empowering You to Run a Smarter Business  
 At **Priscomac**, we provide powerful tools to help you record sales, manage inventory, forecast growth, and generate daily reports — all from one easy-to-use platform.
