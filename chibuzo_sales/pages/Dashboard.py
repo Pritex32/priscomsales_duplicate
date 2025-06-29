@@ -874,8 +874,18 @@ else:
 
 
 def refresh_user_subscription(user_id):
-    response = supabase.table("subscription").select("plan, is_active").eq("user_id", user_id).single().execute()
-    if response.data:
-        st.session_state.plan = response.data["plan"]
-        st.session_state.is_active = response.data["is_active"]
+    response = supabase.table("subscription") \
+    .select("plan, is_active") \
+    .eq("user_id", user_id) \
+    .order("started_at", desc=True) \
+    .limit(1) \
+    .execute()
+    if response.data and len(response.data) > 0:
+        latest_sub = response.data[0]
+        st.session_state.plan = latest_sub["plan"]
+        st.session_state.is_active = latest_sub["is_active"]
+    else:
+            # Handle no subscription found
+        st.session_state.plan = "free"
+        st.session_state.is_active = False
 refresh_user_subscription(user_id)
