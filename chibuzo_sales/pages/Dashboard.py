@@ -44,16 +44,18 @@ load_dotenv()
 jwt_SECRET_KEY = "4606"  # Use env vars in production
 ALGORITHM = "HS256"
 
-def generate_jwt(user_id, username, role, email):
+def generate_jwt(user_id, username, role,plan="free", is_active=False):
     payload = {
         "user_id": user_id,
         "username": username,
         "role": role,
-        "email": email,
+        "plan": plan,
+        "is_active": is_active,
         "exp": datetime.utcnow() + timedelta(hours=1)
     }
+    
     token = jwt.encode(payload, jwt_SECRET_KEY, algorithm=ALGORITHM)
-    return token
+    return tokenen
 
 
 def decode_jwt(token):
@@ -77,7 +79,9 @@ def restore_login_from_jwt():
                 st.session_state.username = user_data["username"]
                 st.session_state.role = user_data["role"]
                 st.session_state.user_email = user_data.get("email")
-                st.session_state.user = user_data 
+                st.session_state.user = user_data
+                st.session_state.plan = user_data.get("plan", "free").lower()
+                st.session_state.is_active = user_data.get("is_active", False)
 
                 # ✅ This is the critical fix
                 if user_data["role"] == "employee":
@@ -91,8 +95,19 @@ if "page" not in st.session_state:
     st.session_state.page = "Login"
 
 restore_login_from_jwt()
+def save_token_to_localstorage(token):
+    st_javascript(f"""localStorage.setItem("login_token", "{token}");""")
 
+def refresh_subscription_from_jwt():
+    token = st.session_state.get("jwt_token")
+    if not token:
+        st.session_state.plan = "free"
+        st.session_state.is_active = False
+        return
 
+    payload = decode_jwt(token)
+    st.session_state.plan = payload.get("plan", "free").lower()
+    st.session_state.is_active = payload.get("is_active", False)
 
 
 from supabase import create_client
@@ -873,19 +888,9 @@ else:
     st.info("ℹ️ No payment reference in URL.")
 
 
-def refresh_user_subscription(user_id):
-    response = supabase.table("subscription") \
-    .select("plan, is_active") \
-    .eq("user_id", user_id) \
-    .order("started_at", desc=True) \
-    .limit(1) \
-    .execute()
-    if response.data and len(response.data) > 0:
-        latest_sub = response.data[0]
-        st.session_state.plan = latest_sub["plan"]
-        st.session_state.is_active = latest_sub["is_active"]
-    else:
-            # Handle no subscription found
-        st.session_state.plan = "free"
-        st.session_state.is_active = False
-refresh_user_subscription(user_id)
+def login_or_upgrade_success(user_id, username, role, plan, is_active):
+    token = generate_jwt(user_id, username, role, plan, is_active)
+    st.session_state.jwt_token = token
+    save_token_to_localstorage(token)
+    restore_login_from_jwt()  # Refresh session state
+    st.success(f"Welcome, {username}! You are now on the {plan.title()} plan.")
