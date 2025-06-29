@@ -436,8 +436,6 @@ with tab1:
     invoice_name = st.text_input("Enter desired invoice name (without extension)", value=f"invoice_{employee_id}_{date.today().isoformat()}", key='sale_key_invoice')
     if invoice_file:
         extension = os.path.splitext(invoice_file.name)[1]
-        filename = f"user_{user_id}_{invoice_number or 'sale'}_{sale_date}{extension}"
-        invoice_file_url = upload_invoice(invoice_file, "salesinvoices", filename,user_id)
         st.markdown("### 📎 Preview of Uploaded File:")   
         if extension.lower() in [".jpg", ".jpeg", ".png"]:
             st.image(invoice_file, use_container_width=True)
@@ -455,10 +453,19 @@ with tab1:
         partial_payment_date = st.date_input("Partial Payment Date", value=date.today(), key="partial_date")
         partial_payment_note = st.text_area("Partial Payment Notes (optional)", key="partial_notes")
 
-  
-    
+      
     # Save Sale
     if st.button("💾 Save Sale", key="save_sale_btn"):
+        if invoice_file:
+            extension = os.path.splitext(invoice_file.name)[1]
+            filename = f"user_{user_id}_{invoice_number or 'sale'}_{sale_date}{extension}"
+            try:
+                invoice_file_url = upload_invoice(invoice_file, "salesinvoices", filename, user_id)
+                st.success("✅ Invoice uploaded successfully.")
+            except Exception as e:
+                st.error(f"❌ Failed to upload invoice: {e}")
+        else:
+            st.warning("Please upload an invoice file before saving.")
         if not item_id or item_name == "Select an item":
             st.error("❌ Please select a valid item before saving.")
         else:
