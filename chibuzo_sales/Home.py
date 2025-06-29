@@ -172,7 +172,7 @@ col4.metric("Monthly Growth", f"{monthly_growth}%")
    
 
 # Generate sample monthly sales data
-months = pd.date_range(end=pd.Timestamp.today(), periods=5, freq='M').strftime('%b %Y')
+months = pd.date_range(end=pd.Timestamp.today(), periods=5, freq='ME').strftime('%b %Y')
 sales = np.random.randint(700000, 1500000, size=5)
 
     
