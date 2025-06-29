@@ -816,7 +816,7 @@ def extract_user_id(reference):
     return int(reference.split('-')[0])
 
 def activate_subscription(user_id):
-    today = date.today()isoformat()
+    today = date.today().isoformat()
     expires = (today + timedelta(days=30)).isoformat()
     response = supabase.table("subscription").update({
         "plan": "pro",
