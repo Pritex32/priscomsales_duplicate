@@ -44,12 +44,13 @@ load_dotenv()
 jwt_SECRET_KEY = "4606"  # Use env vars in production
 ALGORITHM = "HS256"
 
-def generate_jwt(user_id, username, role,plan="free", is_active=False):
+def generate_jwt(user_id, username, role,plan="free", is_active=False,email=None):
     payload = {
         "user_id": user_id,
         "username": username,
         "role": role,
         "plan": plan,
+        "email": email,
         "is_active": is_active,
         "exp": datetime.utcnow() + timedelta(hours=1)
     }
