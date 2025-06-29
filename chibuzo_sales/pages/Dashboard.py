@@ -841,9 +841,12 @@ def save_transaction(user_id, reference, amount, status):
 # ✅ 3. Handle Paystack payment verification
 query_params = st.query_params
 st.write("🧪 Full Query Params:", st.query_params)
-reference = query_params.get("trxref")
+reference = query_params.get("reference")
+tref=query_params.get('trxref')
+st.write(tref)
+st.write(reference)
 if reference:
-    reference = reference[0]
+    reference = reference
     st.write("✅ Payment reference received:", reference)
 
     result = verify_payment(reference)
