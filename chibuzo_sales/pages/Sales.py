@@ -445,6 +445,7 @@ with tab1:
     # Upload invoice
     invoice_file_url = None
     invoice_file = st.file_uploader("Upload Invoice (PDF/Image)", type=["pdf", "jpg", "jpeg", "png"], key="invoice_upload")
+    invoice_name = st.text_input("Enter desired invoice name (without extension)", value=f"invoice_{employee_id}_{date.today().isoformat()}")
     if invoice_file:
         extension = os.path.splitext(invoice_file.name)[1]
         filename = f"{invoice_number or 'sale'}_{sale_date}{extension}"
