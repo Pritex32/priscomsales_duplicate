@@ -873,3 +873,9 @@ else:
     st.info("ℹ️ No payment reference in URL.")
 
 
+def refresh_user_subscription(user_id):
+    response = supabase.table("subscription").select("plan, is_active").eq("user_id", user_id).single().execute()
+    if response.data:
+        st.session_state.plan = response.data["plan"]
+        st.session_state.is_active = response.data["is_active"]
+refresh_user_subscription(user_id)
