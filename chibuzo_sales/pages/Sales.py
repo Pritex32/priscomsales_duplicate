@@ -440,7 +440,7 @@ with tab1:
         invoice_file_url = upload_invoice(invoice_file, "sales_invoices", filename,user_id)
         st.markdown("### 📎 Preview of Uploaded File:")   
         if extension.lower() in [".jpg", ".jpeg", ".png"]:
-            st.image(invoice_file, use_column_width=True)
+            st.image(invoice_file, use_container_width=True)
         elif extension.lower() == ".pdf":
             st.download_button("📥 Download PDF for Preview", invoice_file, file_name=invoice_file.name)
             st.info("👆 Click the button above to preview the PDF file.")
