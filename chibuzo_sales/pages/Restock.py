@@ -483,6 +483,7 @@ with tab1:
     employee_id=st.text_input("user",value= user_id, disabled=True)
     purchase_date = st.date_input("Purchase Date", value=date.today())
     supplier_name = st.text_input("Supplier Name")
+    supplier_phone=st.text_input('supplier phone number')
     item_options = ["Select an item"] + list(item_dict.keys())
     item_name = st.selectbox("Select Item", item_options, key="item_selectbox")
     item_id = item_dict.get(item_name, None)
@@ -542,6 +543,7 @@ with tab1:
                 purchase_data = {
                 "purchase_date": str(purchase_date),
                 "supplier_name": supplier_name,
+                'supplier_phone':supplier_phone if supplier_phone else None,
                 "user_id": user_id,
                 "item_name": item_name,
                 "item_id": item_id,
