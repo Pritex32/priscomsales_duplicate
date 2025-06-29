@@ -832,10 +832,12 @@ query_params = st.query_params
 st.write("🧪 Full Query Params:", st.query_params)
 st.write(query_params)
 reference = query_params.get("reference")
-if reference:
-    if isinstance(reference, list):  # in case it's returned as a list
-        reference = reference     # the full reference string is at index 0
-    st.write("✅ Payment reference received:", reference)
+if isinstance(reference, list):
+    reference = reference[0]
+
+user_id = reference.split('-')[0]  # gets '9'
+st.write("User ID extracted:", user_id)
+st.write("Full reference:", reference)
 
     result = verify_payment(reference)
     if result["status"] and result["data"]["status"] == "success":
