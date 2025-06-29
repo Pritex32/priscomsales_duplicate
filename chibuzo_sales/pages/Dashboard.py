@@ -56,7 +56,7 @@ def generate_jwt(user_id, username, role,plan="free", is_active=False,email=None
     }
     
     token = jwt.encode(payload, jwt_SECRET_KEY, algorithm=ALGORITHM)
-    return tokenen
+    return token
 
 
 def decode_jwt(token):
