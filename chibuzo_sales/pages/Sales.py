@@ -437,7 +437,7 @@ with tab1:
     if invoice_file:
         extension = os.path.splitext(invoice_file.name)[1]
         filename = f"user_{user_id}_{invoice_number or 'sale'}_{sale_date}{extension}"
-        invoice_file_url = upload_invoice(invoice_file, "sales_invoices", filename,user_id)
+        invoice_file_url = upload_invoice(invoice_file, "salesinvoices", filename,user_id)
         st.markdown("### 📎 Preview of Uploaded File:")   
         if extension.lower() in [".jpg", ".jpeg", ".png"]:
             st.image(invoice_file, use_container_width=True)
