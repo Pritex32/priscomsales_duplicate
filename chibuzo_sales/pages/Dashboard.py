@@ -841,20 +841,18 @@ def save_transaction(user_id, reference, amount, status):
 # ✅ 3. Handle Paystack payment verification
 query_params = st.query_params
 st.write("🧪 Full Query Params:", st.query_params)
-st.write(query_params)
 reference = query_params.get("reference")
 if isinstance(reference, list):
     reference = reference[0]
-
-user_id = reference.split('-')[0]  # gets '9'
-st.write("User ID extracted:", user_id)
-st.write("Full reference:", reference)
 
     result = verify_payment(reference)
     if result["status"] and result["data"]["status"] == "success":
         user_id = extract_user_id(reference)
         activate_subscription(user_id)
         st.success("🎉 Payment successful! Your Pro subscription is now active.")
+        user_id = reference.split('-')[0]  # gets '9'
+        st.write("User ID extracted:", user_id)
+        st.write("Full reference:", reference)
     else:
         st.error("❌ Payment failed or could not be verified.")
 else:
