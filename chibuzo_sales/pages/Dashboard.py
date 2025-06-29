@@ -63,7 +63,7 @@ def decode_jwt(token):
     try:
         return jwt.decode(token, jwt_SECRET_KEY, algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError:
-        st.warning("Token expired.")
+        st.warning("Token expired, Login Again")
     except jwt.InvalidTokenError:
         st.error("Invalid token.")
     return None
@@ -73,7 +73,6 @@ def restore_login_from_jwt():
         token = st_javascript("""localStorage.getItem("login_token");""")
         if token and token != "null":
             user_data = decode_jwt(token)
-            st.write("Decoded JWT:", user_data)
             if user_data:
                 st.session_state.logged_in = True
                 st.session_state.user_id = int(user_data["user_id"])
@@ -98,7 +97,7 @@ if "page" not in st.session_state:
 restore_login_from_jwt()
 def save_token_to_localstorage(token):
     st_javascript(f"""localStorage.setItem("login_token", "{token}");""")
-
+# to get the payment details after upgrade
 def refresh_subscription_from_jwt():
     token = st.session_state.get("jwt_token")
     if not token:
@@ -861,17 +860,13 @@ def save_transaction(user_id, reference, amount, status):
 
 # ✅ 3. Handle Paystack payment verification
 query_params = st.query_params
-st.write("🧪 Full Query Params:", st.query_params)
 reference = query_params.get("reference")
 tref=query_params.get('trxref')
-st.write(tref)
-st.write(reference)
 if reference:
     reference = reference
     st.write("✅ Payment reference received:", reference)
-
     result = verify_payment(reference)
-    
+ 
     if result["status"] and result["data"]["status"] == "success":
         user_id = extract_user_id(reference)
         activate_subscription(user_id)
