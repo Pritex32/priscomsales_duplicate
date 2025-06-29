@@ -434,6 +434,8 @@ with tab1:
     # Sale info
     sale_date = st.date_input("Sale Date", value=date.today(), key="sale_date")
     customer_name = st.text_input("Customer Name", key="customer_name")
+    customer_phone = st.text_input("Customer Phone Number", key="customer_phone")
+
     payment_method = st.selectbox("Payment Method", ["cash", "card", "transfer"], key="payment_method")
     payment_status = st.selectbox("Payment Status", ["paid", "credit", "partial"], key="payment_status")
     due_date = st.date_input("Due Date", value=date.today(), key="due_date") if payment_status != "paid" else None
@@ -442,12 +444,17 @@ with tab1:
 
     # Upload invoice
     invoice_file_url = None
-    if payment_status != "paid":
-        invoice_file = st.file_uploader("Upload Invoice (PDF/Image)", type=["pdf", "jpg", "jpeg", "png"], key="invoice_upload")
-        if invoice_file:
-            extension = os.path.splitext(invoice_file.name)[1]
-            filename = f"{invoice_number or 'sale'}_{sale_date}{extension}"
-            invoice_file_url = upload_invoice(invoice_file, "sales_invoices", filename)
+    invoice_file = st.file_uploader("Upload Invoice (PDF/Image)", type=["pdf", "jpg", "jpeg", "png"], key="invoice_upload")
+    if invoice_file:
+        extension = os.path.splitext(invoice_file.name)[1]
+        filename = f"{invoice_number or 'sale'}_{sale_date}{extension}"
+        invoice_file_url = upload_invoice(invoice_file, "sales_invoices", filename)
+        st.markdown("### 📎 Preview of Uploaded File:")   
+        if extension.lower() in [".jpg", ".jpeg", ".png"]:
+            st.image(invoice_file, use_column_width=True)
+        elif extension.lower() == ".pdf":
+            st.download_button("📥 Download PDF for Preview", invoice_file, file_name=invoice_file.name)
+            st.info("👆 Click the button above to preview the PDF file.")
 
     # Partial payment
     partial_payment_amount = None
@@ -478,6 +485,13 @@ with tab1:
             else:
                 amount_paid = partial_payment_amount
                 amount_balance = total_amount - partial_payment_amount
+        if invoice_file is None:
+        st.error("❌ Please upload an invoice or proof of payment before saving.")
+        st.stop()
+        if payment_status in ["credit", "partial"] and not customer_phone:
+            st.warning("📞 It's highly recommended to collect the customer's phone number for credit or partial payments.")
+
+
 
         sale_data = {
             "employee_id": employee_id,
@@ -485,6 +499,7 @@ with tab1:
             "user_id": user_id,
             "sale_date": str(sale_date),
             "customer_name": customer_name,
+            'customer_phone': customer_phone if customer_phone else None,
             "item_id": item_id,
             "item_name": item_name,
             "quantity": quantity,
