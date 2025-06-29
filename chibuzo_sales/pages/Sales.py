@@ -487,8 +487,8 @@ with tab1:
                 amount_paid = partial_payment_amount
                 amount_balance = total_amount - partial_payment_amount
         if invoice_file is None:
-        st.error("❌ Please upload an invoice or proof of payment before saving.")
-        st.stop()
+            st.error("❌ Please upload an invoice or proof of payment before saving.")
+            st.stop()
         if payment_status in ["credit", "partial"] and not customer_phone:
             st.warning("📞 It's highly recommended to collect the customer's phone number for credit or partial payments.")
 
