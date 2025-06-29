@@ -672,7 +672,7 @@ elif choice == 'Login':
     if st.session_state.get("logged_in") or st.session_state.get("employee_logged_in"):
         user_role = st.session_state.get("role", "Employee")  # This comes from the JWT
 
-        if user_role == "MD":
+        if user_role == "md":
             user_name = st.session_state.get("user", {}).get("username", "Unknown User")
         else:  # Employee
             user_name = st.session_state.get("employee_user", {}).get("name", "Unknown User")
