@@ -1296,6 +1296,7 @@ with tab5:
             filtered_expenses = pd.DataFrame(columns=['expense_date', 'total_amount', 'amount_paid'])
 
         # --- Summary Metrics ---
+        
         total_sales = filtered_sales["total_amount"].sum()
         total_paid = filtered_sales["amount_paid"].sum()
         total_credit = (filtered_sales["total_amount"] - filtered_sales["amount_paid"]).sum()
@@ -1317,6 +1318,35 @@ with tab5:
         col6.metric("🕗 Expenses Credit", f"₦{expenses_credit:,.2f}")
 
         st.metric("📈 Estimated Profit", f"₦{profit:,.2f}")
+
+         # --- Payment Method Breakdown ---
+        if "payment_method" in filtered_sales.columns:
+            # Filter for only Card, Transfer, Cash methods
+            common_methods = ["Card", "Transfer", "Cash"]
+            method_filtered = filtered_sales[filtered_sales["payment_method"].isin(common_methods)]
+            if not method_filtered.empty:
+                st.markdown("### 💳 Payment Method Summary (Card / Transfer / Cash)") 
+                # Group and sum
+                method_summary = (
+                    method_filtered
+                    .groupby("payment_method")["total_amount"]
+                    .sum()
+                    .reset_index()
+                    .sort_values("total_amount", ascending=False))
+                method_summary.columns = ["Payment Method", "Total Sales (₦)"]
+                st.dataframe(method_summary)
+
+                # Pie chart
+                fig = px.pie(method_summary,
+                             names="Payment Method",
+                               values="Total Sales (₦)",
+                               title="Sales Distribution by Payment Method" )
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("No sales with Card, Transfer, or Cash method.")
+        else:
+            st.warning("No 'payment_method' column found in data.")
+
 
         # --- Pie Charts ---
         st.markdown("### 🥧 Payment Breakdown")
@@ -1366,6 +1396,15 @@ with tab5:
                 Sales_Count=("item_name", "count")
             ).sort_values("Quantity_Sold", ascending=False).reset_index()
             st.dataframe(top_products)
+            
+        st.markdown("### Low Selling Products")
+        if "item_name" in filtered_sales.columns:
+            low_products = filtered_sales.groupby("item_name").agg(
+            Quantity_Sold=("quantity", "sum"),
+            Total_Sales=("total_amount", "sum")
+        ).sort_values("Quantity_Sold").reset_index()
+        st.dataframe(low_products.head(10))
+
 
         # --- Top Customers ---
         st.markdown("### 👤 Top Customers")
