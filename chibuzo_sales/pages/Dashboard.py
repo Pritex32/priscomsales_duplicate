@@ -150,11 +150,11 @@ st.markdown("""
     <style>
     .header-container {
         background: linear-gradient(90deg, #1e3c72, #2a5298);
-        padding: 1rem;
-        border-radius: 12px;
+        padding: 0.4rem 0.8rem;
+        border-radius: 8px;
         text-align: center;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .header-text {
