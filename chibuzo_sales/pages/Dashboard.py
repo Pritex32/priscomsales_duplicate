@@ -826,6 +826,10 @@ def activate_subscription(user_id):
     }).eq("user_id", user_id).execute()
     st.write("📅 Subscription upsert response:", response)
     return response
+# ✅ Update session state
+st.session_state.plan = "pro"
+st.session_state.is_active = True
+
 # transaction is saved on the subcription table
 def save_transaction(user_id, reference, amount, status):
     supabase.table("subscription").insert({
