@@ -831,7 +831,8 @@ def save_transaction(user_id, reference, amount, status):
 query_params = st.query_params
 reference = query_params.get("reference", [None])[0]
 if reference:
-    reference = reference
+    if isinstance(reference, list):  # in case it's returned as a list
+        reference = reference[0]     # the full reference string is at index 0
     st.write("✅ Payment reference received:", reference)
 
     result = verify_payment(reference)
