@@ -144,7 +144,7 @@ if 'page' not in st.session_state:
 
 if "page" not in st.session_state:
     st.session_state.page = "Login"
-
+st.header('PriscomSales-Smart Sales, Smarter Decisions')
 menu = ["Login", "Register","Delete Account"]
 
 choice = st.selectbox("Navigate 👇", menu, index=0)
