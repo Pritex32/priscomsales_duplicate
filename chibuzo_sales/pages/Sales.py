@@ -890,6 +890,9 @@ def update_payment_status(table_name, id_column, record_id,user_id):
 
 
 with tab2:
+    st.title("💰 Payments Dashboard")
+    st.caption("View and manage all payment transactions — including full, partial, and credit sales.")
+
     
 # to get the debtors information and displays it on the payment page
     transactions = get_pending_transactions(user_id)
