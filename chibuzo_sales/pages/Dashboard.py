@@ -678,7 +678,7 @@ elif choice == 'Login':
             user_name = st.session_state.get("employee_user", {}).get("name", "Unknown User")
 
         st.title(f"👋 Welcome back, {user_name}!")
-        st.caption(f"You are logged in as **{user_role}**.")
+        st.info(f"You are logged in as **{user_role}**.")
 
         # Action buttons
         col1, col2 = st.columns([1, 1])
@@ -914,7 +914,7 @@ if reference:
     else:
         st.error("❌ Payment failed or could not be verified.")
 else:
-    st.caption("ℹ️ No payment reference in URL.")
+    st.info("ℹ️ No payment reference in URL.")
 
 
 def login_or_upgrade_success(user_id, username, role, plan, is_active):
