@@ -205,10 +205,6 @@ def block_free_user_if_limit_exceeded():
         st.error("🚫 Your free plan is exhausted. Please upgrade to continue using the sales features.")
         st.stop()
 
-# to change the upload to supabse format
-if st.button("🔄 Refresh Data"):
-    st.cache_data.clear()  # ✅ Clear cached data
-    st.rerun() 
 
 st.title("💼 Sales & Expenses Management")
 
