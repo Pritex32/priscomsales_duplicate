@@ -816,14 +816,15 @@ def extract_user_id(reference):
     return int(reference.split('-')[0])
 
 def activate_subscription(user_id):
-    today = date.today()
-    expires = today + timedelta(days=30)
+    today = date.today()isoformat()
+    expires = (today + timedelta(days=30)).isoformat()
     response = supabase.table("subscription").update({
         "plan": "pro",
         "is_active": True,
         "started_at": str(today),
         "expires_at": str(expires)
     }).eq("user_id", user_id).execute()
+    st.write("📅 Subscription upsert response:", response)
     return response
 # transaction is saved on the subcription table
 def save_transaction(user_id, reference, amount, status):
