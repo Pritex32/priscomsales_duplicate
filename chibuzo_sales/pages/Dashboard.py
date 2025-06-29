@@ -144,7 +144,40 @@ if 'page' not in st.session_state:
 
 if "page" not in st.session_state:
     st.session_state.page = "Login"
-st.header('PriscomSales-Smart Sales, Smarter Decisions')
+
+# designing the header
+st.markdown("""
+    <style>
+    .header-container {
+        background: linear-gradient(90deg, #1e3c72, #2a5298);
+        padding: 1rem;
+        border-radius: 12px;
+        text-align: center;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-text {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: white;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .header-subtext {
+        font-size: 1.2rem;
+        color: #dcdcdc;
+        margin-top: 0.5rem;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    </style>
+
+    <div class="header-container">
+        <div class="header-text">PriscomSales</div>
+        <div class="header-subtext">Smart Sales, Smarter Decisions</div>
+    </div>
+""", unsafe_allow_html=True)
+
 menu = ["Login", "Register","Delete Account"]
 
 choice = st.selectbox("Navigate 👇", menu, index=0)
