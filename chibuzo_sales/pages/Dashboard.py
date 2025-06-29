@@ -853,11 +853,11 @@ if reference:
     
     if result["status"] and result["data"]["status"] == "success":
         user_id = extract_user_id(reference)
-        save_transaction(user_id, reference, amount, status)
         activate_subscription(user_id)
         # ✅ Save transaction
         amount = result["data"]["amount"] // 100  # Convert from kobo to naira
         status = result["data"]["status"]
+        save_transaction(user_id, reference, amount, status)
         
         st.success("🎉 Payment successful! Your Pro subscription is now active.")
         st.write("User ID extracted:", user_id)
