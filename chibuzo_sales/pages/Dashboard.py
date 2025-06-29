@@ -821,8 +821,8 @@ def activate_subscription(user_id):
     response = supabase.table("subscription").update({
         "plan": "pro",
         "is_active": True,
-        "started_at": str(today).isoformat(),
-        "expires_at": str(expires).isoformat()
+        "started_at": today.isoformat(),
+        "expires_at": expires.isoformat()
     }).eq("user_id", user_id).execute()
     st.write("📅 Subscription upsert response:", response)
     return response
