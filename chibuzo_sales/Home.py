@@ -4,8 +4,17 @@ st.set_page_config(
     page_icon='👋 ',
 
 )
-
-
+#to hide streamlit icons 
+hide_streamlit_style = """
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    footer:after {content:'';}
+    header {visibility: hidden;}
+    .css-164nlkn.egzxvld1 {visibility: hidden;}  /* Streamlit footer class */
+    </style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 import bcrypt
 import pandas as pd
 from streamlit_option_menu import option_menu
