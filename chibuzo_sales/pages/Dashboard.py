@@ -186,12 +186,6 @@ if choice != st.session_state.page:
     st.session_state.page = choice
     st.rerun()
 choice = st.session_state.page
-# Secret Keys for Role-Based Registration
-SECRET_KEYS = {
-   
-
-    "MD": "MD-1qXz$Df@78"
-}
 
 
 def hash_password(password: str) -> str:
@@ -213,11 +207,7 @@ def register_user(username, email, password_hash, role,plan, secret_key):
         
         if existing_email.data:
             return f"Error: Email '{email}' already exists."
-        
-        if role == "MD":
-            if secret_key != "MD-1qXz$Df@78":
-                return "❌ Invalid secret key for MD registration."
-        
+                        
         # Insert user details into the users table
         result = supabase.table("users").insert({
             "username": username,
