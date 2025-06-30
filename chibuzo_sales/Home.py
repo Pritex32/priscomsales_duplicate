@@ -110,7 +110,7 @@ st.markdown("""
 
 # Initialize Supabase client
 supabase = get_supabase_client() # use this to call the supabase database
-col1,col2=st.columns([1,7])
+col1,col2=st.columns([7,2])
 # Load the image
 with col1:  
     st.title('PriscomSales')
