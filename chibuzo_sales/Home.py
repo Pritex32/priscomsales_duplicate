@@ -53,7 +53,7 @@ resized_image = img.resize((200,100)) # Adjust size as needed
 st.sidebar.image(resized_image,width=150)
 
 
- Only show spinner on first load
+# Only show spinner on first load
 if "loaded" not in st.session_state:
     st.markdown("""
         <style>
