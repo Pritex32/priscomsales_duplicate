@@ -38,9 +38,25 @@ from PIL import Image
 import json
 import os
 from urllib.parse import urlencode
-
-
 from supabase import create_client
+
+
+import streamlit as st
+image_path = "priscomac_blacktransparent_logo_rockyart.png"
+image = Image.open(image_path)  
+ # Manually rotate the image 180 degrees to rotate the image
+img = ImageOps.exif_transpose(image)
+img = img.rotate(270, expand=True) # the image was turned upside down, this is to turn it to the right position
+# Resize the image (set new width & height)
+ resized_image = img.resize((200,100)) # Adjust size as needed
+# Display in Streamlit
+ st.sidebar.image(resized_image,width=150)
+
+
+
+
+
+
 # supabase configurations
 def get_supabase_client():
     supabase_url = 'https://ecsrlqvifparesxakokl.supabase.co' # Your Supabase project URL
