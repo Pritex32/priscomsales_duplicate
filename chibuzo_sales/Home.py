@@ -70,11 +70,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# App content
-st.title("NeoFusion Dashboard")
-st.header("Welcome to the Future!")
-st.subheader("This is a custom-themed Streamlit app.")
-st.button("Click Me!")
+
 
 
 
@@ -89,9 +85,12 @@ st.button("Click Me!")
 
 # Initialize Supabase client
 supabase = get_supabase_client() # use this to call the supabase database
-col1,col2=st.columns([1,3])
+col1,col2=st.columns([1,7])
 # Load the image
 with col1:  
+    st.title('PriscomSales')
+    
+with col2:
     image_path = "priscomac_blacktransparent_logo_rockyart.png"
     image = Image.open(image_path)
     
@@ -102,8 +101,6 @@ with col1:
     resized_image = img.resize((200,100)) # Adjust size as needed
 # Display in Streamlit
     st.image(resized_image)
-with col2:
-   st.title('Sales Hub')
 
 
 # contact developer
