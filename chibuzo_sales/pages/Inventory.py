@@ -1,5 +1,15 @@
 from http import cookies
 import streamlit as st
+hide_streamlit_style = """
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    footer:after {content:'';}
+    header {visibility: hidden;}
+    .css-164nlkn.egzxvld1 {visibility: hidden;}  /* Streamlit footer class */
+    </style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 import pandas as pd
 from streamlit_option_menu import option_menu
 from datetime import datetime,timedelta ,date
