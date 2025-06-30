@@ -28,9 +28,6 @@ from PIL import Image
 
 import json
 import os
-
-
-
 from urllib.parse import urlencode
 
 
@@ -41,6 +38,54 @@ def get_supabase_client():
     supabase_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjc3JscXZpZnBhcmVzeGFrb2tsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2NjczMDMsImV4cCI6MjA2MDI0MzMwM30.Zts7p1C3MNFqYYzp-wo3e0z-9MLfRDoY2YJ5cxSexHk'
     supabase = create_client(supabase_url, supabase_key)
     return supabase  # Make sure to return the client
+
+
+
+
+# dessinging the homepage
+# Custom CSS styling
+st.markdown("""
+    <style>
+        /* Customize headers */
+        h1, h2, h3 {
+            color: #00FFC6;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Buttons */
+        .stButton>button {
+            background-color: #00FFC6;
+            color: black;
+            border-radius: 10px;
+            padding: 8px 20px;
+            font-weight: bold;
+        }
+
+        /* Hover effect */
+        .stButton>button:hover {
+            background-color: #0E0E2C;
+            color: #00FFC6;
+            border: 1px solid #00FFC6;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# App content
+st.title("NeoFusion Dashboard")
+st.header("Welcome to the Future!")
+st.subheader("This is a custom-themed Streamlit app.")
+st.button("Click Me!")
+
+
+
+
+
+
+
+
+
+
+
 
 # Initialize Supabase client
 supabase = get_supabase_client() # use this to call the supabase database
