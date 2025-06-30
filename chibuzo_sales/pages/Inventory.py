@@ -28,7 +28,7 @@ import jwt
 
 
 # to show spiner rotating when the app is laoding
- Only show spinner on first load
+# Only show spinner on first load
 if "loaded" not in st.session_state:
     st.markdown("""
         <style>
