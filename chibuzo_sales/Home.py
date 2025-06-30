@@ -48,9 +48,9 @@ image = Image.open(image_path)
 img = ImageOps.exif_transpose(image)
 img = img.rotate(270, expand=True) # the image was turned upside down, this is to turn it to the right position
 # Resize the image (set new width & height)
- resized_image = img.resize((200,100)) # Adjust size as needed
+resized_image = img.resize((200,100)) # Adjust size as needed
 # Display in Streamlit
- st.sidebar.image(resized_image,width=150)
+st.sidebar.image(resized_image,width=150)
 
 
 
