@@ -42,7 +42,7 @@ def get_supabase_client():
 
 
 
-# dessinging the homepage
+# dessinging the homepage, this makes the app look like html and css design
 # Custom CSS styling
 st.markdown("""
     <style>
@@ -142,6 +142,8 @@ At **Priscomac**, we provide powerful tools to help you record sales, manage inv
 with col22:  
     if st.button("Login/Signup"):
         switch_page("Dashboard") 
+
+
 col12,col21=st.columns(2)
 with col12:
     sales_img='photo-1666875753105-c63a6f3bdc86.jfif'
@@ -174,28 +176,7 @@ with st.container():
 
     st.success("📈 Gain full visibility into your business health with Priscomac.")
 
-st.markdown(f"""
-    <div style="
-        position: relative;
-        text-align: center;
-        color: white;
-        ">
-        <img src="file:///{sales_img}" style="width:100%; border-radius:10px;" />
-        <div style="
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 30px;
-            font-weight: bold;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 10px 20px;
-            border-radius: 8px;
-        ">
-            Your Business. Smarter. With Priscomac.
-        </div>
-    </div>
-""", unsafe_allow_html=True)
+
 
 # Simulated data for demo purposes
 st.subheader('Priscomac user  analysis')
