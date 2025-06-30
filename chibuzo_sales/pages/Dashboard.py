@@ -66,7 +66,7 @@ if "loaded" not in st.session_state:
         </style>
 
         <div class="loader"></div>
-        <h5 style="text-align:center;">Loading Priscomac App...</h5>
+        <h5 style="text-align:center;">Loading PriscomSales App...</h5>
     """, unsafe_allow_html=True)
     
     time.sleep(2)  # Simulate loading time
