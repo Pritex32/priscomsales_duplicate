@@ -32,7 +32,30 @@ from streamlit_javascript import st_javascript
 import jwt
 
  # or from auth import initialize_session
+# to show spiner rotating when the app is laoding
+st.markdown("""
+    <style>
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #00FFC6;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: auto;
+      position: relative;
+      top: 50px;
+    }
 
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    </style>
+
+    <div class="loader"></div>
+    <h5 style="text-align:center;">Loading Priscomac App...</h5>
+""", unsafe_allow_html=True)
 
 
 
