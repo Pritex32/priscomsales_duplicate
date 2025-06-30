@@ -468,7 +468,7 @@ def login_md(email, password):
     if not user:
         st.error("❌ Invalid email or password.")
         return False
-     if not user.get("is_verified", False):
+    if not user.get("is_verified", False):
         st.warning("⚠️ Please verify your email before logging in.")
         return False
 
