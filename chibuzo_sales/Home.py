@@ -156,12 +156,12 @@ if st.sidebar.button("📩 Contact Developer"):
    
 
 
-col11,col22=st.columns([7.5,1])
+col11,col22=st.columns([7,1])
 with col11:
     
     st.markdown("""
 ### Empowering You to Run a Smarter Business  
-At **Priscomac**, we provide powerful tools to help you record sales, manage inventory, forecast growth, and generate daily reports — all from one easy-to-use platform.
+At **PriscomSales**, we provide powerful tools to help you record sales, manage inventory, forecast growth, and generate daily reports — all from one easy-to-use platform.
 
 """)
 with col22:  
@@ -199,12 +199,12 @@ with st.container():
     - 📈 **Monitor profits — today and in the future**
     """)
 
-    st.success("📈 Gain full visibility into your business health with Priscomac.")
+    st.success("📈 Gain full visibility into your business health with PriscomSales.")
 
 
 
 # Simulated data for demo purposes
-st.subheader('Priscomac user  analysis')
+st.subheader('PriscomSales user  analysis')
 total_sales = 500000 # in NGN
 num_clients = 32
 active_subscriptions = 25
@@ -228,7 +228,7 @@ sales = np.random.randint(700000, 1500000, size=5)
 # Top Products (sample data)
 st.subheader("Top Products")
 top_products = pd.DataFrame({
-    "Product": ["Data Analytics Suite", "Predictive Model Pro", "Consulting Package", "Training Course"],
+    "Product": ["Data Analytics Suite", "Predictive Model Pro", "Consulting Package", "Inventory Management"],
     "Sales": [4500000, 3500000, 2500000, 1500000]
 })
 
