@@ -371,7 +371,7 @@ with tab1:
 
     with col1:
         
-        st.subheader("📥 Restocks")
+        st.subheader("📥 Restocks An Item")
         
 
     with col2:
