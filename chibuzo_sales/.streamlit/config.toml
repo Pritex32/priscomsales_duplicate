@@ -4,4 +4,4 @@ primaryColor="#00FFC6"          # Neon turquoise
 backgroundColor="#0E0E2C"       # Deep navy/purple
 secondaryBackgroundColor="#1A1A3D"  # Dark indigo
 textColor="#F8F8FF"             # Ghost white
-font="monospace"
+font = "serif"
