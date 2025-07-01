@@ -28,14 +28,14 @@ import requests
 import numpy as np
 import matplotlib.pyplot as plt
 
-from streamlit_extras.switch_page_button import switch_page
+from streamlit_extras.switch_page_button import switch_page # for streamlit to redirect you to a difereent page
 from PIL import Image
-
-import json
+from itsdangerous import URLSafeTimedSerializer # to generate email verification token
+import json for jason file
 import os
-from dotenv import load_dotenv
-import jwt
-import streamlit.components.v1 as components
+from dotenv import load_dotenv #to load keys stored in the .env file
+import jwt # to store login session on the web local stoarge so that you dont  get logged out after refresh
+import streamlit.components.v1 as components # for streamlit jwt token storage
 
 
 
