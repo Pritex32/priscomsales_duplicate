@@ -732,6 +732,12 @@ elif choice == "Register":
                 # Show success and redirect
                 if isinstance(result, str) and "successfully" in result.lower():
                     st.success(result)
+                    try:
+                        code = os.getenv("SECRET_KEY")  # or generate your actual token here
+                        send_verification_email(email, code)
+                        st.success("📧 Verification email sent!")
+                    except Exception as e:          
+                        st.warning(f"❌ Could not send email: {e}")
                     st.info("Redirecting to login...")
                     st.session_state.page = "Login"
                     st.rerun()
