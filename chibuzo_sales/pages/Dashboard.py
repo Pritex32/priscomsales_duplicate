@@ -245,10 +245,11 @@ def generate_token(email):
 def confirm_token(code, expiration=86400):
     try:
         email = serializer.loads(code, salt="email-verify", max_age=expiration)
-        st.write('raw code', email)
-    except Exception:
+        return email
+    except Exception as e:
+        st.error(f"Token decode error: {type(e).__name__} - {e}")
         return None
-    return email
+        
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, Email, To, Content
 from dotenv import load_dotenv
