@@ -388,6 +388,7 @@ def fetch_inventory_items(user_id):
 
 item_dict = fetch_inventory_items(user_id)
 
+
 ## to fetcher the user id
 if not st.session_state.get("logged_in"):
     st.warning("Please log in.")
@@ -421,7 +422,8 @@ with tab1:
                 selected_date = st.date_input("Select Date to Update Inventory", value=date.today())
                 item_name = st.text_input("Item Name")
                 quantity = st.number_input("Initial Quantity Supplied", min_value=0, step=1)
-                unit_price = st.number_input("Unit Price", min_value=0.0, step=0.01)
+                reorder_level = st.number_input("Reorder Level", min_value=0, step=1)
+                unit_price = st.number_input("Unit Price", min_value=0, step=0.01)
                 supplier = st.text_input("Supplier Name (Optional)")
                 purchase_date = st.date_input("Purchase Date", value=date.today())
                 description = st.text_area("Description (Optional)")
@@ -472,7 +474,8 @@ with tab1:
                         "supplied_quantity": quantity,
                         "open_balance": 0,
                         "log_date": purchase_date.isoformat(),
-                        "user_id": user_id
+                        "user_id": user_id,
+                        "reorder_level": reorder_level
                         # closing_balance will be calculated in the DB as a generated column
                     }
 
