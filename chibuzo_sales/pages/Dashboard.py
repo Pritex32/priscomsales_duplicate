@@ -235,6 +235,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # setting up email verification code
+st.write("SECRET_KEY loaded:", os.getenv("SECRET_KEY"))
 
 serializer = URLSafeTimedSerializer(os.getenv("SECRET_KEY"))
 code = st.query_params.get("code")
