@@ -237,8 +237,10 @@ load_dotenv()
 # setting up email verification code
 st.write("SECRET_KEY loaded:", os.getenv("SECRET_KEY"))
 
-serializer = URLSafeTimedSerializer(os.getenv("SECRET_KEY"))
-st.write(serializer)
+
+
+serializer = URLSafeTimedSerializer(os.getenv("SECRET_KEY"),salt="email-verify")
+
 code = st.query_params.get("code")
 def generate_token(email):
     return serializer.dumps(email, salt="email-verify")
@@ -1108,27 +1110,3 @@ def login_or_upgrade_success(user_id, username, role, plan, is_active):
 
 
 
-st.sidebar.subheader("💬 Feedback Form")
-
-with st.sidebar.expander('Submit Feedback'):
-    with st.sidebar.form("feedback_form"):
-        name = st.sidebar.text_input("Your Name")
-        email = st.sidebar.text_input("Your Email")
-        feedback = st.sidebar.text_area("Your Feedback")
-
-        submitted = st.form_submit_button("Submit")
-
-        if submitted:
-            if name and email and feedback:
-                response = supabase.table("feedback").insert({
-                    "name": name,
-                    "email": email,
-                    "feedback": feedback,
-                    "user_id": st.session_state.get("user_id", None),
-                }).execute()
-
-                # Check if data is returned and no errors
-                if response.data:
-                    st.sidebar.success("✅ Thank you for your feedback!")
-                else:
-                    st.sidebar.error("⚠️ Could not submit feedback. Please try again.")
