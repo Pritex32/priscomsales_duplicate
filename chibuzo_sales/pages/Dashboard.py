@@ -1101,3 +1101,37 @@ def login_or_upgrade_success(user_id, username, role, plan, is_active):
     save_token_to_localstorage(token)
     restore_login_from_jwt()  # Refresh session state
     st.success(f"Welcome, {username}! You are now on the {plan.title()} plan.")
+
+
+
+
+
+
+st.sidebar.title("💬 Feedback Form")
+
+with st.sidebar.form("feedback_form"):
+    name = st.sidebar.text_input("Your Name")
+    email = st.sidebar.text_input("Your Email")
+    feedback = st.sidebar.text_area("Your Feedback")
+
+    submitted = st.form_submit_button("Submit")
+
+    if submitted:
+        if name and email and feedback:
+            response = supabase.table("feedback").insert({
+                "name": name,
+                "email": email,
+                "feedback": feedback,
+                "user_id": st.session_state.get("user_id", None),
+            }).execute()
+
+            if response.error is None:
+                st.sidebar.success("✅ Thank you for your feedback!")
+            else:
+                st.sidebar.error(f"⚠️ Could not submit feedback. Error: {response.error.message}")
+
+
+
+
+
+
