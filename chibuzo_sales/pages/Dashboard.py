@@ -723,12 +723,12 @@ elif choice == "Register":
         submitted = st.form_submit_button("Register")
 
         if submitted:
-            if username and email and password and plan and secret_key:
+            if username and email and password and plan:
                 # Hash the password
                 hashed_password = hash_password(password)
 
                 # Register user in the users table
-                result = register_user(username, email, hashed_password, role, plan,secret_key)
+                result = register_user(username, email, hashed_password, role, plan)
                 # Show success and redirect
                 if isinstance(result, str) and "successfully" in result.lower():
                     st.success(result)
