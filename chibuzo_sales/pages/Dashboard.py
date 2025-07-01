@@ -228,13 +228,10 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-
+SECRET_KEY = os.getenv("SECRET_KEY")
 # setting up email verification code
 st.write("SECRET_KEY loaded:", os.getenv("SECRET_KEY"))
-
-
-
-serializer = URLSafeTimedSerializer(os.getenv("SECRET_KEY"),salt="email-verify")
+serializer = URLSafeTimedSerializer(SECRET_KEY,salt="email-verify")
 
 code = st.query_params.get("code")
 def generate_token(email):
