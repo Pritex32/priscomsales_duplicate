@@ -161,29 +161,6 @@ st.sidebar.markdown("---")  # Adds a separator
 if st.sidebar.button("📩 Contact Developer"):
     st.sidebar.markdown("[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/prisca-ukanwa-800a1117a/)")
 
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-        
-    
-
-
-
-   
-
-
 col11,col22=st.columns([7,1])
 with col11:
     
@@ -195,6 +172,43 @@ At **PriscomSales**, we provide powerful tools to help you record sales, manage 
 with col22:  
     if st.button("Login/Signup"):
         switch_page("Dashboard") 
+
+
+
+
+import base64
+
+# Get list of local images
+image_folder = "images"
+image_files = sorted([img for img in os.listdir(image_folder) if img.endswith(('.png', '.jpg', '.jpeg'))])
+
+# Convert each image to base64 string
+def get_base64_image(image_path):
+    with open(image_path, "rb") as img_file:
+        encoded = base64.b64encode(img_file.read()).decode()
+        ext = os.path.splitext(image_path)[-1].replace('.', '')
+        return f"data:image/{ext};base64,{encoded}"
+
+image_data = [get_base64_image(os.path.join(image_folder, img)) for img in image_files]
+
+# HTML + JS to create auto-slider
+html_code = f"""
+<div style="max-width: 700px; margin: auto; border-radius: 12px; overflow: hidden;">
+    <img id="carousel" src="{image_data[0]}" style="width: 100%; height: auto; border-radius: 12px;" />
+</div>
+
+<script>
+let images = {image_data};
+let index = 0;
+setInterval(() => {{
+    index = (index + 1) % images.length;
+    document.getElementById("carousel").src = images[index];
+}}, 3000); // 3000ms = 3 seconds
+</script>
+"""
+
+st.markdown(html_code, unsafe_allow_html=True)
+
 
 
 
