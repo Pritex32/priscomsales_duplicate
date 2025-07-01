@@ -146,10 +146,6 @@ supabase = get_supabase_client() # use this to call the supabase database
 
 
 
-
-
-
-
 # this restores and shows if the person is on free plan or pro
 def restore_subscription_info():
     user_id = st.session_state.get("user_id")
@@ -178,26 +174,6 @@ user_id = st.session_state.get("user_id")
    
 
   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # this will show if the person has paid or not
 
@@ -263,20 +239,7 @@ def block_free_user_if_limit_exceeded():
 
 
 
-
-#
-
-
-
-
-
-
-
 # to import restock page on home page
-
-
-
-
 # this is to get the user id and make it is rightly restored
 user_name = st.session_state.get("username", "Unknown User")
 user_id = st.session_state.get("user_id")
@@ -476,6 +439,7 @@ with tab1:
                         "log_date": purchase_date.isoformat(),
                         "user_id": user_id,
                         "reorder_level": reorder_level
+                       
                         # closing_balance will be calculated in the DB as a generated column
                     }
 
@@ -601,17 +565,6 @@ with tab1:
                 st.success("✅ Goods bought record saved successfully!")
         except Exception as e:
             st.error(f"❌ Error saving record: {e}")
-
-
-
-
-
-
-    
-
-
-
-
 
 
 
