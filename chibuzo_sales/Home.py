@@ -197,20 +197,15 @@ with col22:
         switch_page("Dashboard") 
 
 
-col12,col21=st.columns(2)
-with col12:
-    sales_img='photo-1666875753105-c63a6f3bdc86.jfif'
-    sales_im=Image.open(sales_img)
-    img_s=sales_im.resize((500,300))
-    st.image(img_s,caption="Smart tools for smart businesses")
-with col21:
-    st.markdown(
-    """<span style="color:green; font-weight:bold;font-size:24px;">
-    What is the health of your business?
-    </span>""",
-    unsafe_allow_html=True
-)
-st.markdown(" ")
+
+
+
+
+
+
+
+
+
 
      
 
