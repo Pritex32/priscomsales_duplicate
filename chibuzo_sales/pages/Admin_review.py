@@ -6,14 +6,14 @@ from streamlit_option_menu import option_menu
 from datetime import datetime,date, timedelta
 import json
 import time
-from streamlit_cookies_manager import EncryptedCookieManager
+
 from PIL import Image
 import io
 import os
 import numpy as np
 from storage3.exceptions import StorageApiError
 import uuid
-from streamlit_cookies_manager import EncryptedCookieManager
+
 from fpdf import FPDF
 import base64
 import jwt
