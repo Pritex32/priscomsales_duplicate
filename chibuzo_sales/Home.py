@@ -176,39 +176,34 @@ with col22:
 
 
 
-import base64
-
-# Get list of local images
 image_folder = "images"
 image_files = sorted([img for img in os.listdir(image_folder) if img.endswith(('.png', '.jpg', '.jpeg'))])
+image_paths = [f"/{image_folder}/{img}" for img in image_files]
 
-# Convert each image to base64 string
-def get_base64_image(image_path):
-    with open(image_path, "rb") as img_file:
-        encoded = base64.b64encode(img_file.read()).decode()
-        ext = os.path.splitext(image_path)[-1].replace('.', '')
-        return f"data:image/{ext};base64,{encoded}"
-
-image_data = [get_base64_image(os.path.join(image_folder, img)) for img in image_files]
-
-# HTML + JS to create auto-slider
 html_code = f"""
+<style>
+.carousel-img {{
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+}}
+</style>
+
 <div style="max-width: 700px; margin: auto; border-radius: 12px; overflow: hidden;">
-    <img id="carousel" src="{image_data[0]}" style="width: 100%; height: auto; border-radius: 12px;" />
+    <img id="carousel" class="carousel-img" src="{image_paths[0]}" />
 </div>
 
 <script>
-let images = {image_data};
+let images = {image_paths};
 let index = 0;
 setInterval(() => {{
     index = (index + 1) % images.length;
     document.getElementById("carousel").src = images[index];
-}}, 3000); // 3000ms = 3 seconds
+}}, 3000);
 </script>
 """
 
 st.markdown(html_code, unsafe_allow_html=True)
-
 
 
 
