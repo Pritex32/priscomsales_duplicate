@@ -503,7 +503,7 @@ def update_inventory_balances(selected_date,user_id):
 if selected == 'Home':
     low_stock_items = get_low_stock_items(user_id)
     if low_stock_items:
-    st.warning("⚠️ The following items are low in stock:")
+        st.warning("⚠️ The following items are low in stock:")
     for item in low_stock_items:
         st.write(f"🔻 {item['item_name']}: {item['supplied_quantity']} units (Reorder level: {item['Reorder_level']})")
 else:
