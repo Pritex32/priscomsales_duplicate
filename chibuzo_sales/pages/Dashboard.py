@@ -227,39 +227,141 @@ choice = st.session_state.page
 def hash_password(password: str) -> str:
     # Hash the password using SHA-256 (or a stronger hashing function like bcrypt)
     return hashlib.sha256(password.encode()).hexdigest()
+from email.message import EmailMessage
+import os
+# pip install pyhton-dotenv
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# setting up email verification code
+
+serializer = URLSafeTimedSerializer(os.getenv("SECRET_KEY"))
+code = st.query_params.get("code")
+def generate_token(email):
+    return serializer.dumps(email, salt="email-verify")
+
+def confirm_token(code, expiration=86400):
+    try:
+        email = serializer.loads(code, salt="email-verify", max_age=expiration)
+        st.write('raw code', email)
+    except Exception:
+        return None
+    return email
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Email, To, Content
+from dotenv import load_dotenv
+
+def send_verification_email(email, code):
+    load_dotenv()
+
+    SENDGRID_API_KEY =os.getenv("SENDGRID_API_KEY")
+    EMAIL_USER = os.getenv("EMAIL_USER")    # Your verification link
+    link = f"https://priscomac-sales-software.onrender.com/Dashboard?code={code}"
+
+    # Email subject
+    subject = "Verify Your Email to Access Priscomac Sales Software"
+
+    # Plain-text content
+    plain_text = f"""
+Hi there,
+
+Please verify your email by clicking the link below:
+
+{link}
+
+This link will expire in 24 hours. If you did not register, please ignore this message.
+"""
+
+    # HTML content
+    html_content = f"""
+<html>
+  <body style="font-family: Arial, sans-serif;">
+    <h2>Welcome to Priscomac Sales Software 👋</h2>
+    <p>Please verify your email by clicking the button below:</p>
+    <p>
+      <a href="{link}" style="
+        display:inline-block;
+        padding:10px 20px;
+        background-color:#4CAF50;
+        color:white;
+        text-decoration:none;
+        border-radius:5px;
+      ">
+        Verify Email
+      </a>
+    </p>
+    <p style="color:gray;">This link will expire in 24 hours. If you did not register, please ignore this message.</p>
+  </body>
+</html>
+"""
+
+    # Create SendGrid Mail object
+    message = Mail(
+        from_email=Email(EMAIL_USER, name="PriscomSales"),
+        to_emails=To(email),
+        subject=subject,
+        plain_text_content=plain_text,
+        html_content=html_content
+    )
+
+    # Send the email
+    try:
+        sg = SendGridAPIClient(SENDGRID_API_KEY)
+        response = sg.send(message)
+        print("✅ Verification email sent to:", email)
+        print("🔗 Link:", link)
+        print("📨 Status Code:", response.status_code)
+    except Exception as e:
+        print("❌ Could not send verification email, Try Again later:", e)
+        raise
 
 
 
-def register_user(username, email, password_hash, role,plan, secret_key):
+
+
+def register_user(username, email, password_hash, role,plan):
     try:
         # Check if username already exists in the users table
         existing_user = supabase.table("users").select("username").eq("username", username).execute()
-        
         if existing_user.data:
             return f"Error: Username '{username}' already exists."
 
         # Check if email already exists in the users table
         existing_email = supabase.table("users").select("email").eq("email", email).execute()
-        
         if existing_email.data:
             return f"Error: Email '{email}' already exists."
-                        
+                   
+        code = generate_token(email)
+        st.write(code) #ken
+        try:
+            send_verification_email(email, code)
+        except Exception as e:
+            return f"❌ Could not send verification email: {e}"
+
+               
         # Insert user details into the users table
         result = supabase.table("users").insert({
             "username": username,
             "email": email,
             "password_hash": password_hash,
-            "role": role
+            "role": role,
+            "is_verified": False,
+            "verification_token": code
         }).execute()
         # ✅ Extract user_id from the insert result
-        if result.data and len(result.data) > 0:
-            user_id = result.data[0].get("user_id")
-        else:
-            return "Error: Could not retrieve user_id after registration."
+        
+                
+        if not result.data or "user_id" not in result.data[0]:
+            return "❌ Error: Could not retrieve user_id after registration."
+
+        user_id = result.data[0]["user_id"]
+
         # Set default values based on plan
         is_active = True if plan == "pro" else False
         started_at = date.today() if plan == "pro" else None
         expires_at = date.today() + timedelta(days=30) if plan == "pro" else None
+        
 
         # 5. Insert into subscription table
         supabase.table("subscription").insert({
@@ -270,13 +372,55 @@ def register_user(username, email, password_hash, role,plan, secret_key):
             "expires_at": expires_at
         }).execute()
         
-        # Check if there was an error in the response
-        return "✅ User registered successfully!"
-
-        
-
+        # Send verification email
+        # ✅ Step 6: Send verification email
+       
+        return "✅ Registration successful! Please check your email to verify your account."
+    
+         
     except Exception as e:
         return f"Error: {str(e)}"
+
+
+# this part verify and update the database that the person is verified
+query_params = st.query_params
+code = query_params.get("code", None)
+
+if code:
+     # Override the current page
+    email = confirm_token(code)
+    st.write("Decoded email from token:", email)
+
+    if email:
+        # ✅ Check if user exists with that email
+        user_check = supabase.table("users").select("*").eq("email", email).execute()
+        st.write("User record found:", user_check.data)
+
+        if user_check.data:
+            update_result=supabase.table("users").update({
+                "is_verified": True,
+                "verification_token": None
+            }).eq("email", email).execute()
+            st.write("Update result:", update_result)
+            st.success(f"✅ Email {email} verified successfully! You will be redirected to login shortly...")
+
+            # Clear query params and redirect
+            st.query_params.clear()
+            import time
+            time.sleep(3)
+            st.session_state.page = "Login"
+            st.rerun()
+        else:
+            st.error("❌ No user associated with this token.")
+    else:
+        st.error("❌ Invalid or expired verification link.")
+
+
+
+
+
+
+
 
 # get md subscription status
 def get_md_subscription(md_user_id):
