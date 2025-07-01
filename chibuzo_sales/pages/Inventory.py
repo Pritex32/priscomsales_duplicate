@@ -198,13 +198,6 @@ user_id = st.session_state.get("user_id")
 
 
 
-
-
-
-
-
-
-
 # this will show if the person has paid or not
 
 # ---------- PLAN ENFORCEMENT ---------- #
@@ -289,17 +282,6 @@ with st.sidebar:
 
 
 
-
-
-
-
-
-
-
-
-# to import restock page on home page
-
-
 # === Helper function to get today's date ===
 # === Setup ===
 today = str(date.today()) #this is to set up the todays date
@@ -316,6 +298,16 @@ def fetch_requisitions(user_id):
 @st.cache_data(ttl=60 * 5) # this is to load restock table
 def fetch_restocks(user_id):
     return supabase.table("goods_bought").select("*").eq("purchase_date", today).eq("user_id", user_id).execute().data
+
+
+def get_low_stock_items(user_id):
+    return supabase.table("inventory_master_log")\
+        .select("*")\
+        .eq("user_id", user_id)\
+        .lte("supplied_quantity", "reorder_level")\
+        .execute().data
+
+# Then show other dashboard info below...
 
 # === Load data ===
 with st.spinner("Fetching data..."): # this is to show data is loading and not to show error until data loads
@@ -509,6 +501,13 @@ def update_inventory_balances(selected_date,user_id):
 
 # Trigger Inventory Update and Move to History
 if selected == 'Home':
+    low_stock_items = get_low_stock_items(user_id)
+    if low_stock_items:
+    st.warning("⚠️ The following items are low in stock:")
+    for item in low_stock_items:
+        st.write(f"🔻 {item['item_name']}: {item['supplied_quantity']} units (Reorder level: {item['Reorder_level']})")
+else:
+    st.success("✅ All items are above reorder levels.")
     if st.button("🔄 Update Inventory Balances"):
         update_inventory_balances(selected_date, user_id)
         move_requisitions_to_history(selected_date,user_id)  # Move today's requisitions after updating the inventory
