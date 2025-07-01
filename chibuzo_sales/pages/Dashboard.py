@@ -238,6 +238,7 @@ load_dotenv()
 st.write("SECRET_KEY loaded:", os.getenv("SECRET_KEY"))
 
 serializer = URLSafeTimedSerializer(os.getenv("SECRET_KEY"))
+st.write(serializer)
 code = st.query_params.get("code")
 def generate_token(email):
     return serializer.dumps(email, salt="email-verify")
