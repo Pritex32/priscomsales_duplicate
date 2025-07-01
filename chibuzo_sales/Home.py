@@ -167,6 +167,7 @@ with col22:
 
 from streamlit_autorefresh import st_autorefresh
 
+
 # Refresh every 3 seconds (3000 milliseconds)
 st_autorefresh(interval=3000, key="image_slider_refresh")
 
