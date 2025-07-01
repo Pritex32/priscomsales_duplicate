@@ -125,17 +125,6 @@ st.markdown("""
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 # Initialize Supabase client
 supabase = get_supabase_client() # use this to call the supabase database
 col1,col2=st.columns([7,2])
@@ -176,38 +165,24 @@ with col22:
 
 
 
+from streamlit_autorefresh import st_autorefresh
+
+# Refresh every 3 seconds (3000 milliseconds)
+st_autorefresh(interval=3000, key="image_slider_refresh")
+
+# Load images from a folder
 image_folder = "images"
 image_files = sorted([img for img in os.listdir(image_folder) if img.endswith(('.png', '.jpg', '.jpeg'))])
-image_paths = [f"/{image_folder}/{img}" for img in image_files]
 
-html_code = f"""
-<style>
-.carousel-img {{
-    width: 100%;
-    height: auto;
-    border-radius: 12px;
-}}
-</style>
+# Store current image index in session state
+if 'img_index' not in st.session_state:
+    st.session_state.img_index = 0
+else:
+    st.session_state.img_index = (st.session_state.img_index + 1) % len(image_files)
 
-<div style="max-width: 700px; margin: auto; border-radius: 12px; overflow: hidden;">
-    <img id="carousel" class="carousel-img" src="{image_paths[0]}" />
-</div>
-
-<script>
-let images = {image_paths};
-let index = 0;
-setInterval(() => {{
-    index = (index + 1) % images.length;
-    document.getElementById("carousel").src = images[index];
-}}, 3000);
-</script>
-"""
-
-st.markdown(html_code, unsafe_allow_html=True)
-
-
-
-
+# Display the image
+image_path = os.path.join(image_folder, image_files[st.session_state.img_index])
+st.image(Image.open(image_path), use_column_width=True, caption=image_files[st.session_state.img_index])
 
 
 
