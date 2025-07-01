@@ -1,6 +1,0 @@
-[theme]
-primaryColor = "#F4A261"          # Peach
-backgroundColor = "#FFF5EC"       # Light peach background
-secondaryBackgroundColor = "#FFE8D6"  # Slightly darker for sidebars/boxes
-textColor = "#3E2C2A"             # Deep brown for text contrast
-font = "sans serif"
