@@ -159,11 +159,6 @@ supabase = get_supabase_client() # use this to call the supabase database
 
 
 
-# contact developer
-st.sidebar.markdown("---")  # Adds a separator
-if st.sidebar.button("📩 Contact Developer"):
-    st.sidebar.markdown("[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/prisca-ukanwa-800a1117a/)")
-
 # ✅ Initialize session state variables ONCE
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
@@ -1107,6 +1102,30 @@ def login_or_upgrade_success(user_id, username, role, plan, is_active):
 
 
 
+st.sidebar.subheader("💬 Feedback Form")
+
+with st.sidebar.expander('Submit Feedback'):
+    with st.sidebar.form("feedback_form"):
+        name = st.sidebar.text_input("Your Name")
+        email = st.sidebar.text_input("Your Email")
+        feedback = st.sidebar.text_area("Your Feedback")
+
+        submitted = st.form_submit_button("Submit")
+
+        if submitted:
+            if name and email and feedback:
+                response = supabase.table("feedback").insert({
+                    "name": name,
+                    "email": email,
+                    "feedback": feedback,
+                    "user_id": st.session_state.get("user_id", None),
+                }).execute()
+
+                # Check if data is returned and no errors
+                if response.data:
+                    st.sidebar.success("✅ Thank you for your feedback!")
+                else:
+                    st.sidebar.error("⚠️ Could not submit feedback. Please try again.")
 
 
 
