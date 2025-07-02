@@ -312,7 +312,8 @@ def register_user(username, email, email_confirmation,password_hash, role,plan):
            # Automatically register as employee
                supabase.table("employees").insert({
                 "user_id": user_id,
-                "name": username,  # or any preferred name field
+                "name": username, 
+                "email":email,# or any preferred name field
                 "role": "employee"
             }).execute()
                st.success("✅ MD was also registered as an employee.")
