@@ -226,7 +226,7 @@ def hash_password(password: str) -> str:
     # Hash the password using SHA-256 (or a stronger hashing function like bcrypt)
     return hashlib.sha256(password.encode()).hexdigest()
 from email.message import EmailMessage
-import os
+
 # pip install pyhton-dotenv
 from dotenv import load_dotenv
 
