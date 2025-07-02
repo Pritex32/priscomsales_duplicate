@@ -3,6 +3,7 @@
 bcrypt==4.3.0
 fpdf==1.7.2
 PyJWT==2.8.0
+SQLAlchemy == 2.0.30
 
 matplotlib==3.9.2
 numpy==1.26.4
@@ -13,7 +14,7 @@ requests==2.32.3
 storage3==0.11.3
 streamlit==1.43.2
 python-dotenv
-streamlit-autorefresh==1.0.1
+
 streamlit-extras==0.7.1
 streamlit-javascript==0.1.5
 streamlit-option-menu==0.4.0
