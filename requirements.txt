@@ -12,6 +12,7 @@ requests==2.32.3
 storage3==0.11.3
 streamlit==1.43.2
 python-dotenv
+sqlalchemy>=2.0.30
 
 streamlit-extras==0.7.1
 streamlit-javascript==0.1.5
