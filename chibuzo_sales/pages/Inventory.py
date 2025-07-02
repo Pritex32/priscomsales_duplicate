@@ -125,18 +125,6 @@ if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 # connecting to supabase
 
 from supabase import create_client
@@ -182,20 +170,6 @@ if "plan" not in st.session_state or "is_active" not in st.session_state:
 user_id = st.session_state.get("user_id")
 
    
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # this will show if the person has paid or not
@@ -299,13 +273,20 @@ def fetch_requisitions(user_id):
 def fetch_restocks(user_id):
     return supabase.table("goods_bought").select("*").eq("purchase_date", today).eq("user_id", user_id).execute().data
 
-
+# for reorder level alert
 def get_low_stock_items(user_id):
-    return supabase.table("inventory_master_log")\
+    records = supabase.table("inventory_master_log")\
         .select("*")\
         .eq("user_id", user_id)\
-        .lte("supplied_quantity", "reorder_level")\
         .execute().data
+
+    low_stock = [
+        item for item in records
+        if item.get("closing_balance", 0) <= item.get("Reorder_level", 0)
+    ]
+
+    return low_stock
+
 
 # Then show other dashboard info below...
 
@@ -505,9 +486,10 @@ if selected == 'Home':
     if low_stock_items:
         st.warning("⚠️ The following items are low in stock:")
     for item in low_stock_items:
-        st.write(f"🔻 {item['item_name']}: {item['supplied_quantity']} units (Reorder level: {item['Reorder_level']})")
-else:
-    st.success("✅ All items are above reorder levels.")
+        st.write(f"🔻 {item['item_name']}: {item['closing_balance']} units left (Reorder level: {item['Reorder_level']})")
+    else:
+        st.success("✅ All items are sufficiently stocked.")
+
     if st.button("🔄 Update Inventory Balances"):
         update_inventory_balances(selected_date, user_id)
         move_requisitions_to_history(selected_date,user_id)  # Move today's requisitions after updating the inventory
