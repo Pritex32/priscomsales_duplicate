@@ -625,7 +625,7 @@ elif choice == "Register":
     if "temp_email" not in st.session_state:
         st.session_state.temp_email = ""
     with st.form("registration_form"):
-        username = st.text_input("Username")
+        username = st.text_input("Full name")
         password = st.text_input("Password", type="password")
         plan = st.selectbox("Choose Plan", ["free"])
         role = st.selectbox("Select Role", ["MD"])
