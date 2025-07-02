@@ -165,26 +165,15 @@ with col22:
 
 
 
-# Folder with images
-image_folder = "images"
-image_files = sorted([img for img in os.listdir(image_folder) if img.endswith(('.png', '.jpg', '.jpeg'))])
 
-# Initialize image index in session state
-if "img_index" not in st.session_state:
-    st.session_state.img_index = 0
+video_url = "https://raw.githubusercontent.com/Pritex32/priscomac_sales_software/main/chibuzo_sales/0702-01_1751453097271.mp4"
 
-# Display current image
-image_path = os.path.join(image_folder, image_files[st.session_state.img_index])
-st.image(Image.open(image_path), use_column_width=True, caption=image_files[st.session_state.img_index])
-
-# Buttons to move forward or backward
-col1, col2 = st.columns([1, 1])
-with col1:
-    if st.button("⬅️ Prev"):
-        st.session_state.img_index = (st.session_state.img_index - 1) % len(image_files)
-with col2:
-    if st.button("Next ➡️"):
-        st.session_state.img_index = (st.session_state.img_index + 1) % len(image_files)
+st.markdown(f"""
+<video autoplay muted loop controls style="width: 100%; border-radius: 12px;">
+  <source src="{video_url}" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+""", unsafe_allow_html=True)
 
 
 
