@@ -923,8 +923,8 @@ if "user_id" not in st.session_state or "user_email" not in st.session_state:
 user_id = st.session_state["user_id"]
 email = st.session_state["user_email"]
 
-if st.button("Upgrade to Pro (₦1000)"):
-    result = initialize_payment(email, 1000, user_id)
+if st.button("Upgrade to Pro (₦5000)"):
+    result = initialize_payment(email, 5000, user_id)
     st.write("🔍 Paystack Init Result:", result)  # DEBUG
 
     if result.get("status") and "data" in result:
