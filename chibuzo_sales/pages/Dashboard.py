@@ -306,7 +306,19 @@ def register_user(username, email, email_confirmation,password_hash, role,plan):
         
         # Send verification email
         # ✅ Step 6: Send verification email
-       
+        try:
+           emp_check = supabase.table("employees").select("*").eq("user_id", user_id).limit(1).execute()
+           if not emp_check.data:
+           # Automatically register as employee
+               supabase.table("employees").insert({
+                "user_id": user_id,
+                "full_name": username,  # or any preferred name field
+                "role": "employee"
+            }).execute()
+               st.success("✅ MD was also registered as an employee.")
+               
+        except Exception as e:
+            st.warning(f"⚠️ Could not verify/create employee record: {e}")
         return "✅ Registration successful! Kindly login."
     
          
