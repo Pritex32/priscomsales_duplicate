@@ -504,7 +504,7 @@ def fetch_expenses_master_data(user_id):
     
     expenses_df = pd.DataFrame(data)
     
-    if not expenses_df.empty:
+    if expense_df is not None and not expense_df.empty:
         return expenses_df
     else:
         print("No data found or an error occurred.")
