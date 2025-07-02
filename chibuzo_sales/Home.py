@@ -165,28 +165,26 @@ with col22:
 
 
 
-from streamlit_autorefresh import st_autorefresh
-
-
-# Refresh every 3 seconds (3000 milliseconds)
-st_autorefresh(interval=3000, key="image_slider_refresh")
-
-# Load images from a folder
+# Folder with images
 image_folder = "images"
 image_files = sorted([img for img in os.listdir(image_folder) if img.endswith(('.png', '.jpg', '.jpeg'))])
 
-# Store current image index in session state
-if 'img_index' not in st.session_state:
+# Initialize image index in session state
+if "img_index" not in st.session_state:
     st.session_state.img_index = 0
-else:
-    st.session_state.img_index = (st.session_state.img_index + 1) % len(image_files)
 
-# Display the image
+# Display current image
 image_path = os.path.join(image_folder, image_files[st.session_state.img_index])
 st.image(Image.open(image_path), use_column_width=True, caption=image_files[st.session_state.img_index])
 
-
-
+# Buttons to move forward or backward
+col1, col2 = st.columns([1, 1])
+with col1:
+    if st.button("⬅️ Prev"):
+        st.session_state.img_index = (st.session_state.img_index - 1) % len(image_files)
+with col2:
+    if st.button("Next ➡️"):
+        st.session_state.img_index = (st.session_state.img_index + 1) % len(image_files)
 
 
 
