@@ -917,7 +917,7 @@ def initialize_payment(email, amount, user_id):
 
 # Simulated user info — in production, this should come from your auth/session
 if "user_id" not in st.session_state or "user_email" not in st.session_state:
-    st.error("User information missing. Please log in.")
+    st.error(" ")
     st.stop()
 
 user_id = st.session_state["user_id"]
