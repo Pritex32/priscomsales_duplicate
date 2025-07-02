@@ -314,6 +314,8 @@ This link will expire in 24 hours. If you did not register, please ignore this m
         raise
 
 
+st.write("API Key:", os.getenv("SENDGRID_API_KEY"))
+st.write("From Email:", os.getenv("EMAIL_USER"))
 
 
 
