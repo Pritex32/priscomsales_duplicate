@@ -228,99 +228,34 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-SECRET_KEY = os.getenv("SECRET_KEY")
-# setting up email verification code
-st.write("SECRET_KEY loaded:", os.getenv("SECRET_KEY"))
-serializer = URLSafeTimedSerializer(SECRET_KEY,salt="email-verify")
-
-code = st.query_params.get("code")
-def generate_token(email):
-    return serializer.dumps(email, salt="email-verify")
-
-def confirm_token(code, expiration=86400):
+    
+def mask_email(email):
     try:
-        email = serializer.loads(code, salt="email-verify", max_age=expiration)
-        return email
-    except Exception as e:
-        st.error(f"Token decode error: {type(e).__name__} - {e}")
+        name, domain = email.split("@")
+        # Mask part of the name (e.g., jo***)
+        if len(name) >= 3:
+            name_masked = name[:2] + "***"
+        else:
+            name_masked = name[0] + "***"
+        return f"{name_masked}@{domain}"
+    except:
         return None
-        
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, Email, To, Content
-from dotenv import load_dotenv
+def is_valid_email(email):
+    pattern = r"^[\w\.-]+@[\w\.-]+\.\w{2,}$"
+    return re.match(pattern, email)
 
-def send_verification_email(email, code):
-    load_dotenv()
 
-    SENDGRID_API_KEY =os.getenv("SENDGRID_API_KEY")
-    EMAIL_USER = os.getenv("EMAIL_USER")    # Your verification link
-    link = f"https://priscomac-sales-software.onrender.com/Dashboard?code={code}"
 
-    # Email subject
-    subject = "Verify Your Email to Access Priscomac Sales Software"
-
-    # Plain-text content
-    plain_text = f"""
-Hi there,
-
-Please verify your email by clicking the link below:
-
-{link}
-
-This link will expire in 24 hours. If you did not register, please ignore this message.
-"""
-
-    # HTML content
-    html_content = f"""
-<html>
-  <body style="font-family: Arial, sans-serif;">
-    <h2>Welcome to Priscomac Sales Software 👋</h2>
-    <p>Please verify your email by clicking the button below:</p>
-    <p>
-      <a href="{link}" style="
-        display:inline-block;
-        padding:10px 20px;
-        background-color:#4CAF50;
-        color:white;
-        text-decoration:none;
-        border-radius:5px;
-      ">
-        Verify Email
-      </a>
-    </p>
-    <p style="color:gray;">This link will expire in 24 hours. If you did not register, please ignore this message.</p>
-  </body>
-</html>
-"""
-
-    # Create SendGrid Mail object
-    message = Mail(
-        from_email=Email(EMAIL_USER, name="PriscomSales"),
-        to_emails=To(email),
-        subject=subject,
-        plain_text_content=plain_text,
-        html_content=html_content
-    )
-
-    # Send the email
+def register_user(username, email, email_confirmation,password_hash, role,plan):
     try:
-        sg = SendGridAPIClient(SENDGRID_API_KEY)
-        response = sg.send(message)
-        print("✅ Verification email sent to:", email)
-        print("🔗 Link:", link)
-        print("📨 Status Code:", response.status_code)
-    except Exception as e:
-        print("❌ Could not send verification email, Try Again later:", e)
-        raise
+        # Step 1: Validate email format
+        if not is_valid_email(email):
+            return "❌ Invalid email format."
 
+        # Step 2: Match confirmation
+        if email != email_confirmation:
+            return "❌ Email confirmation does not match."
 
-st.write("API Key:", os.getenv("SENDGRID_API_KEY"))
-st.write("From Email:", os.getenv("EMAIL_USER"))
-
-
-
-def register_user(username, email, password_hash, role,plan):
-    try:
         # Check if username already exists in the users table
         existing_user = supabase.table("users").select("username").eq("username", username).execute()
         if existing_user.data:
@@ -331,12 +266,7 @@ def register_user(username, email, password_hash, role,plan):
         if existing_email.data:
             return f"Error: Email '{email}' already exists."
                    
-        code = generate_token(email)
-        st.write(code) #ken
-        try:
-            send_verification_email(email, code)
-        except Exception as e:
-            return f"❌ Could not send verification email: {e}"
+        
 
                
         # Insert user details into the users table
@@ -345,8 +275,8 @@ def register_user(username, email, password_hash, role,plan):
             "email": email,
             "password_hash": password_hash,
             "role": role,
-            "is_verified": False,
-            "verification_token": code
+            "is_verified":  True ,
+            
         }).execute()
         # ✅ Extract user_id from the insert result
         
@@ -374,48 +304,11 @@ def register_user(username, email, password_hash, role,plan):
         # Send verification email
         # ✅ Step 6: Send verification email
        
-        return "✅ Registration successful! Please check your email to verify your account."
+        return "✅ Registration successful! Kindly login."
     
          
     except Exception as e:
         return f"Error: {str(e)}"
-
-
-# this part verify and update the database that the person is verified
-query_params = st.query_params
-code = query_params.get("code", None)
-
-if code:
-     # Override the current page
-    email = confirm_token(code)
-    st.write("Decoded email from token:", email)
-
-    if email:
-        # ✅ Check if user exists with that email
-        user_check = supabase.table("users").select("*").eq("email", email).execute()
-        st.write("User record found:", user_check.data)
-
-        if user_check.data:
-            update_result=supabase.table("users").update({
-                "is_verified": True,
-                "verification_token": None
-            }).eq("email", email).execute()
-            st.write("Update result:", update_result)
-            st.success(f"✅ Email {email} verified successfully! You will be redirected to login shortly...")
-
-            # Clear query params and redirect
-            st.query_params.clear()
-            import time
-            time.sleep(3)
-            st.session_state.page = "Login"
-            st.rerun()
-        else:
-            st.error("❌ No user associated with this token.")
-    else:
-        st.error("❌ Invalid or expired verification link.")
-
-
-
 
 
 
@@ -611,6 +504,10 @@ def login_md(email, password):
     if not user:
         st.error("❌ Invalid email or password.")
         return False
+    # ✅ Add this verification check
+    if not user.get("is_verified", False):
+        st.warning("⚠️ Your account is not verified. Please check your email or contact support.")
+        return False
     
 
     role = user.get('role', '').strip().lower()
@@ -705,43 +602,68 @@ if st.session_state.redirect_to_login:
 
 # Registration Page
 elif choice == "Register":
+    st.subheader("📋 Register")
+    # 🧠 Only initialize once
+    if "email_entered" not in st.session_state:
+        st.session_state.email_entered = False
+
+    if "temp_email" not in st.session_state:
+        st.session_state.temp_email = ""
     with st.form("registration_form"):
-        # Input fields
         username = st.text_input("Username")
-        email = st.text_input("Email")
         password = st.text_input("Password", type="password")
-        plan = st.selectbox("Choose Plan", ["free", "pro"])
-
+        plan = st.selectbox("Choose Plan", ["free"])
         role = st.selectbox("Select Role", ["MD"])
-             
-        # Submit button
-        submitted = st.form_submit_button("Register")
 
-        if submitted:
-            if username and email and password and plan:
-                # Hash the password
-                hashed_password = hash_password(password)
+        if not st.session_state.email_entered:
+            email = st.text_input("Enter your email")
 
-                # Register user in the users table
-                result = register_user(username, email, hashed_password, role, plan)
-                # Show success and redirect
-                if isinstance(result, str) and "successfully" in result.lower():
-                    st.success(result)
-                    try:
-                        code = os.getenv("SECRET_KEY")  # or generate your actual token here
-                        send_verification_email(email, code)
-                        st.success("📧 Verification email sent!")
-                    except Exception as e:          
-                        st.warning(f"❌ Could not send email: {e}")
-                    st.info("Redirecting to login...")
-                    st.session_state.page = "Login"
+            if st.form_submit_button("Next"):
+                if email and "@" in email:
+                    st.session_state.temp_email = email
+                    st.session_state.email_entered = True
                     st.rerun()
                 else:
-                    st.error(result if result else "⚠️ Unknown error.")
- # Refresh the page
-                
-            else:
-                st.warning("⚠️ Please fill in all fields.")
+                    st.warning("Please enter a valid email.")
+        else:
+            # Email was previously submitted
+            def mask_email(email):
+                try:
+                    name, domain = email.split("@")
+                    name_masked = name[:2] + "***" if len(name) >= 3 else name[0] + "***"
+                    return f"{name_masked}@{domain}"
+                except:
+                    return "*****@unknown.com"
+
+            masked = mask_email(st.session_state.temp_email)
+            st.info(f"To confirm, please complete this email: `{masked}`")
+            email_confirmation = st.text_input("Confirm your email")
+
+            submitted = st.form_submit_button("Register")
+
+            if submitted:
+                if username and password and email_confirmation:
+                    if email_confirmation != st.session_state.temp_email:
+                        st.error("❌ Email confirmation doesn't match.")
+                    else:
+                        hashed_password = hash_password(password)
+                        result = register_user(
+                            username,
+                            st.session_state.temp_email,
+                            email_confirmation,
+                            hashed_password,
+                            role,
+                            plan
+                        )
+                        if isinstance(result, str) and "successfully" in result.lower():
+                            st.success(result)
+                            st.session_state.page = "Login"
+                           
+                            st.rerun()
+                        else:
+                            st.error(result if result else "❌ Registration failed.")
+                else:
+                    st.warning("⚠️ Please fill in all fields.")
 
 ## to redirect you to dashboard after login
  # force rerun to redirect to dashboard
@@ -960,12 +882,6 @@ if st.session_state.get("logged_in") and st.session_state.get("role") == "md":
                                 st.error("❌ Failed to create employee account.")
                     except Exception as e:
                         st.error(f"⚠️ Error: {str(e)}")
-
-
-
-
-
-
 
 
 
