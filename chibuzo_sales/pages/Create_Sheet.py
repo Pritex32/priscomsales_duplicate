@@ -138,7 +138,7 @@ supabase = get_supabase_client() # use this to call the supabase database
 
 
 
-st.title("📄 Create a New Sheet")
+
 
 # Simulated logged-in user
 user_id = st.session_state.get("user_id")
@@ -146,6 +146,17 @@ if not user_id:
     st.error("Please log in.")
     st.stop()
 
+
+# --- Simulated login ---
+if "user_id" not in st.session_state:
+    # For testing, assign a dummy UUID - replace with your auth system
+    st.session_state["user_id"] = "00000000-0000-0000-0000-000000000001"
+
+user_id = st.session_state["user_id"]
+
+st.title("📄 Create a New Sheet")
+st.warning('create tables that are important')
+# Step 1: Create Sheet
 sheet_name = st.text_input("Enter Sheet Name (e.g., sales_june)")
 num_cols = st.number_input("How many columns?", min_value=1, step=1)
 
@@ -157,97 +168,187 @@ for i in range(int(num_cols)):
         ["TEXT", "INTEGER", "FLOAT", "BOOLEAN", "DATE", "TIMESTAMP"],
         key=f"col_type_{i}"
     )
-    columns.append((col_name, col_type))
+    columns.append({"name": col_name, "type": col_type})
+for i, col in enumerate(columns):
+    if not col["name"]:
+        st.write(f"Column {i+1} name is empty!")
+
 
 if st.button("Create Sheet"):
-    if sheet_name and all(c[0] for c in columns):
-        # Save metadata to user_sheets
-        supabase.table("user_sheets").insert({
-            "user_id": user_id,
-            "sheet_name": sheet_name
-        }).execute()
+    if sheet_name and all(col["name"] for col in columns):
+        # Check if sheet exists
+        existing = supabase.table("user_sheets") \
+            .select("*").eq("user_id", user_id).eq("sheet_name", sheet_name).execute()
+        if existing.data:
+            st.warning("Sheet with this name already exists!")
+        else:
+            # Insert sheet metadata with columns list
+            insert_resp = supabase.table("user_sheets").insert({
+                "user_id": user_id,
+                "sheet_name": sheet_name,
+                "columns": columns  # Must be a list of dicts [{name, type}, ...]
+            }).execute()
 
-        # Generate CREATE TABLE SQL dynamically
-        # Safely get short user_id for table name
-        short_user_id = str(user_id)[:8]
-        # Format the SQL correctly with user-defined columns
-        cols_sql = ", ".join([f"{name} {dtype}" for name, dtype in columns])
-        create_sql = f"""
-        CREATE TABLE IF NOT EXISTS {sheet_name}_{short_user_id} (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER,
-                {cols_sql},
-                        created_at TIMESTAMP DEFAULT NOW());"""
+            insert_resp = supabase.table("user_sheets").insert({
+                     "user_id": user_id,
+                     "sheet_name": sheet_name,
+                      "columns": columns}).execute()
 
-        # Send query to database (use your DB client here)
-       
+            if insert_resp.data is not None:
+                st.success("Sheet created successfully!")
+            else:
+                st.error("Failed to create sheet.")
 
-# Build the connection string
-        DATABASE_URL = f"postgresql://postgres:wE4ptqRBpg2vjS1R@db.ecsrlqvifparesxakokl.supabase.co:5432/postgres"
 
-        from sqlalchemy import create_engine
-        engine = create_engine(DATABASE_URL)
-        with engine.connect() as conn:
-            conn.execute(create_sql)
-
-        st.success(f"✅ Sheet `{sheet_name}` created!")
     else:
         st.warning("Please fill all fields.")
 
 
+st.markdown("---")
 st.title("🧾 Enter Data into Your Sheet")
 
-# 1. Fetch available sheets for this user
+# Step 2: Select sheet to add data
 response = supabase.table("user_sheets").select("*").eq("user_id", user_id).execute()
-user_sheets = response.data
+user_sheets = response.data or []
 
 if not user_sheets:
     st.info("You haven't created any sheets yet.")
     st.stop()
 
-# 2. Let user pick a sheet
 sheet_option = st.selectbox("Choose a sheet", [s["sheet_name"] for s in user_sheets])
 sheet_info = next(s for s in user_sheets if s["sheet_name"] == sheet_option)
-table_name = f"{sheet_info['sheet_name']}_{user_id}"
- # same naming used during creation
+
+columns = sheet_info.get("columns")
+if not columns:
+    st.info(" Select previously created sheet or  Please recreate the sheet.")
+    st.stop()
 
 
-# Build the connection string
-DATABASE_URLL = f"postgresql://postgres:wE4ptqRBpg2vjS1R@db.ecsrlqvifparesxakokl.supabase.co:5432/postgres"
-
-# Connect to your database
-engine = create_engine(DATABASE_URLL)
-inspector = inspect(engine)
-
-with engine.connect() as conn:
-    columns = inspector.get_columns(table_name)
-    column_names = [col["name"] for col in columns if col["name"] not in ["id", "user_id", "created_at"]]
-
-
-
-data = {}
+# Step 3: Input data for selected sheet
 st.subheader(f"➕ Add Data to: {sheet_option}")
 
-for col in column_names:
-    data[col] = st.text_input(f"{col}", key=col)
+data = {}
+for col in columns:
+    col_name = col["name"]
+    col_type = col["type"]
+    # Basic input widgets based on type
+    if col_type == "INTEGER":
+        val = st.number_input(f"{col_name} (INTEGER)", step=1, key=f"input_{col_name}")
+    elif col_type == "FLOAT":
+        val = st.number_input(f"{col_name} (FLOAT)", format="%.5f", key=f"input_{col_name}")
+    elif col_type == "BOOLEAN":
+        val = st.checkbox(f"{col_name} (BOOLEAN)", key=f"input_{col_name}")
+    elif col_type == "DATE":
+        val = st.date_input(f"{col_name} (DATE)", key=f"input_{col_name}")
+    elif col_type == "TIMESTAMP":
+        val = st.text_input(f"{col_name} (TIMESTAMP, e.g. 2023-01-01 12:00:00)", key=f"input_{col_name}")
+    else:  # TEXT and fallback
+        val = st.text_input(f"{col_name} (TEXT)", key=f"input_{col_name}")
+
+    data[col_name] = val
 
 if st.button("Submit Row"):
-    # Insert the row
-    insert_query = f"""
-    INSERT INTO {table_name} (user_id, {', '.join(data.keys())})
-    VALUES (%s, {', '.join(['%s'] * len(data))})
-    """
+    # Insert row as JSON data
+    insert_resp = supabase.table("sheet_data").insert({
+        "user_id": user_id,
+        "sheet_name": sheet_option,
+        "data": data
+    }).execute()
 
-    values = [user_id] + list(data.values())
+    if insert_resp.data:
+        st.success("Sheet created successfully!")
+    else:
+        st.error("Failed to create sheet.")
 
-    with engine.connect() as conn:
-        conn.execute(insert_query, values)
-
-    st.success("✅ Row added successfully!")
-
-
+st.markdown("---")
 st.subheader("📄 Current Sheet Data")
-with engine.connect() as conn:
-    df = pd.read_sql(f"SELECT * FROM {table_name} WHERE user_id = %s", conn, params=[user_id])
 
-st.dataframe(df)
+# Step 4: Display sheet data
+with st.expander('View Current Data'):
+    rows_resp = supabase.table("sheet_data").select("*") \
+    .eq("user_id", user_id).eq("sheet_name", sheet_option).execute()
+
+    rows = rows_resp.data or []
+
+    if rows:
+            # Normalize JSONB data column for display
+        df = pd.json_normalize([row["data"] for row in rows])
+        st.dataframe(df)
+    else:
+        st.info("No data found for this sheet yet.")
+
+
+
+st.subheader('Select Rows to edit or delete')
+# Fetch user rows for the selected sheet
+rows_resp = supabase.table("sheet_data") \
+    .select("*") \
+    .eq("user_id", user_id) \
+    .eq("sheet_name", sheet_option) \
+    .execute()
+rows = rows_resp.data or []
+
+if not rows:
+    st.info("No rows found.")
+else:
+    # Show a selectbox for user to pick a row to edit/delete
+    row_options = [f"ID {r['id']} - Created {r['created_at']}" for r in rows]
+    selected_row_str = st.selectbox("Select row to edit or delete", row_options)
+
+    # Find selected row object
+    selected_row = rows[row_options.index(selected_row_str)]
+    row_data = selected_row.get("data", {})
+
+    st.write("Current row data:")
+    
+
+    # Editable inputs for update
+    updated_data = {}
+    for col in columns:
+        col_name = col["name"]
+        current_val = row_data.get(col_name, "")
+        updated_data[col_name] = st.text_input(f"{col_name}", value=str(current_val))
+
+    if st.button("Update Selected Row"):
+        update_resp = supabase.table("sheet_data").update({
+            "data": updated_data
+        }).eq("id", selected_row["id"]).execute()
+
+        if update_resp.data is not None:
+            st.success(f"Row {selected_row['id']} updated successfully.")
+            st.rerun()
+        else:
+            st.error("Failed to update row.")
+
+    if st.button("Delete Selected Row"):
+        delete_resp = supabase.table("sheet_data").delete().eq("id", selected_row["id"]).execute()
+        if delete_resp.data is not None:
+            st.success(f"Row {selected_row['id']} deleted successfully.")
+            st.rerun()
+        else:
+            st.error("Failed to delete row.")
+
+
+st.title('Delete Entire sheet')
+response = supabase.table("user_sheets").select("*").eq("user_id", user_id).execute()
+user_sheets = response.data or []
+st.subheader("Your Sheets")
+
+for i, sheet in enumerate(user_sheets):
+    sheet_name = sheet["sheet_name"]
+    safe_sheet_name = sheet_name.replace(" ", "_").replace("-", "_")
+    st.write(f"📄 {sheet_name}")
+    if st.button(f"Delete '{sheet_name}'", key=f"delete_{safe_sheet_name}_{i}"):
+        # Delete sheet metadata from user_sheets
+        delete_meta = supabase.table("user_sheets").delete() \
+            .eq("user_id", user_id).eq("sheet_name", sheet_name).execute()
+
+        # Optionally delete all sheet data rows
+        delete_data = supabase.table("sheet_data").delete() \
+            .eq("user_id", user_id).eq("sheet_name", sheet_name).execute()
+
+        if delete_meta.data is not None:
+            st.success(f"Deleted sheet '{sheet_name}' and all its data.")
+            st.rerun()  # use experimental_rerun to refresh the app
+        else:
+            st.error(f"Failed to delete sheet '{sheet_name}'.")
