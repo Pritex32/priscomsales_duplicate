@@ -77,8 +77,11 @@ if "loaded" not in st.session_state:
 
 load_dotenv()
 
-jwt_SECRET_KEY = "4606"  # Use env vars in production
-ALGORITHM = "HS256"
+import os
+
+jwt_SECRET_KEY = os.getenv('jwt_SECRET_KEY')  # ✅ Correct usage
+ALGORITHM = os.getenv('ALGORITHM')
+
 
 def generate_jwt(user_id, username, role,plan="free", is_active=False,email=None):
     payload = {
