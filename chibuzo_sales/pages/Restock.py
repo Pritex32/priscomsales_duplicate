@@ -386,7 +386,7 @@ with tab1:
                 item_name = st.text_input("Item Name")
                 quantity = st.number_input("Initial Quantity Supplied", min_value=0, step=1)
                 reorder_level = st.number_input("Reorder Level", min_value=0, step=1)
-                unit_price = st.number_input("Unit Price", min_value=0, step=0.01)
+                unit_price = st.number_input("Unit Price", min_value=0.0, step=0.01)
                 supplier = st.text_input("Supplier Name (Optional)")
                 purchase_date = st.date_input("Purchase Date", value=date.today())
                 description = st.text_area("Description (Optional)")
