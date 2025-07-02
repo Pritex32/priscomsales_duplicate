@@ -183,7 +183,7 @@ st.markdown(f"""
 
 # --- Features & Highlights ---
 with st.container():
-    st.markdown("## 🤝 Let’s Grow Your Business with **Priscomac**")
+    st.markdown("## 🤝 Let’s Grow Your Business with **PriscomSales**")
     st.markdown("### Your all-in-one platform for smarter sales and financial tracking.")
 
     st.markdown("""
