@@ -313,6 +313,7 @@ def register_user(username, email, email_confirmation,password_hash, role,plan):
                supabase.table("employees").insert({
                 "user_id": user_id,
                 "name": username, 
+                'password':password,
                 "email":email,# or any preferred name field
                 "role": "employee"
             }).execute()
@@ -754,27 +755,6 @@ elif choice == 'Delete Account':
                     st.stop()
                 else:
                     st.error(f"❌ Deletion failed: {delete_result.error}")
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-   
-
-
-
-
-
 
 
 
