@@ -677,8 +677,8 @@ elif choice == "Register":
                             st.session_state.redirect_to_login = True
                             st.rerun()          
                             
-                    else:
-                        st.error(result)
+                        else:
+                            st.error(result)
                 else:
                     st.warning("⚠️ Please fill in all fields.")
 
