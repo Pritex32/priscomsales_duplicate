@@ -512,7 +512,9 @@ with tab1:
       
     # Save Sale
     if st.button("💾 Save Sale", key="save_sale_btn"):
-        if invoice_file:
+        if not invoice_file:
+            st.error("❌ Please upload an invoice or proof of payment before saving.")
+            st.stop()
             extension = os.path.splitext(invoice_file.name)[1]
             filename = f"user_{user_id}_{invoice_number or 'sale'}_{sale_date}{extension}"
             try:
@@ -520,6 +522,7 @@ with tab1:
                 st.success("✅ Invoice uploaded successfully.")
             except Exception as e:
                 st.error(f"❌ Failed to upload invoice: {e}")
+                st.stop()
         else:
             st.warning("Please upload an invoice file before saving.")
         if not item_id or item_name == "Select an item":
