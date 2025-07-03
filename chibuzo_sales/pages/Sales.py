@@ -1226,6 +1226,11 @@ with tab4: # type: ignore
         
         # 3. Confirm deletion
         if st.button("🗑️ Delete This Sale"):
+            # Protect this page — allow only MDs
+            if "role" not in st.session_state or st.session_state.role != "MD":
+                st.warning("🚫 You are not authorized to view this page.")
+                st.stop()
+
             try:
                 # 4. Delete from sales_master_history if the record exists
                 if sales_history_data:
@@ -1262,7 +1267,7 @@ with tab4: # type: ignore
 
                 # Success message after deletion from both tables and inventory
                 st.success("✅ Sale record deleted and inventory updated successfully.")
-                
+                st.rerun()
             except Exception as e:
                 st.error(f"❌ Failed to delete: {e}")
     else:
