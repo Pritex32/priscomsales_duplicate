@@ -1227,7 +1227,7 @@ with tab4: # type: ignore
         # 3. Confirm deletion
         if st.button("🗑️ Delete This Sale"):
             # Protect this page — allow only MDs
-            if "role" not in st.session_state or st.session_state.role != "MD":
+            if "role" not in st.session_state or st.session_state.role != "md":
                 st.warning("🚫 You are not authorized to view this page.")
                 st.stop()
 
