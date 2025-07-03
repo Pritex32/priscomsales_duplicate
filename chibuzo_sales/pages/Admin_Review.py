@@ -303,6 +303,11 @@ def fetch_sales_data(user_id):
 
 
 st.header("🔍 Admin - Review Sales & Invoices")
+# refresh button
+if st.button("🔄 Refresh Data"):
+    st.cache_data.clear()  # ✅ Clear cached data
+    st.rerun() 
+
 st.caption('Confirm the Amount recieved from sales with invoice')
 # ✅ STEP 1: Fetch all unverified sales for the current user
 unverified_result = (
