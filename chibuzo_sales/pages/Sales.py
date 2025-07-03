@@ -575,29 +575,7 @@ with tab1:
             result = supabase.table("sales_master_log").insert(sale_data).execute()
             new_sale_id = result.data[0]["sale_id"]
             st.success("✅ Sale recorded successfully!")
-            # ✅ Clear form values before rerun
-            for key in [
-                "item_selectbox",
-                "quantity",
-                "unit_price",
-                "sale_date",
-                "customer_name",
-                "customer_phone",
-                "payment_method",
-                "payment_status",
-                "due_date",
-                "invoice_number",
-                "notes",
-                "invoice_upload",
-                "sale_key_invoice",
-                "partial_amount",
-                "partial_date",
-                "partial_notes"
-            ]:
-                if key in st.session_state:
-                    del st.session_state[key]
-
-            st.rerun()
+            
             # Insert payment record if paid or partial
             if payment_status in ["paid", "partial", "credit"]:
                 st.subheader("💳 Recording Payment...")
@@ -644,6 +622,29 @@ with tab1:
                 st.success("📝 Credit sale recorded without payment.")
              
             supabase.table("sales_master_log").update(update_data).eq("sale_id", new_sale_id).execute()
+            # ✅ Clear form values before rerun
+            for key in [
+                "item_selectbox",
+                "quantity",
+                "unit_price",
+                "sale_date",
+                "customer_name",
+                "customer_phone",
+                "payment_method",
+                "payment_status",
+                "due_date",
+                "invoice_number",
+                "notes",
+                "invoice_upload",
+                "sale_key_invoice",
+                "partial_amount",
+                "partial_date",
+                "partial_notes"
+            ]:
+                if key in st.session_state:
+                    del st.session_state[key]
+
+            st.rerun()
             
         except Exception as e:
               st.error(f"❌ Failed to update sales record with payment: {e}")
