@@ -321,7 +321,7 @@ def register_user(username, email, email_confirmation,password_hash, role,plan):
                
         except Exception as e:
             st.warning(f"⚠️ Could not verify/create employee record: {e}")
-        return True,"✅ Registration successful! Kindly login."
+        return "✅ Registration successful! Kindly login."
     
          
     except Exception as e:
@@ -674,7 +674,7 @@ elif choice == "Register":
                         )
                         if "successfully" in result:
                             st.success(result)
-                            st.session_state.redirect_to_login = True
+                            st.session_state.page='Login'
                             st.rerun()          
                             
                         else:
