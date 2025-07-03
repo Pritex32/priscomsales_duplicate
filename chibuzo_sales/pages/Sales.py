@@ -515,16 +515,15 @@ with tab1:
         if not invoice_file:
             st.error("❌ Please upload an invoice or proof of payment before saving.")
             st.stop()
-            extension = os.path.splitext(invoice_file.name)[1]
-            filename = f"user_{user_id}_{invoice_number or 'sale'}_{sale_date}{extension}"
-            try:
-                invoice_file_url = upload_invoice(invoice_file, "salesinvoices", filename, user_id)
-                st.success("✅ Invoice uploaded successfully.")
-            except Exception as e:
-                st.error(f"❌ Failed to upload invoice: {e}")
-                st.stop()
-        else:
-            st.warning("Please upload an invoice file before saving.")
+        extension = os.path.splitext(invoice_file.name)[1]
+        filename = f"user_{user_id}_{invoice_number or 'sale'}_{sale_date}{extension}"
+        try:
+            invoice_file_url = upload_invoice(invoice_file, "salesinvoices", filename, user_id)
+            st.success("✅ Invoice uploaded successfully.")
+        except Exception as e:
+            st.error(f"❌ Failed to upload invoice: {e}")
+            st.stop()
+       
         if not item_id or item_name == "Select an item":
             st.error("❌ Please select a valid item before saving.")
         else:
