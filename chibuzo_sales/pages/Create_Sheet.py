@@ -155,7 +155,14 @@ if "user_id" not in st.session_state:
 user_id = st.session_state["user_id"]
 
 st.title("📄 Create a New Sheet")
-st.warning('create tables that are important')
+col3,col4=st.columns(2)
+with col3:
+    st.warning('create tables that are important')
+with col4:
+    if st.button("🔄 Refresh Data"):
+        st.cache_data.clear()  # ✅ Clear cached data
+        st.rerun() 
+
 # Step 1: Create Sheet
 sheet_name = st.text_input("Enter Sheet Name (e.g., sales_june)")
 num_cols = st.number_input("How many columns?", min_value=1, step=1)
