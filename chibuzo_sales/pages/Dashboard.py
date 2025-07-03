@@ -777,7 +777,7 @@ elif choice == 'Login':
         col1, col2 = st.columns([1, 1])
         with col1:
             if st.button("🔁 Go to Sales Page"):
-                switch_page("sales")
+                switch_page("Sales")
         with col2:
             if st.button("🚪 Logout", key="logout_dashboard"):
                 st.session_state.clear()
@@ -821,7 +821,7 @@ elif choice == 'Login':
                             st.success(f"✅ Welcome {employee_name} (Employee)! Redirecting to Sales...")
 
                         time.sleep(2)
-                        switch_page("Sales")
+                        switch_page("Restock")
 
         # ❗ Login validation warnings
         if login_type == "MD" and not st.session_state.get("logged_in"):
