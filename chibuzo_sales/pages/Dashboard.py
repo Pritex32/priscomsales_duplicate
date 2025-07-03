@@ -674,7 +674,7 @@ elif choice == "Register":
                         )
                         if "successfully" in result:
                             st.success(result)
-                            st.session_state.page = "Login"
+                            st.session_state.redirect_to_login = True
                             st.rerun()          
                             
                     else:
