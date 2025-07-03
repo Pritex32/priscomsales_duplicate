@@ -208,9 +208,7 @@ def block_free_user_if_limit_exceeded():
 import tempfile
 import mimetypes
 
-if st.button("🔄 Refresh Data"):
-    st.cache_data.clear()  # ✅ Clear cached data
-    st.rerun() 
+
 
 # to restrict acess
 if st.session_state.get("role") != "md":
