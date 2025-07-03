@@ -664,7 +664,7 @@ elif choice == "Register":
                         st.error("❌ Email confirmation doesn't match.")
                     else:
                         hashed_password = hash_password(password)
-                        success, result = register_user(
+                        result = register_user(
                             username,
                             st.session_state.temp_email,
                             email_confirmation,
@@ -672,13 +672,13 @@ elif choice == "Register":
                             role,
                             plan
                         )
-                    if success:
-                        st.success(result)
-                        st.session_state.page = "Login"
-                        st.rerun()          
+                        if "successfully" in result:
+                            st.success(result)
+                            st.session_state.page = "Login"
+                            st.rerun()          
                             
                     else:
-                        st.error(result if result else "❌ Registration failed.")
+                        st.error(result)
                 else:
                     st.warning("⚠️ Please fill in all fields.")
 
