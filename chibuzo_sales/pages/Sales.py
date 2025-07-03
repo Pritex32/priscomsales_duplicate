@@ -437,7 +437,14 @@ except:
     st.stop()
 
 
-# Now use employee_id for tracking or transactions directly without selecting
+# getting the employee id
+employee_lookup = supabase.table("employees").select("employee_id").eq("user_id", user_id).eq("full_name", user_name).limit(1).execute()
+
+if not employee_lookup.data:
+    st.error("❌ This employee is not registered.")
+    st.stop()
+
+
 
 
 with tab1:
@@ -449,9 +456,10 @@ with tab1:
     # Employee selection
     
    
-    employee_name=st.text_input("user",value= user_name, disabled=True,key="employee_name_input")
+    employee_name=st.text_input("Employee name",value= user_name, disabled=True,key="employee_name_input")
 
-    employee_id=st.text_input("user",value= user_id, disabled=True,key="employee_name_input_2")
+    employee_id = employee_lookup.data[0]["employee_id"]
+
     # Item selection with default placeholder
     item_dict = fetch_inventory_items(user_id)
     item_options = ["Select an item"] + list(item_dict.keys())
