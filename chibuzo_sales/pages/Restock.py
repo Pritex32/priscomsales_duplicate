@@ -382,6 +382,7 @@ with tab1:
     with col1:
         
         st.subheader("📥 Restocks An Item")
+        st.info('👉first add a new item before restocking the item over time')
         
 
     with col2:
