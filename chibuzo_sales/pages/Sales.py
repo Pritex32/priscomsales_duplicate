@@ -1244,8 +1244,7 @@ with tab4: # type: ignore
                 item_id = selected_sale.get("item_id")
                 quantity_sold = selected_sale.get("quantity")
 
-                st.write("Item ID:", item_id)
-                st.write("Quantity Sold:", quantity_sold)
+               
 
                 if item_id and quantity_sold:
                     # Fetch current inventory data
