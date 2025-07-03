@@ -441,8 +441,11 @@ except:
 
 
 with tab1:
+  
+    if st.button("🔄 Refresh Data"):
+        st.cache_data.clear()  # ✅ Clear cached data
+        st.rerun() 
     st.header("🛒 Record a New Sale")
-
     # Employee selection
     
    
