@@ -444,7 +444,7 @@ if not employee_lookup.data:
     st.error("❌ This employee is not registered.")
     st.stop()
 
-
+employee_id = employee_lookup.data[0]["employee_id"]
 
 
 with tab1:
@@ -458,7 +458,7 @@ with tab1:
    
     employee_name=st.text_input("Employee name",value= user_name, disabled=True,key="employee_name_input")
 
-    employee_id = employee_lookup.data[0]["employee_id"]
+    employee_id=st.text_input("Employee id",value= employee_id, disabled=True,key="employee_name_input_2")
 
     # Item selection with default placeholder
     item_dict = fetch_inventory_items(user_id)
