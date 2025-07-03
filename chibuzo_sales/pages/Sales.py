@@ -526,6 +526,7 @@ with tab1:
        
         if not item_id or item_name == "Select an item":
             st.error("❌ Please select a valid item before saving.")
+            st.stop()
         else:
             amount_paid = 0.0
             amount_balance = total_amount
@@ -536,6 +537,7 @@ with tab1:
         elif payment_status == "partial":
             if partial_payment_amount <= 0:
                 st.error("❌ Partial payment amount must be greater than 0.")
+                st.stop()
             else:
                 amount_paid = partial_payment_amount
                 amount_balance = total_amount - partial_payment_amount
