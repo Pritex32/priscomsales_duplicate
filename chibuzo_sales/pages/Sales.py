@@ -438,7 +438,7 @@ except:
 
 
 # getting the employee id
-employee_lookup = supabase.table("employees").select("employee_id").eq("user_id", user_id).eq("full_name", user_name).limit(1).execute()
+employee_lookup = supabase.table("employees").select("employee_id").eq("user_id", user_id).eq("name", user_name).limit(1).execute()
 
 if not employee_lookup.data:
     st.error("❌ This employee is not registered.")
