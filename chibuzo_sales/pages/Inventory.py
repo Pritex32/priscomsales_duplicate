@@ -396,7 +396,7 @@ def update_inventory_balances(selected_date,user_id):
     restock_dict = defaultdict(int)
     for entry in restocks_today:
         restock_dict[entry["item_id"]] += entry.get("supplied_quantity", 0)
-    st.write("🔍 Restock Dict Debug:", dict(restock_dict))
+   
 
     # Process requisitions
     requisition_dict = defaultdict(int)
