@@ -405,7 +405,7 @@ for sale in unverified_sales:
 # Example: sales_list = fetch_sales_data(user_id)
 user_id = st.session_state.get("user_id")
 
-st.header('View Sales Invoice')
+
 
 # Assume you have a list or DataFrame of sales (e.g., from Supabase)
 # sales_list = fetch_sales_data(user_id)
@@ -608,7 +608,7 @@ def fetch_expenses_master_data(user_id):
         print(f"Error fetching expenses: {e}")
         return pd.DataFrame()  # Return empty DataFrame on error
 
-st.subheader('💸 View Expense Records')
+st.subheader('💸 View Expense Invoice Records')
 
 # ✅ Get user ID from session
 user_id = st.session_state.get("user_id", None)
