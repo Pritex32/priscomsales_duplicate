@@ -1245,26 +1245,39 @@ with tab4: # type: ignore
         st.warning("🚫 You are not authorized to view this page.")
         st.stop()
     # 1. Input the ID to delete
-    sale_id = st.text_input("Enter Sale ID (Invoice Number) to Delete", "")
+with tab4:
+    st.header("🗑️ Delete Sale or Expense Record by ID")
+    
+    if "role" not in st.session_state or st.session_state.role != "md":
+        st.warning("🚫 You are not authorized to view this page.")
+        st.stop()
+
+    sale_or_expense_id = st.text_input("Enter Sale ID or Expense ID to Delete", "")
+    user_id = st.session_state.get("user_id")
+
     sales_history_data = None
     sales_log_data = None
     selected_sale = None
+    selected_expense = None
 
+    if sale_or_expense_id:
+        # 🔍 Search for Sale record
+        sales_history_data = supabase.table("sales_master_history").select("*").eq("sale_id", sale_or_expense_id).eq("user_id", user_id).execute().data
+        sales_log_data = supabase.table("sales_master_log").select("*").eq("sale_id", sale_or_expense_id).eq("user_id", user_id).execute().data
 
-    if sale_id:
-        sales_history_data = supabase.table("sales_master_history").select("*").eq("sale_id", sale_id).eq("user_id", user_id).execute().data
-        sales_log_data = supabase.table("sales_master_log").select("*").eq("sale_id", sale_id).eq("user_id", user_id).execute().data
-    
-    # Combine sales data from both tables
+        # 🔍 If not sale, check Expense
+        if not sales_history_data and not sales_log_data:
+            expense_data = supabase.table("expenses_master").select("*").eq("expense_id", sale_or_expense_id).eq("user_id", user_id).execute().data
+            if expense_data:
+                selected_expense = expense_data[0]
+
+    # ========================= 💼 DELETE SALE =========================
     if sales_history_data:
         selected_sale = sales_history_data[0]
     elif sales_log_data:
         selected_sale = sales_log_data[0]
-    else:
-        selected_sale = None
 
     if selected_sale:
-        # Display the sale details for confirmation
         st.subheader("Sale Details to Delete")
         st.write(f"**Invoice Number:** {selected_sale['invoice_number']}")
         st.write(f"**Item Name:** {selected_sale['item_name']}")
@@ -1273,57 +1286,53 @@ with tab4: # type: ignore
         st.write(f"**Sale Date:** {selected_sale['sale_date']}")
         st.write(f"**Employee Name:** {selected_sale['employee_name']}")
 
-        # Debugging: Display sale record and quantity
-       
-        
-        # 3. Confirm deletion
         if st.button("🗑️ Delete This Sale"):
-            # Protect this page — allow only MDs
-           
-
             try:
-                # 4. Delete from sales_master_history if the record exists
+                # 1. Delete from sales_master_history
                 if sales_history_data:
                     supabase.table("sales_master_history").delete().eq("sale_id", selected_sale["sale_id"]).eq("user_id", user_id).execute()
 
-                # 5. Delete from sales_master_log if the record exists
+                # 2. Delete from sales_master_log
                 if sales_log_data:
                     supabase.table("sales_master_log").delete().eq("sale_id", selected_sale["sale_id"]).eq("user_id", user_id).execute()
 
-                # 6. Optionally, update inventory if the record exists
+                # 3. Update inventory: subtract the sold quantity from stock_out
                 item_id = selected_sale.get("item_id")
                 quantity_sold = selected_sale.get("quantity")
 
-               
-
                 if item_id and quantity_sold:
-                    # Fetch current inventory data
                     inventory_item = supabase.table("inventory_master_log").select("stock_out").eq("item_id", item_id).eq("user_id", user_id).single().execute().data
-                    
-                    st.write("Inventory Item:", inventory_item)
-                    
                     if inventory_item:
-                        # Add back the sold quantity to inventory
-                        current_quantity = inventory_item["stock_out"] if "stock_out" in inventory_item else 0
-                        new_quantity = current_quantity + quantity_sold
-                        st.write(f"Updating Inventory: Adding {quantity_sold} to {current_quantity}, New Quantity: {new_quantity}")
+                        current_quantity = inventory_item.get("stock_out", 0)
+                        new_quantity = max(current_quantity - quantity_sold, 0)
 
-                        # Update inventory quantity
                         supabase.table("inventory_master_log").update({"stock_out": new_quantity}).eq("item_id", item_id).eq("user_id", user_id).execute()
 
-                    else:
-                        st.error(f"❌ No inventory record found for Item ID {item_id}")
-
-                # Success message after deletion from both tables and inventory
                 st.success("✅ Sale record deleted and inventory updated successfully.")
                 st.rerun()
             except Exception as e:
-                st.error(f"❌ Failed to delete: {e}")
-    else:
-        st.error("❌ No sale record found with the given ID.")
+                st.error(f"❌ Failed to delete sale: {e}")
 
+    # ========================= 💼 DELETE EXPENSE =========================
+    elif selected_expense:
+        st.subheader("Expense Record to Delete")
+        st.write(f"**Vendor Name:** {selected_expense['vendor_name']}")
+        st.write(f"**Expense Item:** {selected_expense['item_name']}")
+        st.write(f"**Total Amount:** ₦{selected_expense['total_amount']}")
+        st.write(f"**Expense Date:** {selected_expense['expense_date']}")
+        st.write(f"**Employee:** {selected_expense['employee_name']}")
 
+        if st.button("🗑️ Delete This Expense Record"):
+            try:
+                supabase.table("expenses_master").delete().eq("expense_id", selected_expense["expense_id"]).eq("user_id", user_id).execute()
+                st.success("✅ Expense record deleted successfully.")
+                st.rerun()
+            except Exception as e:
+                st.error(f"❌ Failed to delete expense: {e}")
 
+    # ========================= ❌ NOTHING FOUND =========================
+    elif sale_or_expense_id:
+        st.error("❌ No sale or expense record found with the given ID.")
 
 
 
