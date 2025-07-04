@@ -468,7 +468,7 @@ def fetch_goods_bought_history(user_id):
 
 df_url = fetch_goods_bought_history(user_id)
 
-
+st.subheader('View Good Bought Invoice Hstory')
 
 # ✅ Get user ID from session
 user_id = st.session_state.get("user_id", None)
@@ -500,7 +500,8 @@ if user_id:
             # 📅 Date range
             min_date = df_url["purchase_date"].min()
             max_date = df_url["purchase_date"].max()
-            date_range = st.date_input("Filter by Date Range", [min_date, max_date])
+            start_date = st.date_input("🗓️ Start Date", value=min_date)
+            end_date = st.date_input("🗓️ End Date", value=max_date)
 
            
             # ------------------- ✅ APPLY FILTERS --------------------
@@ -514,10 +515,9 @@ if user_id:
 
             if date_range:
                 start_date, end_date = pd.to_datetime(date_range)
-                filtered_df = filtered_df[
-                    (filtered_df["purchase_date"] >= start_date) &
-                    (filtered_df["purchase_date"] <= end_date)
-                ]
+                filtered_df = df_url[
+               (df_url["purchase_date"] >= pd.to_datetime(start_date)) &
+               (df_url["purchase_date"] <= pd.to_datetime(end_date))]
 
            
             # ------------------- 📋 SHOW RESULTS -------------------
