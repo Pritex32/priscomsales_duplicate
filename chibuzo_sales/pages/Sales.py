@@ -987,24 +987,6 @@ def update_payment_status(table_name, id_column, record_id,user_id):
 # restock table
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 with tab2:
     st.title("💰 View Customers with Pending Payments")
     st.caption("Review and Mark Customers with Outstanding Balances.")
@@ -1015,7 +997,7 @@ with tab2:
      
     for tx in transactions:
         # Identify transaction type
-        sale_id = tx.get('sale_history_id ')
+        sale_id = tx.get('sale_history_id')
         purchase_id = tx.get('purchase_id')
         expense_id = tx.get('expense_id')
 
