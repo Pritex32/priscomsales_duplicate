@@ -917,6 +917,7 @@ user_id = st.session_state["user_id"]
 email = st.session_state["user_email"]
 
 if st.button("Upgrade to Pro (₦5000)"):
+    st.info('You will have complete access to all your sales data.')
     result = initialize_payment(email, 5000, user_id)
     st.write("🔍 Paystack Init Result:", result)  # DEBUG
 
