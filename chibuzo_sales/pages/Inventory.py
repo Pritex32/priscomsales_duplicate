@@ -490,8 +490,8 @@ if selected == 'Home':
     low_stock_items = get_low_stock_items(user_id)
     if low_stock_items:
         st.warning("⚠️ The following items are low in stock:")
-    for item in low_stock_items:
-        st.write(f"🔻 {item['item_name']}: {item['closing_balance']} units left (reorder level: {item['reorder_level']})")
+        for item in low_stock_items:
+            st.write(f"🔻 {item['item_name']}: {item['closing_balance']} units left (reorder level: {item['reorder_level']})")
     else:
         st.success("✅ All items are sufficiently stocked.")
 
