@@ -1,4 +1,15 @@
 import streamlit as st
+# to hide streamlit icons
+hide_streamlit_style = """
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    footer:after {content:'';}
+    header {visibility: hidden;}
+    .css-164nlkn.egzxvld1 {visibility: hidden;}  /* Streamlit footer class */
+    </style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 import uuid
 from urllib.parse import quote_plus
 
