@@ -372,7 +372,9 @@ if user_id is None:
     st.error("User ID is missing from session.")
     st.stop()
 
-
+ if "role" not in st.session_state or st.session_state.role != "md":
+     st.warning("🚫 You are not authorized to view this page.")
+     st.stop()
 # Purchase details
 with tab1:
     
