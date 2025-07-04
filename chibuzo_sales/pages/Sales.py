@@ -1239,14 +1239,10 @@ with tab3:
             st.write("Error fetching data from the database.")
 
 
-with tab4: # type: ignore
-    st.header("🗑️ Delete Sale Record by ID")
-    if "role" not in st.session_state or st.session_state.role != "md":
-        st.warning("🚫 You are not authorized to view this page.")
-        st.stop()
-    # 1. Input the ID to delete
+
+   
 with tab4:
-    st.header("🗑️ Delete Sale or Expense Record by ID")
+    st.header("🗑️ Delete Sale or Expense Record by table ID")
     
     if "role" not in st.session_state or st.session_state.role != "md":
         st.warning("🚫 You are not authorized to view this page.")
