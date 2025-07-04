@@ -410,45 +410,87 @@ st.header('View Sales Invoice')
 # Assume you have a list or DataFrame of sales (e.g., from Supabase)
 # sales_list = fetch_sales_data(user_id)
 
+st.subheader('🧾 View Sales Invoice Records')
+
+# ✅ Get user ID from session
+user_id = st.session_state.get("user_id", None)
+
+# ✅ Check if user is logged in
 if user_id:
-    sales_list = fetch_sales_data(user_id)  # Replace with your function
+    # 🔁 Fetch data
+    sales_list = fetch_sales_data(user_id)  # Replace with your actual function
     sales_df = pd.DataFrame(sales_list)
 
-    if not sales_df.empty and "sale_date" in sales_df.columns:
-        # ✅ Ensure sale_date is datetime and sort newest first
-        sales_df["sale_date"] = pd.to_datetime(sales_df["sale_date"])
-        sales_df = sales_df.sort_values(by="sale_date", ascending=False)
+    with st.expander("📄 View Your Sales Invoice History"):
+        if sales_df is not None and not sales_df.empty:
+            st.write("### Sales Summary with Invoice Preview")
 
-        with st.expander("🧾 View Sales Invoice"):
-            for _, sale in sales_df.iterrows():
-                st.subheader(f"Sale #{sale.get('invoice_number') or sale.get('sale_id')}")
+            # 🧼 Clean and prepare data
+            sales_df["sale_date"] = pd.to_datetime(sales_df["sale_date"], errors="coerce")
+            sales_df["total_amount"] = pd.to_numeric(sales_df["total_amount"], errors="coerce")
 
-                # ✅ Display core sale info
-                st.write(f"**Customer Name:** {sale.get('customer_name', 'N/A')}")
-                st.write(f"**Item Bought:** {sale.get('item_name', 'N/A')}")
-                st.write(f"**Sale Date:** {sale.get('sale_date', 'N/A')}")
-                st.write(f"**Total Amount Paid:** ₦{sale.get('total_amount', 'N/A')}")
+            if "sale_date" in sales_df.columns:
+                sales_df = sales_df.sort_values(by="sale_date", ascending=False)
 
-                # ✅ Invoice Preview
-                invoice_url = sale.get("invoice_file_url")
+            # ----------------------- 🔍 FILTERS -----------------------
+            st.subheader("🔍 Filter Options")
 
-                if invoice_url:
-                    st.write("Invoice URL:", invoice_url)
+            customer_filter = st.text_input("Search by Customer Name")
 
-                    if invoice_url.endswith(".pdf"):
-                        st.markdown(f"[📎 Open PDF Invoice]({invoice_url})", unsafe_allow_html=True)
+            item_options = sales_df["item_name"].dropna().unique().tolist()
+            item_filter = st.selectbox("Filter by Item Bought", options=["All"] + item_options)
+
+            # 📅 Date range
+            min_date = sales_df["sale_date"].min()
+            max_date = sales_df["sale_date"].max()
+            start_date = st.date_input("🗓️ Start Date", value=min_date)
+            end_date = st.date_input("🗓️ End Date", value=max_date)
+
+            # ------------------- ✅ APPLY FILTERS --------------------
+            filtered_sales = sales_df.copy()
+
+            if customer_filter:
+                filtered_sales = filtered_sales[
+                    filtered_sales["customer_name"].str.contains(customer_filter, case=False, na=False)
+                ]
+
+            if item_filter != "All":
+                filtered_sales = filtered_sales[filtered_sales["item_name"] == item_filter]
+
+            filtered_sales = filtered_sales[
+                (filtered_sales["sale_date"] >= pd.to_datetime(start_date)) &
+                (filtered_sales["sale_date"] <= pd.to_datetime(end_date))
+            ]
+
+            # ------------------- 📋 SHOW RESULTS -------------------
+            if not filtered_sales.empty:
+                st.success(f"Showing {len(filtered_sales)} matching sales invoice(s)")
+                for _, sale in filtered_sales.iterrows():
+                    st.subheader(f"🧾 Sale #{sale.get('invoice_number') or sale.get('sale_id')}")
+
+                    st.write(f"**Customer Name:** {sale.get('customer_name', 'N/A')}")
+                    st.write(f"**Item Bought:** {sale.get('item_name', 'N/A')}")
+                    st.write(f"**Sale Date:** {sale.get('sale_date', 'N/A')}")
+                    st.write(f"**Total Amount Paid:** ₦{sale.get('total_amount', 'N/A')}")
+
+                    st.write("**Invoice:**")
+                    invoice_url = sale.get("invoice_file_url")
+
+                    if invoice_url:
+                        if invoice_url.endswith(".pdf"):
+                            st.markdown(f"[📎 Open PDF Invoice]({invoice_url})", unsafe_allow_html=True)
+                        else:
+                            st.image(invoice_url, caption=f"Invoice for Sale #{sale.get('invoice_number') or sale.get('sale_id')}")
                     else:
-                        st.image(invoice_url, caption=f"Invoice for Sale #{sale.get('invoice_number') or sale.get('sale_id')}")
-                else:
-                    st.info("No invoice file uploaded.")
+                        st.info("No invoice file uploaded.")
 
-                st.markdown("---")
-    else:
-        st.info("ℹ️ No sales records found.")
+                    st.markdown("---")
+            else:
+                st.info("No matching sales invoices found based on the filters.")
+        else:
+            st.info("ℹ️ No sales records found.")
 else:
     st.warning("⚠️ Please log in to view your invoice history.")
-
-
 
 
 
@@ -566,39 +608,83 @@ def fetch_expenses_master_data(user_id):
         print(f"Error fetching expenses: {e}")
         return pd.DataFrame()  # Return empty DataFrame on error
 
-# Check if user is logged in
+st.subheader('💸 View Expense Records')
+
+# ✅ Get user ID from session
+user_id = st.session_state.get("user_id", None)
+
+# ✅ Check if user is logged in
 if user_id:
+    # 🔁 Fetch data
     expense_df = fetch_expenses_master_data(user_id)
 
-    with st.expander("💸 View Your Expense Records"):
-        if not expense_df.empty:
-            st.write("### Expenses Summary")
-            if "expense_date" in df_url.columns:
+    with st.expander("📄 View Your Expense Invoice Records"):
+        if expense_df is not None and not expense_df.empty:
+            st.write("### Expense Summary with Invoice Preview")
+
+            # 🧼 Clean and prepare data
+            expense_df["expense_date"] = pd.to_datetime(expense_df["expense_date"], errors="coerce")
+            expense_df["total_amount"] = pd.to_numeric(expense_df["total_amount"], errors="coerce")
+            expense_df["amount_balance"] = pd.to_numeric(expense_df["amount_balance"], errors="coerce")
+
+            if "expense_date" in expense_df.columns:
                 expense_df = expense_df.sort_values(by="expense_date", ascending=False)
 
-            for idx, expense in expense_df.iterrows():
-                st.subheader(f"Vendor: {expense.get('vendor_name', 'Unknown')}")
+            # ----------------------- 🔍 FILTERS -----------------------
+            st.subheader("🔍 Filter Options")
 
-                st.write(f"**Total Amount:** ₦{expense.get('total_amount', 'N/A')}")
-                st.write(f"**Payment Status:** {expense.get('payment_status', 'N/A')}")
-                st.write(f"**Expense Date:** {expense.get('expense_date', 'N/A')}")
-                st.write(f"**Balance:** ₦{expense.get('amount_balance', 'N/A')}")
+            vendor_filter = st.text_input("Search by Vendor Name")
 
-                # ✅ Uploaded invoice preview
-                st.write("**Invoice:**")
-                invoice_url = expense.get("invoice_file_url")
+            status_options = expense_df["payment_status"].dropna().unique().tolist()
+            status_filter = st.selectbox("Filter by Payment Status", options=["All"] + status_options)
 
-                if invoice_url:
-                    st.write("Invoice URL:", invoice_url)
+            # 📅 Date range
+            min_date = expense_df["expense_date"].min()
+            max_date = expense_df["expense_date"].max()
+            start_date = st.date_input("🗓️ Start Date", value=min_date)
+            end_date = st.date_input("🗓️ End Date", value=max_date)
 
-                    if invoice_url.endswith(".pdf"):
-                        st.markdown(f"[📎 Open PDF Invoice]({invoice_url})", unsafe_allow_html=True)
+            # ------------------- ✅ APPLY FILTERS --------------------
+            filtered_expense = expense_df.copy()
+
+            if vendor_filter:
+                filtered_expense = filtered_expense[
+                    filtered_expense["vendor_name"].str.contains(vendor_filter, case=False, na=False)
+                ]
+
+            if status_filter != "All":
+                filtered_expense = filtered_expense[filtered_expense["payment_status"] == status_filter]
+
+            filtered_expense = filtered_expense[
+                (filtered_expense["expense_date"] >= pd.to_datetime(start_date)) &
+                (filtered_expense["expense_date"] <= pd.to_datetime(end_date))
+            ]
+
+            # ------------------- 📋 SHOW RESULTS -------------------
+            if not filtered_expense.empty:
+                st.success(f"Showing {len(filtered_expense)} matching expense record(s)")
+                for _, expense in filtered_expense.iterrows():
+                    st.subheader(f"🏷️ Vendor: {expense.get('vendor_name', 'Unknown')}")
+
+                    st.write(f"**Total Amount:** ₦{expense.get('total_amount', 'N/A')}")
+                    st.write(f"**Payment Status:** {expense.get('payment_status', 'N/A')}")
+                    st.write(f"**Expense Date:** {expense.get('expense_date', 'N/A')}")
+                    st.write(f"**Balance:** ₦{expense.get('amount_balance', 'N/A')}")
+
+                    st.write("**Invoice:**")
+                    invoice_url = expense.get("invoice_file_url")
+
+                    if invoice_url:
+                        if invoice_url.endswith(".pdf"):
+                            st.markdown(f"[📎 Open PDF Invoice]({invoice_url})", unsafe_allow_html=True)
+                        else:
+                            st.image(invoice_url, caption=f"Invoice for {expense.get('vendor_name', '')}")
                     else:
-                        st.image(invoice_url, caption=f"Invoice for {expense.get('vendor_name', '')}")
-                else:
-                    st.info("No invoice file uploaded.")
+                        st.info("No invoice file uploaded.")
 
-                st.markdown("---")
+                    st.markdown("---")
+            else:
+                st.info("No matching expense records found based on the filters.")
         else:
             st.info("ℹ️ No expenses found for this user.")
 else:
