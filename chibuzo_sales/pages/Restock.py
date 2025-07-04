@@ -597,7 +597,10 @@ with tab2:
 
  #delete section
 with tab3:
-    
+    if "role" not in st.session_state or st.session_state.role != "md":
+        st.warning("🚫 You are not authorized to view this page.")
+        st.stop()
+
     # 1. Input the ID to delete
     st.header("🗑️ Delete purchase Record by ID")
 
