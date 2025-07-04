@@ -513,11 +513,10 @@ if user_id:
             if customer_filter != "All":
                 filtered_df = filtered_df[filtered_df["supplier_name"] == customer_filter]
 
-            if date_range:
-                start_date, end_date = pd.to_datetime(date_range)
-                filtered_df = df_url[
-               (df_url["purchase_date"] >= pd.to_datetime(start_date)) &
-               (df_url["purchase_date"] <= pd.to_datetime(end_date))]
+           
+               filtered_df = filtered_df[
+                 (filtered_df["purchase_date"] >= pd.to_datetime(start_date)) &
+                 (filtered_df["purchase_date"] <= pd.to_datetime(end_date))]
 
            
             # ------------------- 📋 SHOW RESULTS -------------------
