@@ -247,7 +247,7 @@ if st.button("🔄 Refresh Data"):
 with st.sidebar:
     selected = option_menu(
         menu_title=('Options'),
-        options=["Home", "Filter","Reports"],
+        options=["Home", "Filter","Reports",'Delete'],
         icons=["house", "plus-circle","bar-chart-line"],
         default_index=0
     )
@@ -671,3 +671,49 @@ if selected == 'Reports':
             
         else:
             st.warning("⚠️ No data found for the selected date range.")
+
+
+if selected =='Delete':
+    st.subheader("🗑️ Delete Inventory Item")
+    item_name_to_delete = st.text_input("Enter Item Name to Delete", "")
+
+    if item_name_to_delete and user_id:
+        # Step 1: Get the inventory item record
+        inventory_items = supabase.table("inventory_master_log").select("*").eq("user_id", user_id).eq("item_name", item_name_to_delete).execute().data
+
+        if inventory_items:
+            item = inventory_items[0]
+            item_id = item.get("item_id")
+            st.write(f"**Item ID:** {item_id}")
+            st.write(f"**Item Name:** {item.get('item_name')}")
+            st.write(f"**Stock In:** {item.get('stock_in', 0)}")
+            st.write(f"**Stock Out:** {item.get('stock_out', 0)}")
+            confirm = st.checkbox("⚠️ I understand that this will delete related sales, purchases, restocks, etc.")
+
+            if confirm and st.button("🗑️ Delete This Inventory Item"):
+                try:
+                    # 🔁 Step 2: Manually delete from all related tables using item_id
+                    tables_to_clean = [
+                    "sales_master_history",
+                    "sales_master_log",
+                    "goods_bought_history",
+                    "goods_bought" ]
+ 
+                for table in tables_to_clean:
+                    supabase.table(table).delete().eq("item_id", item_id).eq("user_id", user_id).execute()
+
+                # 🔁 Step 3: Delete the item itself from inventory
+                supabase.table("inventory_master_log").delete().eq("item_id", item_id).eq("user_id", user_id).execute()
+
+                st.success(f"✅ Item '{item_name_to_delete}' and all linked records deleted successfully.")
+                st.rerun()
+
+            except Exception as e:
+                st.error(f"❌ Failed to delete item and related data: {e}")
+    else:
+        st.warning("❗ No inventory item found with that name.")
+
+
+
+
+
