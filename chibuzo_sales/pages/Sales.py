@@ -1256,7 +1256,9 @@ with tab3:
 
 with tab4: # type: ignore
     st.header("🗑️ Delete Sale Record by ID")
-
+    if "role" not in st.session_state or st.session_state.role != "md":
+        st.warning("🚫 You are not authorized to view this page.")
+        st.stop()
     # 1. Input the ID to delete
     sale_id = st.text_input("Enter Sale ID (Invoice Number) to Delete", "")
     sales_history_data = None
@@ -1292,9 +1294,7 @@ with tab4: # type: ignore
         # 3. Confirm deletion
         if st.button("🗑️ Delete This Sale"):
             # Protect this page — allow only MDs
-            if "role" not in st.session_state or st.session_state.role != "md":
-                st.warning("🚫 You are not authorized to view this page.")
-                st.stop()
+           
 
             try:
                 # 4. Delete from sales_master_history if the record exists
