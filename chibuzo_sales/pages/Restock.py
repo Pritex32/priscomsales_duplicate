@@ -404,19 +404,19 @@ with tab1:
                 payment_method = st.selectbox("Payment Method", ["cash", "card", "transfer", "cheque"])
                 due_date = st.date_input("Due Date", value=date.today()) if payment_status != "paid" else None
                 notes = st.text_area("Notes (Optional)")
-
+                invoice_file_url = None
                 total_cost = quantity * unit_price
                 total_price_paid = 0.0
                 if payment_status == "paid":
                     total_price_paid = total_cost
                 elif payment_status == "partial":
                     total_price_paid = st.number_input("Total Price Paid", min_value=0.0, max_value=total_cost, step=0.01, format="%.2f")
+               
                 st.markdown("📎 **Upload Invoice (PDF/Image)**")
                 invoice_file = st.file_uploader("Upload Invoice", type=["pdf", "jpg", "jpeg", "png"], key="exp_file_2")
-                invoice_file_url = None
                 invoice_name = st.text_input("Enter desired invoice name (without extension)", value=f"invoice_{employee_id}_{date.today().isoformat()}")
                 submitted = st.form_submit_button("Add Item")
-
+            
                 if submitted:
                     if not item_name or quantity <= 0:
                         st.error("❌ Please fill in all required fields.")
@@ -424,8 +424,7 @@ with tab1:
                     else:
                         check_item = supabase.table("inventory_master_log").select("item_name").eq("item_name", item_name).eq("user_id", user_id).execute()
 
-                    invoice_file_url = None  # ✅ Always define at the top
-
+                   
                     if check_item.data:
                         st.warning("⚠️ Item already exists in inventory.")
                     else:
@@ -435,10 +434,10 @@ with tab1:
                             unique_suffix = uuid.uuid4().hex[:8]
                             filename = f"{safe_name}_{unique_suffix}{extension}"
                             st.write(f"Uploading file as: {filename}")
-                            exp_invoice_file_url = upload_invoice(invoice_file,"salesinvoices", filename,user_id)
-                            if exp_invoice_file_url:
+                            invoice_file_url = upload_invoice(invoice_file,"salesinvoices", filename,user_id)
+                            if invoice_file_url:
                                 st.success("✅ Invoice uploaded successfully!")
-                                st.write(f"[View Invoice]({exp_invoice_file_url})")
+                                st.write(f"[View Invoice]({invoice_file_url})")
                             else:
                                 st.warning("⚠️ Invoice not uploaded. Please check for errors above.")
                     # Insert into inventory_master_log
