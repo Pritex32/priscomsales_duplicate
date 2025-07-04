@@ -461,6 +461,8 @@ with tab1:
                         restock_entry = {
                             "item_id": new_item_id,
                             "user_id": user_id,
+                            "employee_id":employee_id,
+                            "employee_name":employee_name,
                             "item_name": item_name,
                             "supplied_quantity": quantity,
                             "unit_price": unit_price,
