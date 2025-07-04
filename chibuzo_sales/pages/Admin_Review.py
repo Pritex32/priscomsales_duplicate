@@ -89,8 +89,8 @@ if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
 
  # Protect this page — allow only MDs
 if "role" not in st.session_state or st.session_state.role != "md":
-                st.warning("🚫 You are not authorized to view this page.")
-                st.stop()
+    st.warning("🚫 You are not authorized to view this page.")
+    st.stop()
 
 
 
