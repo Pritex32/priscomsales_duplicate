@@ -133,7 +133,7 @@ with col1:
     st.title('PriscomSales')
     
 with col2:
-    image_path = "priscomac_blacktransparent_logo_rockyart.png"
+    image_path = "priscomac_white_transparent_logo_rockyart.png"
     image = Image.open(image_path)
     
     # Manually rotate the image 180 degrees to rotate the image
