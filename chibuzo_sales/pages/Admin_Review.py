@@ -491,16 +491,7 @@ if user_id:
             max_date = df_url["purchase_date"].max()
             date_range = st.date_input("Filter by Date Range", [min_date, max_date])
 
-            # 💰 Price range
-            min_price = float(df_url["total_price_paid"].min())
-            max_price = float(df_url["total_price_paid"].max())
-            price_range = st.slider(
-                "Filter by Total Price Paid (₦)", 
-                min_value=min_price, 
-                max_value=max_price, 
-                value=(min_price, max_price)
-            )
-
+           
             # ------------------- ✅ APPLY FILTERS --------------------
             filtered_df = df_url.copy()
 
@@ -508,7 +499,7 @@ if user_id:
                 filtered_df = filtered_df[filtered_df["item_name"].str.contains(item_filter, case=False, na=False)]
 
             if customer_filter != "All":
-                filtered_df = filtered_df[filtered_df["customer_name"] == customer_filter]
+                filtered_df = filtered_df[filtered_df["supplier_name"] == customer_filter]
 
             if date_range:
                 start_date, end_date = pd.to_datetime(date_range)
@@ -517,11 +508,7 @@ if user_id:
                     (filtered_df["purchase_date"] <= end_date)
                 ]
 
-            filtered_df = filtered_df[
-                (filtered_df["total_price_paid"] >= price_range[0]) &
-                (filtered_df["total_price_paid"] <= price_range[1])
-            ]
-
+           
             # ------------------- 📋 SHOW RESULTS -------------------
             if not filtered_df.empty:
                 st.success(f"Showing {len(filtered_df)} matching invoice(s)")
