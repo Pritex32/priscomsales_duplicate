@@ -311,77 +311,81 @@ if st.button("🔄 Refresh Data"):
     st.rerun() 
 
 st.caption('Confirm the Amount recieved from sales with invoice')
-# ✅ STEP 1: Fetch all unverified sales for the current user
+
+
+# ✅ Get user ID from session once
+user_id = st.session_state.get("user_id")
+
+# ✅ Fetch all unverified sales for this user
 unverified_result = (
     supabase
     .table("sales_master_history")
     .select("*")
     .eq("is_verified", False)
     .eq("user_id", user_id)
+    .order("sale_date", desc=True)
     .execute()
 )
 
-unverified_sales = unverified_result.data
+unverified_sales = unverified_result.data or []
 
-# ✅ STEP 2: Loop through each sale
+# ✅ Optional download as Excel
+if unverified_sales:
+    df = pd.DataFrame(unverified_sales)
+    st.download_button(
+        label="📥 Download Unverified Sales as Excel",
+        data=df.to_csv(index=False),
+        file_name="unverified_sales.csv",
+        mime="text/csv"
+    )
+
+# ✅ Loop and display each sale inside an expander
 for sale in unverified_sales:
-    st.markdown("----")
-    st.subheader(f"🧾 Sale #{sale['invoice_number'] or sale['sale_id']}")
+    with st.expander(f"🧾 Sale #{sale.get('invoice_number') or sale['sale_id']} — ₦{sale['total_amount']}"):
+        st.write(f"**Date:** {sale['sale_date']}")
+        st.write(f"**Customer Phone:** {sale.get('customer_phone', 'N/A')}")
+        st.write(f"**Customer:** {sale['customer_name']}")
+        st.write(f"**Amount:** ₦{sale['total_amount']}")
+        st.write(f"**Payment Method:** {sale['payment_method']}")
+        st.write(f"**Payment Status:** {sale['payment_status']}")
+        st.write(f"**Entered By:** {sale['employee_name']}")
 
-    st.write(f"**Date:** {sale['sale_date']}")
-    st.write(f"**Customer Phone:** {sale.get('customer_phone', 'N/A')}")
-    st.write(f"**Customer:** {sale['customer_name']}")
-    st.write(f"**Amount:** ₦{sale['total_amount']}")
-    st.write(f"**Payment Method:** {sale['payment_method']}")
-    st.write(f"**Payment Status:** {sale['payment_status']}")
-    st.write(f"**Entered By:** {sale['employee_name']}")
-
-    # ✅ Show uploaded invoice (image or PDF)
-    if sale["invoice_file_url"]:
-        if sale["invoice_file_url"].endswith(".pdf"):
-            st.markdown(f"[📎 View PDF Invoice]({sale['invoice_file_url']})", unsafe_allow_html=True)
+        # ✅ Show uploaded invoice
+        invoice_url = sale.get("invoice_file_url")
+        if invoice_url:
+            if invoice_url.endswith(".pdf"):
+                st.markdown(f"[📎 View PDF Invoice]({invoice_url})", unsafe_allow_html=True)
+            else:
+                st.image(invoice_url, caption="Uploaded Invoice / POP")
         else:
-            st.image(sale["invoice_file_url"], caption="Uploaded Invoice / POP")
+            st.info("No invoice uploaded.")
 
-    # ✅ STEP 3: Admin Verification Form
-    user_id = st.session_state.get("user_id")
-    with st.form(key=f"verify_form_{sale['sale_id']}"):
-        verification_notes = st.text_area("📝 Admin Review / Notes", key=f"note_{sale['sale_id']}")
-        verify_button = st.form_submit_button("✅ Mark as Verified")
-        flag_button = st.form_submit_button("🚩 Flag Sale")
+        # ✅ Admin action form
+        with st.form(key=f"verify_form_{sale['sale_id']}"):
+            notes = st.text_area("📝 Admin Review / Notes", key=f"note_{sale['sale_id']}")
+            verify_button = st.form_submit_button("✅ Mark as Verified")
+            flag_button = st.form_submit_button("🚩 Flag Sale")
 
-        if verify_button:
-            supabase.table("sales_master_history").update({
-                "is_verified": True,
-                "verified_by": st.session_state.get("user_email", "admin"),
-                "verified_at": str(datetime.now()),
-                "verification_notes": verification_notes
-            }).eq("sale_id", sale["sale_id"]).eq("user_id", user_id).execute()
-            st.success("✅ Sale marked as verified.")
-            st.rerun()
+            if verify_button:
+                supabase.table("sales_master_history").update({
+                    "is_verified": True,
+                    "verified_by": st.session_state.get("user_email", "admin"),
+                    "verified_at": str(datetime.now()),
+                    "verification_notes": notes
+                }).eq("sale_id", sale["sale_id"]).eq("user_id", user_id).execute()
+                st.success("✅ Sale marked as verified.")
+                st.rerun()
 
-        if flag_button:
-            supabase.table("sales_master_history").update({
-                "is_verified": False,
-                "verified_by": st.session_state.get("user_email", "admin"),
-                "verified_at": str(datetime.now()),
-                "verification_notes": verification_notes or "Flagged for follow-up"
-            }).eq("sale_id", sale["sale_id"]).eq("user_id", user_id).execute()
-            st.warning("🚩 Sale flagged for review.")
-            st.rerun()
-
-        if flag_button:
-            update = {
-                "is_verified": False,
-                "verified_by": st.session_state.get("user_email", "admin"),
-                "verified_at": str(datetime.now()),
-                "verification_notes": f"[FLAGGED] {verification_notes}"
-            }
-            supabase.table("sales_master_history").update(update).eq("sale_id", sale["sale_id"]).eq("user_id", user_id).execute()
-            st.warning("🚩 Sale has been flagged.")
-            st.rerun()
-
-
+            if flag_button:
+                update = {
+                    "is_verified": False,
+                    "verified_by": st.session_state.get("user_email", "admin"),
+                    "verified_at": str(datetime.now()),
+                    "verification_notes": f"[FLAGGED] {notes or 'Flagged for follow-up'}"
+                }
+                supabase.table("sales_master_history").update(update).eq("sale_id", sale["sale_id"]).eq("user_id", user_id).execute()
+                st.warning("🚩 Sale has been flagged.")
+                st.rerun()
 
 
 
@@ -479,8 +483,8 @@ if user_id:
 
             item_filter = st.text_input("Search by Item Name")
 
-            customer_options = df_url["customer_name"].dropna().unique().tolist()
-            customer_filter = st.selectbox("Filter by Customer Name", options=["All"] + customer_options)
+            customer_options = df_url["supplier_name"].dropna().unique().tolist()
+            customer_filter = st.selectbox("Filter by Supplier Name", options=["All"] + customer_options)
 
             # 📅 Date range
             min_date = df_url["purchase_date"].min()
@@ -524,7 +528,7 @@ if user_id:
                 for _, item in filtered_df.iterrows():
                     st.subheader(f"🛒 Item: {item.get('item_name', 'Unknown')}")
 
-                    st.write(f"**Customer:** {item.get('customer_name', 'N/A')}")
+                    st.write(f"**Supplier:** {item.get('supplier_name', 'N/A')}")
                     st.write(f"**Purchase Date:** {item.get('purchase_date', 'N/A')}")
                     st.write(f"**Total Price Paid:** ₦{item.get('total_price_paid', 'N/A')}")
 
