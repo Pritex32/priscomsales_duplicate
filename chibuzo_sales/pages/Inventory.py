@@ -282,7 +282,7 @@ def get_low_stock_items(user_id):
 
     low_stock = [
         item for item in records
-        if item.get("closing_balance", 0) <= item.get("Reorder_level", 0)
+        if item.get("closing_balance", 0) <= item.get("reorder_level", 0)
     ]
 
     return low_stock
@@ -431,7 +431,12 @@ def update_inventory_balances(selected_date,user_id):
             
             return_quantity = int(return_quantity or 0)
             open_balance = int(prev_closing or 0)
-            closing_balance = open_balance + supplied_quantity  + return_quantity - stock_out
+            total_available = open_balance + supplied_quantity + return_quantity
+            #this is to stop items that is stock out
+            if total_available <= 0:
+                st.warning(f"🚫 You are out of stock for '{item_name}'. No stock-out will be recorded.")
+                continue  # Skip updating this item
+            closing_balance = total_available - stock_out
             closing_balance = int(closing_balance)
 
 ## this code is to make sure what is updated doesnt disappear
@@ -486,7 +491,7 @@ if selected == 'Home':
     if low_stock_items:
         st.warning("⚠️ The following items are low in stock:")
     for item in low_stock_items:
-        st.write(f"🔻 {item['item_name']}: {item['closing_balance']} units left (Reorder level: {item['Reorder_level']})")
+        st.write(f"🔻 {item['item_name']}: {item['closing_balance']} units left (reorder level: {item['reorder_level']})")
     else:
         st.success("✅ All items are sufficiently stocked.")
 
