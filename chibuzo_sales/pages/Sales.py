@@ -539,11 +539,11 @@ with tab1:
                 st.info("👆 Click the button above to preview the PDF file.")
 
      # Optional re-upload
-     if st.session_state.get("invoice_uploaded"):
-         if st.button("🔁 Re-upload Invoice"):
-             st.session_state["invoice_uploaded"] = False
-             st.session_state["invoice_file_url"] = None
-             st.warning("⚠️ You can now upload a new invoice.")
+    if st.session_state.get("invoice_uploaded"):
+        if st.button("🔁 Re-upload Invoice"):
+            st.session_state["invoice_uploaded"] = False
+            st.session_state["invoice_file_url"] = None
+            st.warning("⚠️ You can now upload a new invoice.")
 
     # Save Sale
     if st.button("💾 Save Sale", key="save_sale_btn"):
