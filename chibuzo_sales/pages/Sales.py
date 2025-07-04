@@ -546,7 +546,7 @@ with tab1:
              st.warning("⚠️ You can now upload a new invoice.")
 
     # Save Sale
-    if st.session_state.get("invoice_uploaded") and st.button("💾 Save Sale", key="save_sale_btn"):
+    if st.button("💾 Save Sale", key="save_sale_btn"):
         if not st.session_state.get("invoice_uploaded"):
             st.error("❌ Please upload an invoice before saving the sale.")
             st.stop()
