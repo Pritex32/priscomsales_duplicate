@@ -547,6 +547,9 @@ with tab1:
 
     # Save Sale
     if st.session_state.get("invoice_uploaded") and st.button("💾 Save Sale", key="save_sale_btn"):
+        if not st.session_state.get("invoice_uploaded"):
+            st.error("❌ Please upload an invoice before saving the sale.")
+            st.stop()
         invoice_file_url = st.session_state.get("invoice_file_url")      
         if not item_id or item_name == "Select an item":
             st.error("❌ Please select a valid item before saving.")
