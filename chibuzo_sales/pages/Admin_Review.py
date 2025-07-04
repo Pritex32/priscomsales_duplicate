@@ -514,7 +514,7 @@ if user_id:
                 filtered_df = filtered_df[filtered_df["supplier_name"] == customer_filter]
 
            
-               filtered_df = filtered_df[
+                filtered_df = filtered_df[
                  (filtered_df["purchase_date"] >= pd.to_datetime(start_date)) &
                  (filtered_df["purchase_date"] <= pd.to_datetime(end_date))]
 
