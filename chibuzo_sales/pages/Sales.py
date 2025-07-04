@@ -299,7 +299,7 @@ def upload_invoice(file, folder, filename,user_id):
 
 
 
-
+import re
 
 
 
@@ -495,6 +495,7 @@ with tab1:
     invoice_file = st.file_uploader("Upload Invoice (PDF/Image)", type=["pdf", "jpg", "jpeg", "png"], key="invoice_upload")
     invoice_name = st.text_input("Enter desired invoice name (without extension)", value=f"invoice_{employee_id}_{date.today().isoformat()}", key='sale_key_invoice')
     if invoice_file:
+ 
         if st.button("🖼️ Preview Invoice File"):
             extension = os.path.splitext(invoice_file.name)[1]
             st.markdown("### 📎 Preview of Uploaded File:")   
@@ -519,11 +520,20 @@ with tab1:
         if invoice_file and st.button("📤 Upload Invoice"):
             try:
                 extension = os.path.splitext(invoice_file.name)[1]
-                filename = f"user_{user_id}_{invoice_number or 'sale'}_{sale_date}{extension}"
+                # Use user-entered name, or fallback if blank
+                # Prepare fallback item name
+                fallback_item_name = item_name.strip().replace(" ", "_") if item_name and item_name != "Select an item" else "no_item"
+                # Build default filename if invoice_name is empty
+                default_name = f"invoice_{user_id}_{fallback_item_name}_{sale_date}"
+                final_invoice_name = invoice_name.strip() or default_name
+               
+                # Sanitize to remove invalid characters
+                final_invoice_name = re.sub(r'[^a-zA-Z0-9_\-]', '_', final_invoice_name)
+                filename = f"{final_invoice_name}{extension}"
                 invoice_file_url = upload_invoice(invoice_file, "salesinvoices", filename, user_id)
                 st.session_state["invoice_uploaded"] = True
                 st.session_state["invoice_file_url"] = invoice_file_url
-                st.success("✅ Invoice uploaded successfully.")
+                st.success(f"✅ Invoice uploaded successfully as '{filename}'.")
             except Exception as e:
                 st.error(f"❌ Upload failed: {e}")
                 st.session_state["invoice_uploaded"] = False
