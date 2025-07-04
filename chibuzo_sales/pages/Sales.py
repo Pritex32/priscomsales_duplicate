@@ -446,7 +446,11 @@ if not employee_lookup.data:
 
 employee_id = employee_lookup.data[0]["employee_id"]
 
-
+# Initialize session state keys if not set
+if "invoice_uploaded" not in st.session_state:
+    st.session_state["invoice_uploaded"] = False
+if "invoice_file_url" not in st.session_state:
+    st.session_state["invoice_file_url"] = None
 with tab1:
   
     if st.button("🔄 Refresh Data"):
@@ -491,13 +495,14 @@ with tab1:
     invoice_file = st.file_uploader("Upload Invoice (PDF/Image)", type=["pdf", "jpg", "jpeg", "png"], key="invoice_upload")
     invoice_name = st.text_input("Enter desired invoice name (without extension)", value=f"invoice_{employee_id}_{date.today().isoformat()}", key='sale_key_invoice')
     if invoice_file:
-        extension = os.path.splitext(invoice_file.name)[1]
-        st.markdown("### 📎 Preview of Uploaded File:")   
-        if extension.lower() in [".jpg", ".jpeg", ".png"]:
-            st.image(invoice_file, use_container_width=True)
-        elif extension.lower() == ".pdf":
-            st.download_button("📥 Download PDF for Preview", invoice_file, file_name=invoice_file.name)
-            st.info("👆 Click the button above to preview the PDF file.")
+        if st.button("🖼️ Preview Invoice File"):
+            extension = os.path.splitext(invoice_file.name)[1]
+            st.markdown("### 📎 Preview of Uploaded File:")   
+            if extension.lower() in [".jpg", ".jpeg", ".png"]:
+                st.image(invoice_file, use_container_width=True)
+            elif extension.lower() == ".pdf":
+                st.download_button("📥 Download PDF for Preview", invoice_file, file_name=invoice_file.name)
+                st.info("👆 Click the button above to preview the PDF file.")
 
     # Partial payment
     partial_payment_amount = None
@@ -509,27 +514,45 @@ with tab1:
         partial_payment_date = st.date_input("Partial Payment Date", value=date.today(), key="partial_date")
         partial_payment_note = st.text_area("Partial Payment Notes (optional)", key="partial_notes")
 
-      
-    # Save Sale
-    if st.button("💾 Save Sale", key="save_sale_btn"):
-        if not invoice_file:
-            st.error("❌ Please upload an invoice or proof of payment before saving.")
-            st.stop()
-        else:
-            if not item_id or item_name == "Select an item":
-                st.error("❌ Please select a valid item before saving.")
-                st.stop()
-            extension = os.path.splitext(invoice_file.name)[1]
-            filename = f"user_{user_id}_{invoice_number or 'sale'}_{sale_date}{extension}"
+    # Upload logic (only once)
+    if not st.session_state.get("invoice_uploaded"):
+        if invoice_file and st.button("📤 Upload Invoice"):
             try:
+                extension = os.path.splitext(invoice_file.name)[1]
+                filename = f"user_{user_id}_{invoice_number or 'sale'}_{sale_date}{extension}"
                 invoice_file_url = upload_invoice(invoice_file, "salesinvoices", filename, user_id)
+                st.session_state["invoice_uploaded"] = True
+                st.session_state["invoice_file_url"] = invoice_file_url
                 st.success("✅ Invoice uploaded successfully.")
             except Exception as e:
-                st.error(f"❌ Failed to upload invoice: {e}")
-                st.stop()
-       
-        
-           
+                st.error(f"❌ Upload failed: {e}")
+                st.session_state["invoice_uploaded"] = False
+
+    # Optional preview button
+    if invoice_file and st.session_state.get("invoice_uploaded"):
+        if st.button("🖼️ Preview Invoice"):
+            extension = os.path.splitext(invoice_file.name)[1]
+            if extension.lower() in [".jpg", ".jpeg", ".png"]:
+                st.image(invoice_file, use_container_width=True)
+            elif extension.lower() == ".pdf":
+                st.download_button("📥 Download PDF for Preview", invoice_file, file_name=invoice_file.name)
+                st.info("👆 Click the button above to preview the PDF file.")
+
+     # Optional re-upload
+     if st.session_state.get("invoice_uploaded"):
+         if st.button("🔁 Re-upload Invoice"):
+             st.session_state["invoice_uploaded"] = False
+             st.session_state["invoice_file_url"] = None
+             st.warning("⚠️ You can now upload a new invoice.")
+
+    # Save Sale
+    if st.session_state.get("invoice_uploaded") and st.button("💾 Save Sale", key="save_sale_btn"):
+        invoice_file_url = st.session_state.get("invoice_file_url")      
+        if not item_id or item_name == "Select an item":
+            st.error("❌ Please select a valid item before saving.")
+            st.stop()
+              
+                 
             amount_paid = 0.0
             amount_balance = total_amount
 
