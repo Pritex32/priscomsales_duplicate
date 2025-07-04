@@ -906,9 +906,8 @@ def initialize_payment(email, amount, user_id):
         "reference":  unique_ref,
         "callback_url": CALLBACK_URL
     }
-    st.write(data)
+   
     response = requests.post("https://api.paystack.co/transaction/initialize", json=data, headers=headers)
-    st.write("Paystack Response:", response.json()) 
     return response.json()
     
 
