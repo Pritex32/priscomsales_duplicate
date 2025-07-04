@@ -137,8 +137,7 @@ with col2:
     image = Image.open(image_path)
     
     # Manually rotate the image 180 degrees to rotate the image
-    img = ImageOps.exif_transpose(image)
-    img = img.rotate(270, expand=True)
+    
 # Resize the image (set new width & height)
     resized_image = img.resize((200,100)) # Adjust size as needed
 # Display in Streamlit
