@@ -1317,7 +1317,6 @@ with tab4:
     elif selected_expense:
         st.subheader("Expense Record to Delete")
         st.write(f"**Vendor Name:** {selected_expense['vendor_name']}")
-        st.write(f"**Expense Item:** {selected_expense['item_name']}")
         st.write(f"**Total Amount:** ₦{selected_expense['total_amount']}")
         st.write(f"**Expense Date:** {selected_expense['expense_date']}")
         st.write(f"**Employee:** {selected_expense['employee_name']}")
