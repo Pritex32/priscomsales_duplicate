@@ -443,8 +443,8 @@ if user_id:
             # 📅 Date range
             min_date = sales_df["sale_date"].min()
             max_date = sales_df["sale_date"].max()
-            start_date = st.date_input("🗓️ Start Date", value=min_date)
-            end_date = st.date_input("🗓️ End Date", value=max_date)
+            start_date = st.date_input("🗓️ Start Date", value=min_date,key="sales_start_date")
+            end_date = st.date_input("🗓️ End Date", value=max_date,key="sales_end_date")
 
             # ------------------- ✅ APPLY FILTERS --------------------
             filtered_sales = sales_df.copy()
@@ -542,8 +542,8 @@ if user_id:
             # 📅 Date range
             min_date = df_url["purchase_date"].min()
             max_date = df_url["purchase_date"].max()
-            start_date = st.date_input("🗓️ Start Date", value=min_date)
-            end_date = st.date_input("🗓️ End Date", value=max_date)
+            start_date = st.date_input("🗓️ Start Date", value=min_date,key="goods_start_date")
+            end_date = st.date_input("🗓️ End Date", value=max_date,key="goods_end_date")
 
            
             # ------------------- ✅ APPLY FILTERS --------------------
@@ -641,8 +641,8 @@ if user_id:
             # 📅 Date range
             min_date = expense_df["expense_date"].min()
             max_date = expense_df["expense_date"].max()
-            start_date = st.date_input("🗓️ Start Date", value=min_date)
-            end_date = st.date_input("🗓️ End Date", value=max_date)
+            start_date = st.date_input("🗓️ Start Date", value=min_date,key="expense_start_date")
+            end_date = st.date_input("🗓️ End Date", value=max_date,key="expense_end_date")
 
             # ------------------- ✅ APPLY FILTERS --------------------
             filtered_expense = expense_df.copy()
