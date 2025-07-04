@@ -694,6 +694,10 @@ elif choice == "Register":
 
 # Get from session or input
 elif choice == 'Delete Account':
+    # Example check at the top of the page
+    if st.session_state.get("role") != "md":
+        st.error("⛔ Access Denied: This page is restricted to MD users only.")
+        st.stop()
     is_employee = st.session_state.get("employee_logged_in")
     is_md = st.session_state.get("logged_in")
 
