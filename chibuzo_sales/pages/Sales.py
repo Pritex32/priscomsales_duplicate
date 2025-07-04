@@ -1488,25 +1488,27 @@ with tab5:
                 .agg(total_sales=("total_amount", "sum"))
                 .reset_index())
             sales_time["sale_date"] = sales_time["sale_date"].dt.to_timestamp()
-            sales_time["date_ordinal"] = sales_time["sale_date"].map(pd.Timestamp.toordinal)
-            slope, intercept = np.polyfit(sales_time["date_ordinal"], sales_time["total_sales"], 1)
-            sales_time["trendline"] = slope * sales_time["date_ordinal"] + intercept
+            if len(sales_time) >= 2:
+                sales_time["date_ordinal"] = sales_time["sale_date"].map(pd.Timestamp.toordinal)
+                slope, intercept = np.polyfit(sales_time["date_ordinal"], sales_time["total_sales"], 1)
+                sales_time["trendline"] = slope * sales_time["date_ordinal"] + intercept
 
-            fig3 = px.line(sales_time, x="sale_date", y="total_sales", markers=True, title="Total Sales Over Time")
-            fig3.add_scatter(x=sales_time["sale_date"], y=sales_time["trendline"], mode="lines",
-                             name="Trendline", line=dict(dash="dash", color="red"))
-            st.plotly_chart(fig3, use_container_width=True)
+                fig3 = px.line(sales_time, x="sale_date", y="total_sales", markers=True, title="Total Sales Over Time")
+                fig3.add_scatter(x=sales_time["sale_date"], y=sales_time["trendline"], mode="lines",
+                         name="Trendline", line=dict(dash="dash", color="red"))
+                st.plotly_chart(fig3, use_container_width=True)
 
-            if slope > 0:
-                trend_msg = f"✅ Sales are increasing over time, with an average daily growth of ₦{slope:,.2f}."
-                st.success(trend_msg)
-            elif slope < 0:
-                trend_msg = f"⚠️ Sales are decreasing over time, dropping by approximately ₦{abs(slope):,.2f} per day."
-                st.warning(trend_msg)
+                if slope > 0:
+                    st.success(f"✅ Sales are increasing over time, with an average daily growth of ₦{slope:,.2f}.")
+                elif slope < 0:
+                    st.warning(f"⚠️ Sales are decreasing over time, dropping by approximately ₦{abs(slope):,.2f} per day.")
             else:
-                trend_msg = "➖ Sales have remained stable over the selected period."
-                st.info(trend_msg)
-            
+                st.info("➖ Sales have remained stable over the selected period.")
+        else:
+            fig3 = px.line(sales_time, x="sale_date", y="total_sales", markers=True, title="Total Sales Over Time")
+            st.plotly_chart(fig3, use_container_width=True)
+            st.info("ℹ️ Not enough data points to determine a trend.")
+
         # --- Top Products ---
         st.markdown("### 🏆 Top Selling Products")
         if "item_name" in filtered_sales.columns and not filtered_sales.empty:
