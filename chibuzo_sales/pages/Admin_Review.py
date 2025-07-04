@@ -455,51 +455,97 @@ df_url = fetch_goods_bought_history(user_id)
 
 
 
-# Simulate a logged-in user ID (you would typically get this from session or login state)
+# ✅ Get user ID from session
 user_id = st.session_state.get("user_id", None)
 
-st.header('Goods Bought Invoice')
-
-# Simulate a logged-in user ID (you would typically get this from session or login state)
-user_id = st.session_state.get("user_id", None)
-
-# Check if user is logged in
+# ✅ Check if user is logged in
 if user_id:
+    # 🔁 Fetch data
     df_url = fetch_goods_bought_history(user_id)
 
     with st.expander("📄 View Your Goods Bought Invoice History"):
-        if not df_url.empty:
+        if df_url is not None and not df_url.empty:
             st.write("### Goods Bought History with Invoice Preview")
+
+            # 🧼 Clean and prepare data
+            df_url["purchase_date"] = pd.to_datetime(df_url["purchase_date"], errors="coerce")
+            df_url["total_price_paid"] = pd.to_numeric(df_url["total_price_paid"], errors="coerce")
+
             if "purchase_date" in df_url.columns:
                 df_url = df_url.sort_values(by="purchase_date", ascending=False)
 
-            for _, item in df_url.iterrows():
-                st.subheader(f"Item: {item.get('item_name', 'Unknown')}")
+            # ----------------------- 🔍 FILTERS -----------------------
+            st.subheader("🔍 Filter Options")
 
-                st.write(f"**Purchase Date:** {item.get('purchase_date', 'N/A')}")
-                st.write(f"**Total Price Paid:** ₦{item.get('total_price_paid', 'N/A')}")
+            item_filter = st.text_input("Search by Item Name")
 
-                # ✅ Uploaded invoice preview
-                st.write("**Invoice:**")
-                invoice_url = item.get("invoice_file_url")
+            customer_options = df_url["customer_name"].dropna().unique().tolist()
+            customer_filter = st.selectbox("Filter by Customer Name", options=["All"] + customer_options)
 
-                if invoice_url:
-                    st.write("Invoice URL:", invoice_url)
+            # 📅 Date range
+            min_date = df_url["purchase_date"].min()
+            max_date = df_url["purchase_date"].max()
+            date_range = st.date_input("Filter by Date Range", [min_date, max_date])
 
-                    if invoice_url.endswith(".pdf"):
-                        st.markdown(f"[📎 Open PDF Invoice]({invoice_url})", unsafe_allow_html=True)
+            # 💰 Price range
+            min_price = float(df_url["total_price_paid"].min())
+            max_price = float(df_url["total_price_paid"].max())
+            price_range = st.slider(
+                "Filter by Total Price Paid (₦)", 
+                min_value=min_price, 
+                max_value=max_price, 
+                value=(min_price, max_price)
+            )
+
+            # ------------------- ✅ APPLY FILTERS --------------------
+            filtered_df = df_url.copy()
+
+            if item_filter:
+                filtered_df = filtered_df[filtered_df["item_name"].str.contains(item_filter, case=False, na=False)]
+
+            if customer_filter != "All":
+                filtered_df = filtered_df[filtered_df["customer_name"] == customer_filter]
+
+            if date_range:
+                start_date, end_date = pd.to_datetime(date_range)
+                filtered_df = filtered_df[
+                    (filtered_df["purchase_date"] >= start_date) &
+                    (filtered_df["purchase_date"] <= end_date)
+                ]
+
+            filtered_df = filtered_df[
+                (filtered_df["total_price_paid"] >= price_range[0]) &
+                (filtered_df["total_price_paid"] <= price_range[1])
+            ]
+
+            # ------------------- 📋 SHOW RESULTS -------------------
+            if not filtered_df.empty:
+                st.success(f"Showing {len(filtered_df)} matching invoice(s)")
+                for _, item in filtered_df.iterrows():
+                    st.subheader(f"🛒 Item: {item.get('item_name', 'Unknown')}")
+
+                    st.write(f"**Customer:** {item.get('customer_name', 'N/A')}")
+                    st.write(f"**Purchase Date:** {item.get('purchase_date', 'N/A')}")
+                    st.write(f"**Total Price Paid:** ₦{item.get('total_price_paid', 'N/A')}")
+
+                    invoice_url = item.get("invoice_file_url")
+                    st.write("**Invoice:**")
+
+                    if invoice_url:
+                        if invoice_url.endswith(".pdf"):
+                            st.markdown(f"[📎 Open PDF Invoice]({invoice_url})", unsafe_allow_html=True)
+                        else:
+                            st.image(invoice_url, caption=f"Invoice for {item.get('item_name', '')}")
                     else:
-                        st.image(invoice_url, caption=f"Invoice for {item.get('item_name', '')}")
-                else:
-                    st.info("No invoice file uploaded.")
-
-                st.markdown("---")
+                        st.info("No invoice file uploaded.")
+                    
+                    st.markdown("---")
+            else:
+                st.info("No matching invoices found based on the filters.")
         else:
             st.info("ℹ️ No purchase history found for this user.")
 else:
     st.warning("⚠️ Please log in to view your invoice history.")
-
-
 
 
 
