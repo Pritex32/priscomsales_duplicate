@@ -1091,12 +1091,15 @@ with tab2:
                 )
             with col2:
                 if update_type == "Partial Payment":
-                    partial_amount = st.number_input(
-                        f"Amount paying now (₦)",
-                        min_value=0.0,
-                        max_value=outstanding_amount,
-                        key=f"partial_amount_{sale_id or purchase_id or expense_id}"
-                    )
+                    if outstanding_amount > 0:
+                        partial_amount = st.number_input(
+                           f"Amount paying now (₦)",
+                           min_value=0.0,
+                           max_value=outstanding_amount,
+                           key=f"partial_amount_{sale_id or purchase_id or expense_id}")
+                    else:
+                        st.warning("❗ Outstanding amount is zero or negative. Cannot accept partial payment.")
+                        partial_amount = 0.0
                 else:
                     partial_amount = outstanding_amount
 
