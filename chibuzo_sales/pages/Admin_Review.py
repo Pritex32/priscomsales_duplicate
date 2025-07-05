@@ -167,12 +167,7 @@ def fetch_subscription_data(user_id):
         st.error(f"Error fetching subscription data: {e}")
         return pd.DataFrame()
 
-def enforce_free_plan_limit():
-    if st.session_state.plan == "free" and not st.session_state.is_active:
-        df = fetch_subscription_data(user_id)
-        if len(df) >= 10:
-            st.error("🚫 Your free plan is exhausted. Please upgrade to continue.")
-            st.stop()
+
 # to prevent usage after plan expired on employee
 def block_if_subscription_expired():
     plan = st.session_state.get("plan", "free")
@@ -190,8 +185,7 @@ def block_if_subscription_expired():
         if row_count1 > 10 or row_count2 > 10:
             st.error("🚫 Free plan limit reached (max 10 entries in sales or purchases). Please upgrade to continue.")
             st.stop()
-if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in"):
-    block_if_subscription_expired()
+
 
 def show_plan_status():
     if st.session_state.plan == "free" and not st.session_state.is_active:
@@ -201,8 +195,8 @@ def show_plan_status():
     else:
         st.warning("⚠️ Your subscription status is unclear. Please contact support.")
 
-show_plan_status()
-enforce_free_plan_limit()
+
+
 
 
    # this will check is the person has subcribe or not         
@@ -217,6 +211,57 @@ def block_free_user_if_limit_exceeded():
         st.stop()
 
 #
+
+
+
+def handle_subscription_expiration(user_id):
+    try:
+        # 🔁 Fetch latest subscription data
+        response = supabase.table("subscription").select("*").eq("user_id", user_id).order("expires_at", desc=True).limit(1).execute()
+        data = response.data
+
+        if not data:
+            return  # No subscription record yet
+
+        sub = data[0]
+        expires_at_str = sub.get("expires_at")
+        plan = sub.get("plan", "free")
+        is_active = sub.get("is_active", False)
+        today = date.today()
+
+        # 🧮 Check if expired
+        if expires_at_str and date.fromisoformat(expires_at_str) < today and is_active:
+            # ❌ Subscription expired – downgrade to free
+            supabase.table("subscription").update({
+                "plan": "free",
+                "is_active": False
+            }).eq("user_id", user_id).execute()
+
+            # 🔄 Update session
+            st.session_state.plan = "free"
+            st.session_state.is_active = False
+
+            # 🔁 Re-generate token with downgraded plan
+            username = st.session_state.get("username", "")
+            role = st.session_state.get("role", "user")
+            email = st.session_state.get("user_email", "")
+
+            token = generate_jwt(user_id, username, role, plan="free", is_active=False, email=email)
+            st.session_state.jwt_token = token
+            save_token_to_localstorage(token)
+
+            # ⚠️ Notify user
+            st.warning("🔔 Your Pro subscription has expired. You've been downgraded to the Free Plan.")
+
+    except Exception as e:
+        st.error(f"Subscription check failed: {e}")
+
+if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in"):
+    block_if_subscription_expired()
+    # 🔍 Check if Pro subscription has expired
+    handle_subscription_expiration(user_id)
+    block_free_user_if_limit_exceeded()
+    show_plan_status()
 
 
 
