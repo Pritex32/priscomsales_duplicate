@@ -787,7 +787,7 @@ def delete_invoice_ui():
             st.subheader("🔍 Filter Expenses")
             df["expense_date"] = pd.to_datetime(df["expense_date"], errors="coerce")
             vendor = st.text_input("Filter by Vendor")
-            status = st.selectbox("Filter by Payment Status", ["All"] + df["payment_status"].dropna().unique().tolist())
+            status = st.selectbox("Filter by Payment Status", ["All"] + df["payment_status"].dropna().unique().tolist(), key="expense_status")
             start = st.date_input("Start Date", df["expense_date"].min())
             end = st.date_input("End Date", df["expense_date"].max())
 
