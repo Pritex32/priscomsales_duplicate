@@ -689,3 +689,141 @@ if user_id:
             st.info("ℹ️ No expenses found for this user.")
 else:
     st.warning("⚠️ Please log in to view your expense records.")
+
+
+
+
+st.markdown('___')
+# Pagination helper
+def paginate_dataframe(df, page_size=10):
+    page = st.number_input("Page", min_value=1, max_value=max(1, (len(df) - 1) // page_size + 1), step=1)
+    start_idx = (page - 1) * page_size
+    end_idx = start_idx + page_size
+    return df.iloc[start_idx:end_idx]
+
+# Unified Deletion UI
+def delete_invoice_ui():
+    st.header("🗑️ Delete Invoice Records")
+
+    delete_category = st.selectbox("🗂️ Select Category", ["Sales", "Goods Bought", "Expenses"])
+    user_id = st.session_state.get("user_id", None)
+
+    if not user_id:
+        st.warning("⚠️ Please log in to manage invoices.")
+        return
+
+    # ----------------- SALES ------------------
+    if delete_category == "Sales":
+        sales_data = fetch_sales_data(user_id)
+        df = pd.DataFrame(sales_data)
+
+        if not df.empty:
+            st.subheader("🔍 Filter Sales Records")
+            df["sale_date"] = pd.to_datetime(df["sale_date"], errors="coerce")
+            customer = st.text_input("Filter by Customer")
+            item = st.text_input("Filter by Item")
+            start = st.date_input("Start Date", df["sale_date"].min())
+            end = st.date_input("End Date", df["sale_date"].max())
+
+            filtered = df.copy()
+            if customer:
+                filtered = filtered[filtered["customer_name"].str.contains(customer, case=False, na=False)]
+            if item:
+                filtered = filtered[filtered["item_name"].str.contains(item, case=False, na=False)]
+            filtered = filtered[(filtered["sale_date"] >= pd.to_datetime(start)) & (filtered["sale_date"] <= pd.to_datetime(end))]
+
+            if not filtered.empty:
+                st.write(f"Found {len(filtered)} sale(s)")
+                for idx, row in paginate_dataframe(filtered).iterrows():
+                    cols = st.columns([1, 2, 2, 2, 1])
+                    cols[0].write(f"**#{idx+1}**")
+                    cols[1].write(row.get("customer_name"))
+                    cols[2].write(row.get("item_name"))
+                    cols[3].write(str(row.get("sale_date")))
+                    if cols[4].button("🗑️ Delete", key=f"del_sale_{idx}"):
+                        supabase.table("sales").delete().eq("sale_id", row.get("sale_id")).execute()
+                        st.success("✅ Sale deleted!")
+                        st.rerun()
+            else:
+                st.info("No matching sales.")
+
+    # ----------------- GOODS BOUGHT ------------------
+    elif delete_category == "Goods Bought":
+        df = fetch_goods_bought_history(user_id)
+        if not df.empty:
+            st.subheader("🔍 Filter Goods Bought")
+            df["purchase_date"] = pd.to_datetime(df["purchase_date"], errors="coerce")
+            supplier = st.text_input("Filter by Supplier")
+            item = st.text_input("Filter by Item Name")
+            start = st.date_input("Start Date", df["purchase_date"].min())
+            end = st.date_input("End Date", df["purchase_date"].max())
+
+            filtered = df.copy()
+            if supplier:
+                filtered = filtered[filtered["supplier_name"].str.contains(supplier, case=False, na=False)]
+            if item:
+                filtered = filtered[filtered["item_name"].str.contains(item, case=False, na=False)]
+            filtered = filtered[(filtered["purchase_date"] >= pd.to_datetime(start)) & (filtered["purchase_date"] <= pd.to_datetime(end))]
+
+            if not filtered.empty:
+                st.write(f"Found {len(filtered)} record(s)")
+                for idx, row in paginate_dataframe(filtered).iterrows():
+                    cols = st.columns([1, 2, 2, 2, 1])
+                    cols[0].write(f"**#{idx+1}**")
+                    cols[1].write(row.get("supplier_name"))
+                    cols[2].write(row.get("item_name"))
+                    cols[3].write(str(row.get("purchase_date")))
+                    if cols[4].button("🗑️ Delete", key=f"del_goods_{idx}"):
+                        supabase.table("goods_bought_history").delete().eq("purchase_id", row.get("purchase_id")).execute()
+                        st.success("✅ Goods bought record deleted!")
+                        st.rerun()
+            else:
+                st.info("No matching goods bought records.")
+
+    # ----------------- EXPENSES ------------------
+    elif delete_category == "Expenses":
+        df = fetch_expenses_master_data(user_id)
+        if not df.empty:
+            st.subheader("🔍 Filter Expenses")
+            df["expense_date"] = pd.to_datetime(df["expense_date"], errors="coerce")
+            vendor = st.text_input("Filter by Vendor")
+            status = st.selectbox("Filter by Payment Status", ["All"] + df["payment_status"].dropna().unique().tolist())
+            start = st.date_input("Start Date", df["expense_date"].min())
+            end = st.date_input("End Date", df["expense_date"].max())
+
+            filtered = df.copy()
+            if vendor:
+                filtered = filtered[filtered["vendor_name"].str.contains(vendor, case=False, na=False)]
+            if status != "All":
+                filtered = filtered[filtered["payment_status"] == status]
+            filtered = filtered[(filtered["expense_date"] >= pd.to_datetime(start)) & (filtered["expense_date"] <= pd.to_datetime(end))]
+
+            if not filtered.empty:
+                st.write(f"Found {len(filtered)} expense(s)")
+                for idx, row in paginate_dataframe(filtered).iterrows():
+                    cols = st.columns([1, 2, 2, 2, 1])
+                    cols[0].write(f"**#{idx+1}**")
+                    cols[1].write(row.get("vendor_name"))
+                    cols[2].write(row.get("payment_status"))
+                    cols[3].write(str(row.get("expense_date")))
+                    if cols[4].button("🗑️ Delete", key=f"del_exp_{idx}"):
+                        supabase.table("expenses_master").delete().eq("expense_id", row.get("expense_id")).execute()
+                        st.success("✅ Expense deleted!")
+                        st.rerun()
+            else:
+                st.info("No matching expenses.")
+
+# --- Call the UI ---
+delete_invoice_ui()
+
+
+
+
+
+
+
+
+
+
+
+
