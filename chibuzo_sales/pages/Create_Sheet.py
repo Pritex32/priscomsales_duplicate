@@ -48,7 +48,7 @@ jwt_SECRET_KEY = "4606"  # Use env vars in production
 ALGORITHM = "HS256"
 
 #Decode function
-def generate_jwt(user_id, username, role):
+def generate_jwt(user_id, username, role,plan="free", is_active=False, email=None):
     payload = {
         "user_id": user_id,
         "username": username,
