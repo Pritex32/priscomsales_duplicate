@@ -675,6 +675,9 @@ if selected == 'Reports':
 
 if selected =='Delete':
     st.subheader("🗑️ Delete Inventory Item")
+    if "role" not in st.session_state or st.session_state.role != "md":
+        st.warning("🚫 You are not authorized to view this page.")
+        st.stop()
     item_name_to_delete = st.text_input("Enter Item Name to Delete", "")
 
     if item_name_to_delete and user_id:
