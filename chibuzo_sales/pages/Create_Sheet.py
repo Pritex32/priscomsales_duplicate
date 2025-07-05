@@ -53,6 +53,9 @@ def generate_jwt(user_id, username, role):
         "user_id": user_id,
         "username": username,
         "role": role,
+         "plan": plan,
+        "is_active": is_active,
+        "email": email,
         "exp": datetime.utcnow() + timedelta(hours=1)
     }
     
@@ -80,6 +83,10 @@ def restore_login_from_jwt():
                 st.session_state.user_id = int(user_data["user_id"])
                 st.session_state.username = user_data["username"]
                 st.session_state.role = user_data["role"]
+                st.session_state.role = user_data["role"]
+                st.session_state.plan = user_data.get("plan", "free")
+                st.session_state.is_active = user_data.get("is_active", False)
+                 st.session_state.user_email = user_data.get("email", "")
 
 # Run this first
 restore_login_from_jwt()
@@ -219,20 +226,7 @@ def show_plan_status():
     else:
         st.warning("⚠️ Your subscription status is unclear. Please contact support.")
 
-show_plan_status()
 
-
-
-   # this will check is the person has subcribe or not         
-def block_free_user_if_limit_exceeded():
-    user_id = st.session_state.get("user_id")
-    plan = st.session_state.get("plan", "free")
-    is_active = st.session_state.get("is_active", False)
-
-    df = fetch_subscription_data(user_id)
-    if plan == "free" and not is_active and len(df) >= 10:
-        st.error("🚫 Your free plan is exhausted. Please upgrade to continue using the sales features.")
-        st.stop()
 
 
 def handle_subscription_expiration(user_id):
@@ -282,6 +276,7 @@ if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in
     # 🔍 Check if Pro subscription has expired
     handle_subscription_expiration(user_id)
     block_free_user_if_limit_exceeded()
+    show_plan_status()
 
 
 
