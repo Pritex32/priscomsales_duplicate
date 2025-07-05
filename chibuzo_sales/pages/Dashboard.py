@@ -481,19 +481,12 @@ def login_employee(email, password):
     return True
     
 
+
+
+
 # to fetch subcription data
-def fetch_subscription_data(user_id):
-    try:
-        # Example: fetch all subscription records for this user_id (if multiple rows)
-        response = supabase.table("subscription").select("*").eq("user_id", user_id).execute()
-        data = response.data if response.data else []
-        # Convert to DataFrame for easier display
-        df = pd.DataFrame(data)
-        return df
-    except Exception as e:
-        st.error(f"Error fetching subscription data: {e}")
-        return pd.DataFrame()  # empty df on error
-# to limit you to 10 rows
+from datetime import date
+
 def show_user_data():
     FREE_LIMIT = 10
     user_id = st.session_state.get("user_id")
@@ -502,10 +495,42 @@ def show_user_data():
         return
 
     plan = st.session_state.get("plan", "free")
-    subscription_active = st.session_state.get("is_active", False)
-    plan = st.session_state.get("plan", "free")
     is_active = st.session_state.get("is_active", False)
-    # 👇 Show plan type and status message
+    email = st.session_state.get("user_email", None)
+    username = st.session_state.get("username", "")
+    role = st.session_state.get("role", "user")
+
+    # ✅ Fetch subscription info
+    df = fetch_subscription_data(user_id)
+    if not df.empty:
+        expires_at_str = df.iloc[-1]["expires_at"]  # Most recent record
+        if expires_at_str:
+            expires_at = date.fromisoformat(expires_at_str)
+            today = date.today()
+
+            if today > expires_at:
+                # ❌ Subscription expired
+                plan = "free"
+                is_active = False
+
+                # Update session
+                st.session_state.plan = "free"
+                st.session_state.is_active = False
+
+                # Optional: update backend (Supabase)
+                supabase.table("subscription").update({
+                    "is_active": False,
+                    "plan": "free"
+                }).eq("user_id", user_id).execute()
+
+                # Optional: regenerate JWT
+                token = generate_jwt(user_id, username, role, plan, is_active, email)
+                st.session_state.jwt_token = token
+                save_token_to_localstorage(token)
+
+                st.warning("🔔 Your subscription has expired. You are now on the Free Plan.")
+
+    # ✅ Show plan info
     if plan == "free" and not is_active:
         st.info("🆓 You are currently on the **Free Plan**. Limited to 10 transactions.")
     elif plan == "pro" and is_active:
@@ -513,10 +538,13 @@ def show_user_data():
     else:
         st.warning("⚠️ Your subscription status is unclear. Please contact support.")
     df = fetch_subscription_data(user_id)
+    # ✅ Enforce limits for Free Plan
     transaction_count = len(df)
     if plan == "free" and not is_active and transaction_count >= FREE_LIMIT:
         st.error("🚫 Your free plan has been exhausted. Please subscribe to continue using the app.")
-        st.stop()  # Prevent access to the rest of the app
+        st.stop()
+
+
 
 if st.session_state.get("logged_in"):
     show_user_data()
@@ -845,6 +873,7 @@ elif choice == 'Login':
 
 # Employee account creation form (only visible to logged-in MD)
 # employee create account form when the md logins
+st.subheader('Create Employee Account')
 if st.session_state.get("logged_in") and st.session_state.get("role") == "md":
     with st.expander('Create Employee Account'):
         st.subheader("👨‍💼 Create Employee Account")
@@ -927,7 +956,7 @@ user_id = st.session_state["user_id"]
 email = st.session_state["user_email"]
 
 if st.button("Upgrade to Pro (₦5000)"):
-    st.info('You will have complete access to all your sales data.')
+    st.info('Upgrade to 1 month plan,you will have complete access to all your sales data.')
     result = initialize_payment(email, 5000, user_id)
     
     if result.get("status") and "data" in result:
@@ -969,7 +998,7 @@ def activate_subscription(user_id):
         "started_at": today.isoformat(),
         "expires_at": expires.isoformat()
     }).eq("user_id", user_id).execute()
-    st.write("📅 Subscription upsert response:", response)
+    
     return response
 # ✅ Update session state
 st.session_state.plan = "pro"
@@ -1011,7 +1040,7 @@ if reference:
 else:
     st.info("ℹ️ No payment reference in URL.")
 
-
+# to update the plan on jwt token
 def login_or_upgrade_success(user_id, username, role, plan, is_active):
     token = generate_jwt(user_id, username, role, plan, is_active)
     st.session_state.jwt_token = token
