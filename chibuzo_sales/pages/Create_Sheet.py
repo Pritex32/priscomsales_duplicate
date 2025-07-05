@@ -131,6 +131,110 @@ except:
 
 
 
+
+
+from supabase import create_client
+
+# supabase configurations
+def get_supabase_client():
+    supabase_url = 'https://ecsrlqvifparesxakokl.supabase.co' # Your Supabase project URL
+    supabase_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjc3JscXZpZnBhcmVzeGFrb2tsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2NjczMDMsImV4cCI6MjA2MDI0MzMwM30.Zts7p1C3MNFqYYzp-wo3e0z-9MLfRDoY2YJ5cxSexHk'
+    supabase = create_client(supabase_url, supabase_key)
+    return supabase  # Make sure to return the client
+
+# Initialize Supabase client
+supabase = get_supabase_client() # use this to call the supabase database
+
+
+
+
+def restore_subscription_info():
+    user_id = st.session_state.get("user_id")
+    try:
+        response = supabase.table("subscription")\
+            .select("plan, is_active")\
+            .eq("user_id", user_id)\
+            .order("started_at", desc=True)\
+            .limit(1)\
+            .execute()
+        sub = response.data[0] if response.data else {}
+        st.session_state.plan = sub.get("plan", "free")
+        st.session_state.is_active = sub.get("is_active", False)
+    except Exception as e:
+        st.session_state.plan = "free"
+        st.session_state.is_active = False
+        st.warning(f"⚠️ Could not fetch subscription info: {e}")
+
+
+if "plan" not in st.session_state or "is_active" not in st.session_state:
+    restore_subscription_info()
+
+
+user_id = st.session_state.get("user_id")
+
+   
+
+ 
+
+
+
+
+
+# this will show if the person has paid or not
+
+# ---------- PLAN ENFORCEMENT ---------- #
+def fetch_subscription_data(user_id):
+    try:
+        response = supabase.table("subscription").select("*").eq("user_id", user_id).execute()
+        return pd.DataFrame(response.data) if response.data else pd.DataFrame()
+    except Exception as e:
+        st.error(f"Error fetching subscription data: {e}")
+        return pd.DataFrame()
+
+
+# to prevent usage after plan expired on employee
+def block_if_subscription_expired():
+    plan = st.session_state.get("plan", "free")
+    is_active = st.session_state.get("is_active", False)
+    user_id = st.session_state.get("user_id")
+
+    if plan == "free" or not is_active:
+        # Check row count (example: from 'sales' table)
+        response1 = supabase.table("sales_master_log").select("sale_id", count="exact").eq("user_id", user_id).execute()
+        row_count1 = response1.count or 0
+        response2 = supabase.table("sales_master_history").select("sale_id", count="exact").eq("user_id", user_id).execute()
+        row_count2 = response2.count or 0
+
+        # ✅ Block if either exceeds 10
+        if row_count1 > 10 or row_count2 > 10:
+            st.error("🚫 Free plan limit reached (max 10 entries in sales or purchases). Please upgrade to continue.")
+            st.stop()
+
+
+def show_plan_status():
+    if st.session_state.plan == "free" and not st.session_state.is_active:
+        st.info("🆓 You are currently on the **Free Plan**. Limited to 10 transactions.")
+    elif st.session_state.plan == "pro" and st.session_state.is_active:
+        st.success("💼 You are on the **Pro Plan**. Enjoy unlimited access!")
+    else:
+        st.warning("⚠️ Your subscription status is unclear. Please contact support.")
+
+show_plan_status()
+
+
+
+   # this will check is the person has subcribe or not         
+def block_free_user_if_limit_exceeded():
+    user_id = st.session_state.get("user_id")
+    plan = st.session_state.get("plan", "free")
+    is_active = st.session_state.get("is_active", False)
+
+    df = fetch_subscription_data(user_id)
+    if plan == "free" and not is_active and len(df) >= 10:
+        st.error("🚫 Your free plan is exhausted. Please upgrade to continue using the sales features.")
+        st.stop()
+
+
 def handle_subscription_expiration(user_id):
     try:
         # 🔁 Fetch latest subscription data
@@ -173,26 +277,11 @@ def handle_subscription_expiration(user_id):
     except Exception as e:
         st.error(f"Subscription check failed: {e}")
 
-if st.session_state.get("logged_in", False):
-    user_id = st.session_state.get("user_id")
-
+if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in"):
+    block_if_subscription_expired()
     # 🔍 Check if Pro subscription has expired
     handle_subscription_expiration(user_id)
-
-
-from supabase import create_client
-
-# supabase configurations
-def get_supabase_client():
-    supabase_url = 'https://ecsrlqvifparesxakokl.supabase.co' # Your Supabase project URL
-    supabase_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjc3JscXZpZnBhcmVzeGFrb2tsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2NjczMDMsImV4cCI6MjA2MDI0MzMwM30.Zts7p1C3MNFqYYzp-wo3e0z-9MLfRDoY2YJ5cxSexHk'
-    supabase = create_client(supabase_url, supabase_key)
-    return supabase  # Make sure to return the client
-
-# Initialize Supabase client
-supabase = get_supabase_client() # use this to call the supabase database
-
-
+    block_free_user_if_limit_exceeded()
 
 
 
