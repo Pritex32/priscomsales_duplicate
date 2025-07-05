@@ -1491,8 +1491,11 @@ with tab5:
                     st.success(f"✅ Sales are increasing over time, with an average daily growth of ₦{slope:,.2f}.")
                 elif slope < 0:
                     st.warning(f"⚠️ Sales are decreasing over time, dropping by approximately ₦{abs(slope):,.2f} per day.")
+                else:
+                    st.info("➖ Sales have remained stable over the selected period.")
+
             else:
-                st.info("➖ Sales have remained stable over the selected period.")
+                st.info("ℹ️ Not enough data points to determine a trend.")
         else:
             fig3 = px.line(sales_time, x="sale_date", y="total_sales", markers=True, title="Total Sales Over Time")
             st.plotly_chart(fig3, use_container_width=True)
