@@ -936,7 +936,7 @@ import requests
 
 # Use your Paystack **SECRET** key here (starts with sk_live...) — not the PUBLIC key
 PAYSTACK_SECRET_KEY =  os.getenv('PAYSTACK_SECRET_KEY')
-st.write(PAYSTACK_SECRET_KEY)    # this is to hide the real key from public eyes
+    # this is to hide the real key from public eyes
 CALLBACK_URL = "https://priscomsales.online/Dashboard"  # Optional, can be your app URL
 
 def initialize_payment(email, amount, user_id):
