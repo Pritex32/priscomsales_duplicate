@@ -755,7 +755,8 @@ elif choice == 'Delete Account':
         name_field = "name"
     else:
         table_name = "users"
-        email = st.session_state.get("username")  # This was originally st.session_state.temp_email during registration
+        email = st.session_state.get("user", {}).get("email")
+        # This was originally st.session_state.temp_email during registration
         name_value = st.session_state.get("user", {}).get("username")
         password_column = "password_hash"
         name_field = "username"
