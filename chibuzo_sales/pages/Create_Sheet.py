@@ -275,7 +275,6 @@ if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in
     block_if_subscription_expired()
     # 🔍 Check if Pro subscription has expired
     handle_subscription_expiration(user_id)
-    block_free_user_if_limit_exceeded()
     show_plan_status()
 
 
