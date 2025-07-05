@@ -760,6 +760,11 @@ elif choice == 'Delete Account':
 
     # ✅ Confirm password input
     st.write(f"🔐 Logged in as: `{email}`")
+    st.write("Entered Email:", email)
+    st.write("Hashed Password:", hash_password(confirm))
+
+# And check what's in your database manually to compare
+
     confirm = st.text_input("Confirm your password to delete account", type="password")
 
     if st.button("❌ Delete My Account"):
