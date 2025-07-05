@@ -686,7 +686,7 @@ if selected =='Delete':
             item_id = item.get("item_id")
             st.write(f"**Item ID:** {item_id}")
             st.write(f"**Item Name:** {item.get('item_name')}")
-            st.write(f"**Stock In:** {item.get('stock_in', 0)}")
+            st.write(f"**Stock In:** {item.get('supplied_quantity', 0)}")
             st.write(f"**Stock Out:** {item.get('stock_out', 0)}")
             confirm = st.checkbox("⚠️ I understand that this will delete related sales, purchases, restocks, etc.")
 
