@@ -1497,8 +1497,6 @@ with tab5:
             else:
                 st.info("ℹ️ Not enough data points to determine a trend.")
         else:
-            fig3 = px.line(sales_time, x="sale_date", y="total_sales", markers=True, title="Total Sales Over Time")
-            st.plotly_chart(fig3, use_container_width=True)
             st.info("ℹ️ Not enough data points to determine a trend.")
 
         # --- Top Products ---
