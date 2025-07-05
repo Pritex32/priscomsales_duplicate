@@ -1044,7 +1044,8 @@ else:
 
 # to update the plan on jwt token
 def login_or_upgrade_success(user_id, username, role, plan, is_active):
-    token = generate_jwt(user_id, username, role, plan, is_active)
+    email = st.session_state.get("user_email", None)
+    token = generate_jwt(user_id, username, role, plan, is_active,email)
     st.session_state.jwt_token = token
     save_token_to_localstorage(token)
     restore_login_from_jwt()  # Refresh session state
