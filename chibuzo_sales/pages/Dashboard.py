@@ -149,33 +149,7 @@ def refresh_subscription_from_jwt():
     st.session_state.is_active = payload.get("is_active", False)
 
 
-# ✅ 3. Handle Paystack payment verification
-query_params = st.query_params
-reference = query_params.get("reference")
-tref=query_params.get('trxref')
-if reference:
-    reference = reference
-    st.write("✅ Payment reference received:", reference)
-    result = verify_payment(reference)
- 
-    if result["status"] and result["data"]["status"] == "success":
-        user_id = extract_user_id(reference)
-        activate_subscription(user_id)
-        # ✅ Save transaction
-        amount = result["data"]["amount"] // 100  # Convert from kobo to naira
-        status = result["data"]["status"]
-        save_transaction(user_id, reference, amount, status)
-        
-        st.success("🎉 Payment successful! Your Pro subscription is now active.")
-        st.markdown("""
-            <meta http-equiv="refresh" content="3; url=/Dashboard" />
-        """, unsafe_allow_html=True)
-        st.write("User ID extracted:", user_id)
-        st.write("Full reference:", reference)
-    else:
-        st.error("❌ Payment failed or could not be verified.")
-else:
-    st.info("ℹ️ No payment reference in URL.")
+
 
 
 
@@ -1011,8 +985,33 @@ def save_transaction(user_id, reference, amount, status):
     }).execute()
 
 
-
-#
+# ✅ 3. Handle Paystack payment verification
+query_params = st.query_params
+reference = query_params.get("reference")
+tref=query_params.get('trxref')
+if reference:
+    reference = reference
+    st.write("✅ Payment reference received:", reference)
+    result = verify_payment(reference)
+ 
+    if result["status"] and result["data"]["status"] == "success":
+        user_id = extract_user_id(reference)
+        activate_subscription(user_id)
+        # ✅ Save transaction
+        amount = result["data"]["amount"] // 100  # Convert from kobo to naira
+        status = result["data"]["status"]
+        save_transaction(user_id, reference, amount, status)
+        
+        st.success("🎉 Payment successful! Your Pro subscription is now active.")
+        st.markdown("""
+            <meta http-equiv="refresh" content="3; url=/Dashboard" />
+        """, unsafe_allow_html=True)
+        st.write("User ID extracted:", user_id)
+        st.write("Full reference:", reference)
+    else:
+        st.error("❌ Payment failed or could not be verified.")
+else:
+    st.info("ℹ️ No payment reference in URL.")
 
 
 def login_or_upgrade_success(user_id, username, role, plan, is_active):
