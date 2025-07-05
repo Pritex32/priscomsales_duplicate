@@ -230,19 +230,6 @@ def show_plan_status():
 
 
 
-
-   # this will check is the person has subcribe or not         
-def block_free_user_if_limit_exceeded():
-    user_id = st.session_state.get("user_id")
-    plan = st.session_state.get("plan", "free")
-    is_active = st.session_state.get("is_active", False)
-
-    df = fetch_subscription_data(user_id)
-    if plan == "free" and not is_active and len(df) >= 10:
-        st.error("🚫 Your free plan is exhausted. Please upgrade to continue using the sales features.")
-        st.stop()
-
-
 def handle_subscription_expiration(user_id):
     try:
         # 🔁 Fetch latest subscription data
@@ -288,7 +275,6 @@ if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in
     block_if_subscription_expired()
     # 🔍 Check if Pro subscription has expired
     handle_subscription_expiration(user_id)
-    block_free_user_if_limit_exceeded()
     show_plan_status()
 
 st.title("💼 Sales & Expenses Management")
