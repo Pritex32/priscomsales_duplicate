@@ -407,6 +407,14 @@ def login_user(email, password):
 
 
 
+# ✅ Fetch subscription data
+def fetch_subscription_data(user_id):
+    try:
+        response = supabase.table("subscription").select("*").eq("user_id", user_id).execute()
+        return pd.DataFrame(response.data) if response.data else pd.DataFrame()
+    except Exception as e:
+        st.error(f"Error fetching subscription data: {e}")
+        return pd.DataFrame()
 
 
 
