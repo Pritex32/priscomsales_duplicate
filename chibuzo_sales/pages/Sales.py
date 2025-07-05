@@ -1194,6 +1194,19 @@ with tab3:
     user_invoice_name = st.text_input("Enter desired invoice name (without extension)", value=f"invoice_{employee_id}_{date.today().isoformat()}")
     
     if st.button("💾 Save Expense"):
+        error_msgs = []
+        if exp_payment_status in ["paid", "credit", "partial"] and not (exp_invoice_number or exp_invoice_file):
+            error_msgs.append("📄 Please provide either an invoice number or upload the invoice file for paid, credit, or partial expenses.")
+        if not vendor_name:
+            error_msgs.append("🏪 Vendor name is required.")
+        if total_exp_amount == 0.0:
+            error_msgs.append("💰 Expense amount must be greater than zero.")
+        # --- Stop if any validation errors exist ---
+        if error_msgs:
+            for msg in error_msgs:
+                st.error(msg)
+            st.stop()
+            
         if exp_invoice_file:
                 extension = os.path.splitext(exp_invoice_file.name)[1]
                 safe_name = user_invoice_name.strip().replace(" ", "_")
@@ -1225,6 +1238,7 @@ with tab3:
         }
         supabase.table("expenses_master").insert(exp_data).execute()
         st.success("✅ Expense recorded successfully!")
+        st.rerun()
 
 
     
