@@ -186,12 +186,7 @@ def fetch_subscription_data(user_id):
         st.error(f"Error fetching subscription data: {e}")
         return pd.DataFrame()
 
-def enforce_free_plan_limit():
-    if st.session_state.plan == "free" and not st.session_state.is_active:
-        df = fetch_subscription_data(user_id)
-        if len(df) >= 10:
-            st.error("🚫 Your free plan is exhausted. Please upgrade to continue.")
-            st.stop()
+
 
 # to prevent usage after plan expired on employee
 def block_if_subscription_expired():
@@ -210,8 +205,6 @@ def block_if_subscription_expired():
         if row_count1 > 10 or row_count2 > 10:
             st.error("🚫 Free plan limit reached (max 10 entries in sales or purchases). Please upgrade to continue.")
             st.stop()
-if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in"):
-    block_if_subscription_expired()
 
 
 def show_plan_status():
@@ -222,8 +215,6 @@ def show_plan_status():
     else:
         st.warning("⚠️ Your subscription status is unclear. Please contact support.")
 
-show_plan_status()
-enforce_free_plan_limit()
 
 
    # this will check is the person has subcribe or not         
@@ -297,12 +288,12 @@ def handle_subscription_expiration(user_id):
     except Exception as e:
         st.error(f"Subscription check failed: {e}")
 
-if st.session_state.get("logged_in", False):
-    user_id = st.session_state.get("user_id")
-
+if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in"):
+    block_if_subscription_expired()
     # 🔍 Check if Pro subscription has expired
     handle_subscription_expiration(user_id)
-
+    block_free_user_if_limit_exceeded()
+    show_plan_status()
 def upload_invoice(file, folder, filename,user_id):
     bucket = "salesinvoices"  # Make sure the bucket name matches your Supabase Storage bucket
     path_in_bucket = f"{folder}/{filename}"
