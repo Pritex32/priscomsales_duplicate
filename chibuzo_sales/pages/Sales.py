@@ -107,10 +107,7 @@ def restore_login_from_jwt():
                 st.session_state.role = user_data["role"]
                 st.session_state.plan = user_data.get("plan", "free")
                 st.session_state.is_active = user_data.get("is_active", False)
-                 st.session_state.user_email = user_data.get("email", "")
-
-# Run this first
-restore_login_from_jwt()
+                st.session_state.user_email = user_data.get("email", "")
 
 # Run this first
 restore_login_from_jwt()
