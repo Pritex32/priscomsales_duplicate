@@ -916,6 +916,7 @@ if st.session_state.get("logged_in") and st.session_state.get("role") == "md":
                             response = supabase.table("employees").insert(employee_data).execute()
                             if response.data:
                                 st.success(f"✅ Employee account for '{name}' created successfully!-login")
+                                st.rerun()
                             else:
                                 st.error("❌ Failed to create employee account.")
                     except Exception as e:
