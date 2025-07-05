@@ -537,15 +537,9 @@ def show_user_data():
         st.success("💼 You are on the **Pro Plan**. Enjoy unlimited access!")
     else:
         st.warning("⚠️ Your subscription status is unclear. Please contact support.")
-    df = fetch_subscription_data(user_id)
-    # ✅ Enforce limits for Free Plan
-    transaction_count = len(df)
-    if plan == "free" and not is_active and transaction_count >= FREE_LIMIT:
-        st.error("🚫 Your free plan has been exhausted. Please subscribe to continue using the app.")
-        st.stop()
+   
 
-
-
+# to show the subcription status
 if st.session_state.get("logged_in"):
     show_user_data()
 
