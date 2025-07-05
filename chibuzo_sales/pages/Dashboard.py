@@ -731,71 +731,77 @@ elif choice == "Register":
 
 # Get from session or input
 elif choice == 'Delete Account':
-    # Example check at the top of the page
+    # ✅ Restrict access to MD only
     if st.session_state.get("role") != "md":
         st.error("⛔ Access Denied: This page is restricted to MD users only.")
         st.stop()
+
+    # ✅ Check login status
     is_employee = st.session_state.get("employee_logged_in")
     is_md = st.session_state.get("logged_in")
 
     if not (is_employee or is_md):
         st.warning("⚠️ You are not logged in.")
-    else:
-        # Identify which table and name column to use
-        if is_employee:
-            table_name = "employees"
-            email = st.session_state.get("employee_user", {}).get("email")
-            name_field = "name"
-            name_value = st.session_state.get("employee_user", {}).get("name")
-            password_column = "password"
-        else:
-            table_name = "users"  # or "mds", based on your actual MD table name
-            email = st.session_state.get("username")
-            name_field = "username"
-            password_column = "password_hash"
-            name_value = st.session_state.get("user", {}).get("username")
-        st.write("🔍 Debug Info")
-        st.write("Email:", email)
-        st.write("Name:", name_value)
-        st.write("Password Hash:", hash_password(password_column))
-        # Confirm deletion
-        st.write(f"Logged in as: `{email}`")
-        confirm = st.text_input("🔐 Confirm your password to delete account", type="password")
+        st.stop()
 
-        if st.button("❌ Delete My Account"):
-            # Re-authenticate
-            hashed_pw = hash_password(confirm)
-            login_check = supabase.table(table_name)\
-                .select("*")\
+    # ✅ Determine table and credentials
+    if is_employee:
+        table_name = "employees"
+        email = st.session_state.get("employee_user", {}).get("email")
+        name_field = "name"
+        name_value = st.session_state.get("employee_user", {}).get("name")
+        password_column = "password"
+    else:
+        table_name = "users"  # Or use "mds" if that's your actual table
+        email = st.session_state.get("username")
+        name_field = "username"
+        name_value = st.session_state.get("user", {}).get("username")
+        password_column = "password_hash"
+
+    # ✅ Confirm password input
+    st.write(f"🔐 Logged in as: `{email}`")
+    confirm = st.text_input("Confirm your password to delete account", type="password")
+
+    if st.button("❌ Delete My Account"):
+        if not confirm:
+            st.warning("⚠️ Please enter your password.")
+            st.stop()
+
+        hashed_pw = hash_password(confirm)
+
+        # ✅ Re-authenticate
+        login_check = supabase.table(table_name)\
+            .select("*")\
+            .eq("email", email)\
+            .eq(password_column, hashed_pw)\
+            .execute()
+
+        if not login_check.data:
+            st.error("❌ Password incorrect or account not found.")
+        else:
+            # ✅ Proceed with deletion
+            delete_result = supabase.table(table_name)\
+                .delete()\
                 .eq("email", email)\
-                .eq(password_column, hashed_pw)\
+                .eq(name_field, name_value)\
                 .execute()
 
-            if not login_check.data:
-                st.error("❌ Password incorrect or account not found.")
+            if not hasattr(delete_result, "error") or not delete_result.error:
+                st.success("✅ Account deleted successfully.")
+
+                # ✅ Clear session
+                for key in list(st.session_state.keys()):
+                    del st.session_state[key]
+                st.session_state.clear()
+
+                # ✅ Clear localStorage token & redirect
+                st_javascript("localStorage.removeItem('login_token');")
+                time.sleep(1)
+                st_javascript("window.location.href = '/';")
+                st.stop()
             else:
-                # Proceed to delete
-                delete_result = supabase.table(table_name)\
-                    .delete()\
-                    .eq("email", email)\
-                    .eq(name_field,name_value)\
-                    .execute()
+                st.error(f"❌ Deletion failed: {delete_result.error}")
 
-                if not hasattr(delete_result, "error") or not delete_result.error:
-                    st.success("✅ Account deleted successfully.")
-                    # ✅ Clear all session data
-                    for key in list(st.session_state.keys()):
-                        del st.session_state[key]
-                    st.session_state.clear()
-                    st_javascript("localStorage.removeItem('login_token');")
-                    time.sleep(1)
-
-    # ✅ Redirect to home page
-                    st_javascript("""
-                                          window.location.href = "/";    """)
-                    st.stop()
-                else:
-                    st.error(f"❌ Deletion failed: {delete_result.error}")
 
 
 
