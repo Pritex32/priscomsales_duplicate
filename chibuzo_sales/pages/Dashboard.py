@@ -731,12 +731,14 @@ elif choice == "Register":
 
 # Get from session or input
 elif choice == 'Delete Account':
-    # ✅ Restrict access to MD only
+    import time
+
+    # ✅ Restrict access
     if st.session_state.get("role") != "md":
         st.error("⛔ Access Denied: This page is restricted to MD users only.")
         st.stop()
 
-    # ✅ Check login status
+    # ✅ Check login state
     is_employee = st.session_state.get("employee_logged_in")
     is_md = st.session_state.get("logged_in")
 
@@ -744,27 +746,21 @@ elif choice == 'Delete Account':
         st.warning("⚠️ You are not logged in.")
         st.stop()
 
-    # ✅ Determine table and credentials
+    # ✅ Determine table and session info
     if is_employee:
         table_name = "employees"
         email = st.session_state.get("employee_user", {}).get("email")
-        name_field = "name"
         name_value = st.session_state.get("employee_user", {}).get("name")
         password_column = "password"
+        name_field = "name"
     else:
-        table_name = "users"  # Or use "mds" if that's your actual table
-        email = st.session_state.get("username")
-        name_field = "username"
+        table_name = "users"
+        email = st.session_state.get("username")  # This was originally st.session_state.temp_email during registration
         name_value = st.session_state.get("user", {}).get("username")
         password_column = "password_hash"
+        name_field = "username"
 
-    # ✅ Confirm password input
     st.write(f"🔐 Logged in as: `{email}`")
-    st.write("Entered Email:", email)
-    st.write("Hashed Password:", hash_password(confirm))
-
-# And check what's in your database manually to compare
-
     confirm = st.text_input("Confirm your password to delete account", type="password")
 
     if st.button("❌ Delete My Account"):
@@ -772,40 +768,43 @@ elif choice == 'Delete Account':
             st.warning("⚠️ Please enter your password.")
             st.stop()
 
+        # ✅ Hash the confirmation password (to match how it's stored)
         hashed_pw = hash_password(confirm)
 
-        # ✅ Re-authenticate
+        # ✅ Re-authenticate using hashed password
         login_check = supabase.table(table_name)\
             .select("*")\
             .eq("email", email)\
             .eq(password_column, hashed_pw)\
+            .eq("deleted", False)\
             .execute()
 
         if not login_check.data:
             st.error("❌ Password incorrect or account not found.")
         else:
-            # ✅ Proceed with deletion
+            # ✅ Perform soft delete
             delete_result = supabase.table(table_name)\
-                .delete()\
+                .update({"deleted": True})\
                 .eq("email", email)\
                 .eq(name_field, name_value)\
                 .execute()
 
             if not hasattr(delete_result, "error") or not delete_result.error:
-                st.success("✅ Account deleted successfully.")
+                st.success("✅ Account deleted (soft delete).")
 
                 # ✅ Clear session
                 for key in list(st.session_state.keys()):
                     del st.session_state[key]
                 st.session_state.clear()
 
-                # ✅ Clear localStorage token & redirect
+                # ✅ Clear browser storage & redirect
                 st_javascript("localStorage.removeItem('login_token');")
                 time.sleep(1)
                 st_javascript("window.location.href = '/';")
                 st.stop()
             else:
                 st.error(f"❌ Deletion failed: {delete_result.error}")
+
 
 
 
