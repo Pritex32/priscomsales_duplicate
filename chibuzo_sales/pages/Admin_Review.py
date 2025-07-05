@@ -741,7 +741,7 @@ def delete_invoice_ui():
                     cols[2].write(row.get("item_name"))
                     cols[3].write(str(row.get("sale_date")))
                     if cols[4].button("🗑️ Delete", key=f"del_sale_{idx}"):
-                        supabase.table("sales").delete().eq("sale_id", row.get("sale_id")).execute()
+                        supabase.table("sales_master_history").delete().eq("sale_id", row.get("sale_id")).eq("user_id", user_id).execute()
                         st.success("✅ Sale deleted!")
                         st.rerun()
             else:
@@ -774,7 +774,7 @@ def delete_invoice_ui():
                     cols[2].write(row.get("item_name"))
                     cols[3].write(str(row.get("purchase_date")))
                     if cols[4].button("🗑️ Delete", key=f"del_goods_{idx}"):
-                        supabase.table("goods_bought_history").delete().eq("purchase_id", row.get("purchase_id")).execute()
+                        supabase.table("goods_bought_history").delete().eq("purchase_id", row.get("purchase_id")).eq("user_id", user_id).execute()
                         st.success("✅ Goods bought record deleted!")
                         st.rerun()
             else:
@@ -807,7 +807,7 @@ def delete_invoice_ui():
                     cols[2].write(row.get("payment_status"))
                     cols[3].write(str(row.get("expense_date")))
                     if cols[4].button("🗑️ Delete", key=f"del_exp_{idx}"):
-                        supabase.table("expenses_master").delete().eq("expense_id", row.get("expense_id")).execute()
+                        supabase.table("expenses_master").delete().eq("expense_id", row.get("expense_id")).eq("user_id", user_id).execute()
                         st.success("✅ Expense deleted!")
                         st.rerun()
             else:
