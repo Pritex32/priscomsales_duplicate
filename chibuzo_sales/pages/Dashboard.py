@@ -763,14 +763,7 @@ elif choice == 'Delete Account':
 
     st.write(f"🔐 Logged in as: `{email}`")
     confirm = st.text_input("Confirm your password to delete account", type="password")
-    st.write("EMAIL:", email)
-    st.write("CONFIRM PASSWORD:", confirm)
-    st.write("HASHED:", hash_password(confirm))
-    st.write("Session username:", st.session_state.get("username"))
-    st.write("User object:", st.session_state.get("user"))
-
-
-
+    
     if st.button("❌ Delete My Account"):
         if not confirm:
             st.warning("⚠️ Please enter your password.")
@@ -806,10 +799,12 @@ elif choice == 'Delete Account':
                 st.session_state.clear()
 
                 # ✅ Clear browser storage & redirect
+                # ✅ Clear session and redirect to Login page in-app
                 st_javascript("localStorage.removeItem('login_token');")
                 time.sleep(1)
-                st_javascript("window.location.href = '/';")
-                st.stop()
+                st.session_state.page = "Login"  # 👈 Set to Login page
+                st.rerun()
+
             else:
                 st.error(f"❌ Deletion failed: {delete_result.error}")
 
