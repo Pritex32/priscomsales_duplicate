@@ -1075,6 +1075,7 @@ with st.sidebar.expander('Submit Feedback'):
                 # Check if data is returned and no errors
                 if response.data:
                     st.sidebar.success("✅ Thank you for your feedback!")
+                    st.rerun()
                 else:
                     st.sidebar.error("⚠️ Could not submit feedback. Please try again.")
 
