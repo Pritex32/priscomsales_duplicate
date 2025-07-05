@@ -694,24 +694,24 @@ if selected =='Delete':
                 try:
                     # 🔁 Step 2: Manually delete from all related tables using item_id
                     tables_to_clean = [
-                    "sales_master_history",
-                    "sales_master_log",
-                    "goods_bought_history",
-                    "goods_bought" ]
+                        "sales_master_history",
+                        "sales_master_log",
+                        "goods_bought_history",
+                        "goods_bought" ]
  
-                for table in tables_to_clean:
-                    supabase.table(table).delete().eq("item_id", item_id).eq("user_id", user_id).execute()
+                    for table in tables_to_clean:
+                        supabase.table(table).delete().eq("item_id", item_id).eq("user_id", user_id).execute()
 
-                # 🔁 Step 3: Delete the item itself from inventory
-                supabase.table("inventory_master_log").delete().eq("item_id", item_id).eq("user_id", user_id).execute()
+                    # 🔁 Step 3: Delete the item itself from inventory
+                    supabase.table("inventory_master_log").delete().eq("item_id", item_id).eq("user_id", user_id).execute()
 
-                st.success(f"✅ Item '{item_name_to_delete}' and all linked records deleted successfully.")
-                st.rerun()
+                    st.success(f"✅ Item '{item_name_to_delete}' and all linked records deleted successfully.")
+                    st.rerun()
 
-            except Exception as e:
-                st.error(f"❌ Failed to delete item and related data: {e}")
-    else:
-        st.warning("❗ No inventory item found with that name.")
+                except Exception as e:
+                    st.error(f"❌ Failed to delete item and related data: {e}")
+            else:
+                st.warning("❗ No inventory item found with that name.")
 
 
 
