@@ -115,6 +115,7 @@ restore_login_from_jwt()
 # === Session Validation ===
 if not st.session_state.get("logged_in"):
     st.warning("⏳ Waiting for session to restore from browser...")
+    st.warning('Login Again')
     st.stop()
 
 user_id = st.session_state.get("user_id")
