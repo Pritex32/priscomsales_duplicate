@@ -475,7 +475,7 @@ def login_employee(email, password):
     jwt_token = generate_jwt(
     user_id=md_user_id,
     username=user_data.get("name"),
-    email=user_data.get["email"],
+    email=user_data.get("email"),
     role=user_data.get("role", "employee")
 )
 
