@@ -476,8 +476,11 @@ def login_employee(email, password):
     user_id=md_user_id,
     username=user_data.get("name"),
     email=user_data.get("email"),
-    role=user_data.get("role", "employee")
+    role=user_data.get("role", "employee"),
+    plan=subscription.get("plan", "free"),
+    is_active=subscription.get("is_active", False)
 )
+
 
 
     # ✅ Save the JWT to browser localStorage using JavaScript
