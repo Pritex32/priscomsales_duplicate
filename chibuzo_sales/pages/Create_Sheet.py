@@ -264,7 +264,9 @@ def handle_subscription_expiration(user_id):
 
             token = generate_jwt(user_id, username, role, plan="free", is_active=False, email=email)
             st.session_state.jwt_token = token
-            save_token_to_localstorage(token)
+            st.markdown(f"""<script>
+                          localStorage.setItem("login_token", "{token}");
+                           </script>""", unsafe_allow_html=True)
 
             # ⚠️ Notify user
             st.warning("🔔 Your Pro subscription has expired. You've been downgraded to the Free Plan.")
@@ -295,6 +297,12 @@ if "user_id" not in st.session_state:
     st.session_state["user_id"] = "00000000-0000-0000-0000-000000000001"
 
 user_id = st.session_state["user_id"]
+# Change to "EMPLOYEE" to test employee view
+ # Retrieve from session
+user_id = st.session_state.get("user_id")
+role = st.session_state.get("role")
+
+
 
 st.title("📄 Create a New Sheet")
 col3,col4=st.columns(2)
@@ -323,6 +331,13 @@ for i, col in enumerate(columns):
         st.write(f"Column {i+1} name is empty!")
 
 
+access_choice = st.radio(
+    "Allow employees to view and modify this sheet?",
+    ("No", "Yes"),
+    index=0
+)
+allow_employee_access = access_choice == "Yes"
+
 if st.button("Create Sheet"):
     if sheet_name and all(col["name"] for col in columns):
         # Check if sheet exists
@@ -335,16 +350,15 @@ if st.button("Create Sheet"):
             insert_resp = supabase.table("user_sheets").insert({
                 "user_id": user_id,
                 "sheet_name": sheet_name,
-                "columns": columns  # Must be a list of dicts [{name, type}, ...]
+                "columns": columns,  # Must be a list of dicts [{name, type}, ...]
+                "employee_access": allow_employee_access
             }).execute()
 
-            insert_resp = supabase.table("user_sheets").insert({
-                     "user_id": user_id,
-                     "sheet_name": sheet_name,
-                      "columns": columns}).execute()
+            
 
             if insert_resp.data is not None:
                 st.success("Sheet created successfully!")
+                st.rerun()
             else:
                 st.error("Failed to create sheet.")
 
@@ -357,7 +371,16 @@ st.markdown("---")
 st.title("🧾 Enter Data into Your Sheet")
 
 # Step 2: Select sheet to add data
-response = supabase.table("user_sheets").select("*").eq("user_id", user_id).execute()
+
+if role == "employee":
+    response = supabase.table("user_sheets") \
+        .select("*") \
+        .eq("user_id", user_id) \
+        .eq("employee_access", True).execute()
+else:
+    response = supabase.table("user_sheets") \
+        .select("*") \
+        .eq("user_id", user_id).execute()
 user_sheets = response.data or []
 
 if not user_sheets:
@@ -406,6 +429,7 @@ if st.button("Submit Row"):
 
     if insert_resp.data:
         st.success("Sheet created successfully!")
+        st.rerun()
     else:
         st.error("Failed to create sheet.")
 
