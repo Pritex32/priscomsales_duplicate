@@ -148,7 +148,18 @@ def get_supabase_client():
 supabase = get_supabase_client() # use this to call the supabase database
 
 
+@st.cache_data(ttl=7200)
+def fetch_inventory_items(user_id):
+    if not user_id or str(user_id) == "None":
+        raise ValueError("Invalid user_id passed to fetch_inventory_items")
 
+    response = supabase.table("inventory_master_log")\
+        .select("item_id, item_name")\
+        .eq("user_id", user_id)\
+        .execute()
+
+    items = response.data or []
+    return {item["item_name"]: item["item_id"] for item in items}
 
 
 
