@@ -510,7 +510,6 @@ def show_user_data():
     email = st.session_state.get("user_email", None)
     username = st.session_state.get("username", "")
     role = st.session_state.get("role", "user")
-
     # ✅ Fetch subscription info
     df = fetch_subscription_data(user_id)
     if not df.empty:
@@ -537,7 +536,7 @@ def show_user_data():
                 # Optional: regenerate JWT
                 token = generate_jwt(user_id, username, role, plan, is_active, email)
                 st.session_state.jwt_token = token
-                save_token_to_localstorage(token)
+                st_javascript(f"""localStorage.setItem("login_token", "{token}");""")
 
                 st.warning("🔔 Your subscription has expired. You are now on the Free Plan.")
 
@@ -891,7 +890,8 @@ elif choice == 'Login':
 
 # Employee account creation form (only visible to logged-in MD)
 # employee create account form when the md logins
-st.subheader('Create Employee Account')
+if st.session_state.get("logged_in") and st.session_state.get("role") == "md":
+    st.subheader('Create Employee Account')
 if st.session_state.get("logged_in") and st.session_state.get("role") == "md":
     with st.expander('Create Employee Account'):
         st.subheader("👨‍💼 Create Employee Account")
