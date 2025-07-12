@@ -270,8 +270,9 @@ def handle_subscription_expiration(user_id):
 
             token = generate_jwt(user_id, username, role, plan="free", is_active=False, email=email)
             st.session_state.jwt_token = token
-            save_token_to_localstorage(token)
-
+            st.markdown(f"""<script>
+                          localStorage.setItem("login_token", "{token}");
+                           </script>""", unsafe_allow_html=True)
             # ⚠️ Notify user
             st.warning("🔔 Your Pro subscription has expired. You've been downgraded to the Free Plan.")
 
@@ -534,15 +535,75 @@ def update_inventory_balances(selected_date,user_id):
 
 # Trigger Inventory Update and Move to History
 if selected == 'Home':
-    low_stock_items = get_low_stock_items(user_id)
-    if low_stock_items:
-        st.warning("⚠️ The following items are low in stock:")
-        for item in low_stock_items:
-            st.write(f"🔻 {item['item_name']}: {item['closing_balance']} units left (reorder level: {item['reorder_level']})")
-    else:
-        st.success("✅ All items are sufficiently stocked.")
+    col5,col6=st.columns(2)
+    with col5:
+        low_stock_items = get_low_stock_items(user_id)
+        if low_stock_items:
+            st.warning("⚠️ The following items are low in stock:")
+            for item in low_stock_items:
+                st.write(f"🔻 {item['item_name']}: {item['closing_balance']} units left (reorder level: {item['reorder_level']})")
+        else:
+            st.success("✅ All items are sufficiently stocked.")
+    
+    with col6:
+        with st.expander('**➕ Return Item to Inventory**'):
+            if "role" not in st.session_state or st.session_state.role != "md":
+                st.warning("🚫 You are not authorized to view this page.")
+                st.stop()
+            with st.form("return_inventory_form"):
+                item_dict = fetch_inventory_items(user_id)
+                item_options = ["Select an item"] + list(item_dict.keys())
+                item_name = st.selectbox("Select Item", item_options, key="item_selectbox")
+                item_id = item_dict.get(item_name, None)
 
-    if st.button("🔄 Update Inventory Balances"):
+                return_quantity = st.number_input('Return Quantity', min_value=1, step=1)
+                submit = st.form_submit_button("Submit")
+
+                if submit:
+                    if item_name == "Select an item" or item_id is None:
+                        st.warning("Please select a valid item.")
+                    else:
+                        try:                              
+                            log_data = {
+                                "user_id": user_id,
+                                "item_id": item_id,
+                                "item_name": item_name,
+                                "return_quantity": return_quantity,
+                                "stock_out": 0,
+                                "supplied_quantity": 0,
+                                "log_date": str(selected_date),
+                                "last_updated": str(selected_date),}
+
+                            # Check if an entry already exists for today
+                            existing_log = supabase.table("inventory_master_log")\
+                                 .select("*")\
+                                 .eq("user_id", user_id)\
+                                 .eq("item_id", item_id)\
+                                 .eq("log_date", str(selected_date))\
+                                 .execute().data
+
+                            if existing_log:
+                                prev_return = existing_log[0].get("return_quantity", 0)
+                                log_data["return_quantity"] += prev_return
+                                supabase.table("inventory_master_log")\
+                                    .update(log_data)\
+                                    .eq("user_id", user_id)\
+                                    .eq("item_id", item_id)\
+                                    .eq("log_date", str(selected_date))\
+                                    .execute()
+                            else:
+                                supabase.table("inventory_master_log")\
+                                            .upsert(log_data, on_conflict=["item_id", "log_date", "user_id"])\
+                                            .execute()
+                                           
+                                                      
+                            update_inventory_balances(selected_date, user_id)
+                            st.success(f"{return_quantity} units of '{item_name}' returned and stock updated.")
+                                          
+                        except Exception as e:
+                            st.error(f"Failed to process return: {e}")
+
+    if st.button("**🔄 Update Inventory Balances**"):
         update_inventory_balances(selected_date, user_id)
         move_requisitions_to_history(selected_date,user_id)  # Move today's requisitions after updating the inventory
         move_restocks_to_history(selected_date,user_id)  # Move today's restocks to history
@@ -680,6 +741,9 @@ def get_summary_report(time_period, start_date, end_date):
 # 🔹 Streamlit UI
 
 if selected == 'Reports':
+    if "role" not in st.session_state or st.session_state.role != "md":
+        st.warning("🚫 You are not authorized to view this page.")
+        st.stop()
     st.title("📦 Inventory Summary Reports")
 
 # Select Report Type
