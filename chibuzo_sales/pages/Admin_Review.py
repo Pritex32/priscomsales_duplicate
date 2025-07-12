@@ -256,7 +256,9 @@ def handle_subscription_expiration(user_id):
 
             token = generate_jwt(user_id, username, role, plan="free", is_active=False, email=email)
             st.session_state.jwt_token = token
-            save_token_to_localstorage(token)
+            st.markdown(f"""<script>
+                          localStorage.setItem("login_token", "{token}");
+                           </script>""", unsafe_allow_html=True)
 
             # ⚠️ Notify user
             st.warning("🔔 Your Pro subscription has expired. You've been downgraded to the Free Plan.")
