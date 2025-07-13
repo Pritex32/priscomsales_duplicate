@@ -530,17 +530,7 @@ with tab1:
     invoice_file_url = None
     invoice_file = st.file_uploader("Upload Invoice (PDF/Image)", type=["pdf", "jpg", "jpeg", "png"], key="invoice_upload")
     invoice_name = st.text_input("Enter desired invoice name (without extension)", value=f"invoice_{employee_id}_{date.today().isoformat()}", key='sale_key_invoice')
-    if invoice_file:
- 
-        if st.button("🖼️ Preview Invoice File"):
-            extension = os.path.splitext(invoice_file.name)[1]
-            st.markdown("### 📎 Preview of Uploaded File:")   
-            if extension.lower() in [".jpg", ".jpeg", ".png"]:
-                st.image(invoice_file, use_container_width=True)
-            elif extension.lower() == ".pdf":
-                st.download_button("📥 Download PDF for Preview", invoice_file, file_name=invoice_file.name)
-                st.info("👆 Click the button above to preview the PDF file.")
-
+   
     # Partial payment
     partial_payment_amount = None
     partial_payment_date = None
@@ -593,6 +583,9 @@ with tab1:
 
     # Save Sale
     if st.button("💾 Save Sale", key="save_sale_btn"):
+        if payment_status in ["credit", "partial"] and not customer_phone:
+            st.warning("📞 It's highly recommended to collect the customer's phone number for credit or partial payments.")
+
         if not st.session_state.get("invoice_uploaded"):
             st.error("❌ Please upload an invoice before saving the sale.")
             st.stop()
@@ -602,25 +595,27 @@ with tab1:
             st.stop()
               
                  
-            amount_paid = 0.0
-            amount_balance = total_amount
+        amount_paid = 0.0
+        amount_balance = total_amount
 
         if payment_status == "paid":
             amount_paid = total_amount
             amount_balance = 0.0
         elif payment_status == "partial":
-            if partial_payment_amount <= 0:
-                st.error("❌ Partial payment amount must be greater than 0.")
+            if partial_payment_amount is None or partial_payment_amount <= 0:
+                st.error("❌ Please enter a valid partial payment amount.")
                 st.stop()
             else:
                 amount_paid = partial_payment_amount
                 amount_balance = total_amount - partial_payment_amount
+        elif payment_status == "credit":
+            amount_paid = 0.0
+            amount_balance = total_amount
+
         if invoice_file is None:
             st.error("❌ Please upload an invoice or proof of payment before saving.")
             st.stop()
-        if payment_status in ["credit", "partial"] and not customer_phone:
-            st.warning("📞 It's highly recommended to collect the customer's phone number for credit or partial payments.")
-
+        
 
 
         sale_data = {
@@ -1105,7 +1100,7 @@ with tab2:
                 update_type = st.radio(
                     f"Select update type",
                     ["Partial Payment", "Fully Paid"],
-                    key=f"update_type_{sale_id or purchase_id or expense_id}"
+                    key=f"update_type_{sale_id or purchase_id or expense_id or str(uuid.uuid4())}"
                 )
             with col2:
                 if update_type == "Partial Payment":
@@ -1114,14 +1109,14 @@ with tab2:
                            f"Amount paying now (₦)",
                            min_value=0.0,
                            max_value=outstanding_amount,
-                           key=f"partial_amount_{sale_id or purchase_id or expense_id}")
+                           key=f"partial_amount_{sale_id or purchase_id or expense_id or str(uuid.uuid4())}")
                     else:
                         st.warning("❗ Outstanding amount is zero or negative. Cannot accept partial payment.")
                         partial_amount = 0.0
                 else:
                     partial_amount = outstanding_amount
 
-            if st.button(f"💰 Update Payment", key=f"update_btn_{sale_id or purchase_id or expense_id}"):
+            if st.button(f"💰 Update Payment", key=f"update_btn_{sale_id or purchase_id or expense_id or str(uuid.uuid4())}"):
                 new_amount_paid = amount_paid + partial_amount
                 new_status = "paid" if new_amount_paid >= total_amount else "partial"
 
