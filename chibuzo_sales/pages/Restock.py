@@ -373,10 +373,13 @@ def get_employee_dict(user_id):
 
 # ---------- UI Begins ----------
 # refresh pages
-st.header("🛒 Record Goods Bought")
-if st.button("🔄 Refresh Data"):
-    st.cache_data.clear()  # ✅ Clear cached data
-    st.rerun() 
+col5,col7=st.columns([3,1])
+with col5:
+    st.header("🛒 Record Goods Bought")
+with col7:
+    if st.button("🔄 Refresh Data"):
+        st.cache_data.clear()  # ✅ Clear cached data
+        st.rerun() 
 
 
 tab1,tab2,tab3,tab4=st.tabs(["🛒Goods_purchased",'🛢️Data','Delete','Report'])
