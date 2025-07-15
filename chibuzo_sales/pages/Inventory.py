@@ -374,7 +374,6 @@ st.markdown("""
 
 
 
-
 with st.sidebar:
     selected = option_menu(
         menu_title=('Options'),
@@ -706,10 +705,9 @@ if selected == 'Home':
     with col5:
         low_stock_items = get_low_stock_items(user_id)
         if low_stock_items:
-            st.markdown("""
-               <div style="padding: 15px; background-color:  #fff4e5; border-left: 6px solid #ffa726; border-radius: 5px;">
-           ⚠️<strong>Warning:</strong> The following items are low in stock:
-              </div>""", unsafe_allow_html=True)
+        st.markdown("""
+               <div style="padding: 15px; background-color: #fff4e5; border-left: 6px solid #ffa726; border-radius: 5px; color: black;">
+               ⚠️<strong>Warning:</strong> The following items are low in stock:  </div>""", unsafe_allow_html=True)
             
             for item in low_stock_items:
                 st.write(f"**🔻 {item['item_name']}: {item['closing_balance']} units left (reorder level: {item['reorder_level']})**")
