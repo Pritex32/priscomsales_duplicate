@@ -305,7 +305,7 @@ role = st.session_state.get("role")
 
 
 st.title("📄 Create a New Sheet")
-col3,col4=st.columns(2)
+col3,col4=st.columns([3,1])
 with col3:
     st.warning('create tables that are important')
 with col4:
