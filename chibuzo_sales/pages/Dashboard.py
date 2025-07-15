@@ -831,15 +831,14 @@ elif choice == 'Login':
         else:  # Employee
             user_name = st.session_state.get("employee_user", {}).get("name", "Unknown User")
 
-        st.title(f"👋 Welcome back, {user_name}!")
-        st.info(f"You are logged in as **{user_role}**.")
-        st.markdown(f""" <div style='padding: 20px; background-color: #f0f8ff; border-left: 6px solid #4CAF50; border-radius: 8px;'>
-    <h2 style='color: #2c3e50;'>👋 Welcome back, <span style="color:#4CAF50;">{user_name}</span>!</h2>
-    <p style='font-size: 18px; color: #555;'>
-        You are logged in as <strong style='color: #2c3e50;'>{user_role}</strong>.
+        st.markdown(f""" <div style='padding: 20px; background-color: #1e1e2f; border-left: 6px solid #00e5ff; border-radius: 8px;'>
+    <h2 style='color: #ffffff;'>👋 Welcome back, <span style="color:#00e5ff;">{user_name}</span>!</h2>
+    <p style='font-size: 18px; color: #ccc;'>
+        You are logged in as <strong style='color: #00e5ff;'>{user_role}</strong>.
     </p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
         # Action buttons
