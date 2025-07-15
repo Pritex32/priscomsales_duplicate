@@ -368,11 +368,7 @@ def get_employee_dict(user_id):
     return {emp["name"]: emp["employee_id"] for emp in employees.data}
 
 
-# Main content # this shows you are currently logged in
-if st.session_state.get("logged_in"):
-    st.title(f"Welcome, {st.session_state.username}")
-else:
-    st.warning("Please log in first.")
+
 
 
 # ---------- UI Begins ----------
