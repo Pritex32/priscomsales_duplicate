@@ -356,23 +356,7 @@ if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in
 
 
 
-# 🧾 Subheading + Refresh Button Row
-
-
-
-st.markdown("""
-<div style="font-size: 30px; font-weight: bold; color: #2c3e50;">
-    📦 REAL-TIME INVENTORY MANAGEMENT SYSTEM
-</div>
-""", unsafe_allow_html=True)
-
-
-
-
-
-
-
-
+st.subheader("**📦 REAL-TIME INVENTORY MANAGEMENT SYSTEM**")
 
 with st.sidebar:
     selected = option_menu(
@@ -381,10 +365,6 @@ with st.sidebar:
         icons=["house", "plus-circle","bar-chart-line"],
         default_index=0
     )
-
-
-
-
 
 # === Helper function to get today's date ===
 # === Setup ===
