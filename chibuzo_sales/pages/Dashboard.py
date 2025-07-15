@@ -343,7 +343,7 @@ def get_md_subscription(md_user_id):
     response = supabase.table("subscription")\
         .select("plan, is_active, expires_at")\
         .eq("user_id", md_user_id)\
-        .order("created_at", desc=True)\
+        .order("started_at", desc=True)\
         .limit(1)\
         .execute()
 
@@ -448,13 +448,22 @@ def login_employee(email, password):
 
     # Fetch the MD’s subscription
     sub_response = supabase.table("subscription")\
-        .select("plan, is_active")\
+        .select("plan, is_active,expires_at")\
         .eq("user_id", md_user_id)\
         .order("started_at", desc=True)\
         .limit(1)\
         .execute()
 
     subscription = sub_response.data[0] if sub_response.data else {}
+    is_active = subscription.get("is_active", False)
+    expires_at = subscription.get("expires_at")
+    if expires_at:
+        try:
+            expires_date = datetime.strptime(expires_at, "%Y-%m-%d")
+            if expires_date < datetime.now():
+                is_active = False
+        except:
+            pass  # Handle inval
 
     # Store session data
     st.session_state.employee_logged_in = True
@@ -470,6 +479,7 @@ def login_employee(email, password):
     st.session_state.user_id = md_user_id  # MD this employee belongs to
     st.session_state.plan = subscription.get("plan", "free")
     st.session_state.is_active = subscription.get("is_active", False)
+    st.session_state.is_active = is_active
 
     # ✅ Generate a JWT for the employee
     jwt_token = generate_jwt(
@@ -579,15 +589,10 @@ def login_md(email, password):
 
     # Try fetching subscription
     try:
-        sub_result = supabase.table("subscription")\
-            .select("*")\
-            .eq("user_id", user_id)\
-            .single()\
-            .execute()
-        sub = sub_result.data if sub_result.data else {}
+       sub = get_md_subscription(user_id)
     except Exception as e:
         st.warning(f"⚠️ Could not retrieve subscription info: {str(e)}")
-        sub = {}
+        return False
 
     # ✅ Update session state
     st.session_state.user_id = user_id
