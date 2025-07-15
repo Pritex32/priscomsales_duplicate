@@ -833,13 +833,12 @@ elif choice == 'Login':
 
         st.markdown(f""" <div style='padding: 20px; background-color: #1e1e2f; border-left: 6px solid #00e5ff; border-radius: 8px;'>
     <h2 style='color: #ffffff;'>👋 Welcome back, <span style="color:#00e5ff;">{user_name}</span>!</h2>
-    <p style='font-size: 18px; color: #ccc;'>
-        You are logged in as <strong style='color: #00e5ff;'>{user_role}</strong>.
+    <p style='font-size: 18px; color: #ccc;'> You are logged in as <strong style='color: #00e5ff;'>{user_role}</strong>.
     </p>
 </div>
 """, unsafe_allow_html=True)
 
-
+    st.markdown("___")
 
         # Action buttons
         col1, col2 = st.columns([3, 1])
@@ -851,6 +850,7 @@ elif choice == 'Login':
                 st.session_state.clear()
                 st_javascript("localStorage.removeItem('login_token');")
                 st.success("You’ve been logged out.")
+                st.balloons()
                 time.sleep(1)
                 st.rerun()
 
