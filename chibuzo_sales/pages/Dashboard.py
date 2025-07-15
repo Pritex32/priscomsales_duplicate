@@ -833,9 +833,17 @@ elif choice == 'Login':
 
         st.title(f"👋 Welcome back, {user_name}!")
         st.info(f"You are logged in as **{user_role}**.")
+        st.markdown(f""" <div style='padding: 20px; background-color: #f0f8ff; border-left: 6px solid #4CAF50; border-radius: 8px;'>
+    <h2 style='color: #2c3e50;'>👋 Welcome back, <span style="color:#4CAF50;">{user_name}</span>!</h2>
+    <p style='font-size: 18px; color: #555;'>
+        You are logged in as <strong style='color: #2c3e50;'>{user_role}</strong>.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
 
         # Action buttons
-        col1, col2 = st.columns([1, 1])
+        col1, col2 = st.columns([3, 1])
         with col1:
             if st.button("🔁 Go to Sales Page"):
                 switch_page("Sales")
@@ -892,7 +900,7 @@ elif choice == 'Login':
             st.error("❌ You must be logged in as an Employee to access this page.")
 
 
-
+st.markdown("___")
 # Employee account creation form (only visible to logged-in MD)
 # employee create account form when the md logins
 if st.session_state.get("logged_in") and st.session_state.get("role") == "md":
