@@ -27,6 +27,63 @@ import jwt
 
 
 
+
+# to design the entire lay out
+
+st.markdown("""
+    <style>
+    /* Custom section divider */
+    .section-divider {
+        border: none;
+        height: 2px;
+        background: linear-gradient(to right, #ccc, #888, #ccc);
+        margin: 20px 0;
+    }
+
+    /* Custom title & subheader */
+    .main-title {
+        font-size: 32px;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    .section-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: #34495e;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+
+    /* Button styling */
+    div.stButton > button {
+        background-color: #27ae60;
+        color: white;
+        font-weight: bold;
+        padding: 8px 20px;
+        border-radius: 8px;
+        border: none;
+        transition: background-color 0.3s ease;
+    }
+
+    div.stButton > button:hover {
+        background-color: #219150;
+    }
+
+    /* Expander styling */
+    details summary {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
+
+
+
 # to show spiner rotating when the app is laoding
 # Only show spinner on first load
 if "loaded" not in st.session_state:
@@ -148,18 +205,7 @@ def get_supabase_client():
 supabase = get_supabase_client() # use this to call the supabase database
 
 
-@st.cache_data(ttl=7200)
-def fetch_inventory_items(user_id):
-    if not user_id or str(user_id) == "None":
-        raise ValueError("Invalid user_id passed to fetch_inventory_items")
 
-    response = supabase.table("inventory_master_log")\
-        .select("item_id, item_name")\
-        .eq("user_id", user_id)\
-        .execute()
-
-    items = response.data or []
-    return {item["item_name"]: item["item_id"] for item in items}
 
 
 
@@ -244,7 +290,18 @@ except:
     st.error("❌ Invalid user ID format.")
     st.stop()
 
+@st.cache_data(ttl=7200)
+def fetch_inventory_items(user_id):
+    if not user_id or str(user_id) == "None":
+        raise ValueError("Invalid user_id passed to fetch_inventory_items")
 
+    response = supabase.table("inventory_master_log")\
+        .select("item_id, item_name")\
+        .eq("user_id", user_id)\
+        .execute()
+
+    items = response.data or []
+    return {item["item_name"]: item["item_id"] for item in items}
 
 
 def handle_subscription_expiration(user_id):
@@ -297,11 +354,26 @@ if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in
     block_free_user_if_limit_exceeded()
     show_plan_status()
 
-st.subheader("📦 REAL TIME INVENTORY MANAGEMENT SYSTEM")
 
-if st.button("🔄 Refresh Data"):
-    st.cache_data.clear()  # ✅ Clear cached data
-    st.rerun() # ✅ Force rerun of the app
+
+# 🧾 Subheading + Refresh Button Row
+
+
+
+st.markdown("""
+<div style="font-size: 30px; font-weight: bold; color: #2c3e50;">
+    📦 REAL-TIME INVENTORY MANAGEMENT SYSTEM
+</div>
+""", unsafe_allow_html=True)
+
+
+
+
+
+
+
+
+
 
 with st.sidebar:
     selected = option_menu(
@@ -346,8 +418,9 @@ def get_low_stock_items(user_id):
 
     return low_stock
 
+# this is to design the dataframe
 
-# Then show other dashboard info below...
+
 
 # === Load data ===
 with st.spinner("Fetching data..."): # this is to show data is loading and not to show error until data loads
@@ -359,14 +432,22 @@ with st.spinner("Fetching data..."): # this is to show data is loading and not t
 df_inventory = pd.DataFrame(inventory)
 
 # === Display Inventory ===
+col9,col10=st.columns([4,1])
 if selected == 'Home':
-    st.subheader("📋 Current Inventory")
+    with col9:
+        st.subheader("📋 Current Inventory")
+    with col10:
+        st.markdown("<div style='padding-top: 8px;'></div>", unsafe_allow_html=True)  # Align button vertically
+        if st.button("🔄 Refresh", use_container_width=True):
+            st.cache_data.clear()
+            st.rerun()
     df_inventory = pd.DataFrame(inventory)
     st.dataframe(df_inventory)
-    selected_date = st.date_input("Select Date to Update Inventory", value=date.today())
+    selected_date = st.date_input("**Select Date to Update Inventory**", value=date.today())
+    
 
-
-
+    
+    
 
 
 
@@ -374,7 +455,7 @@ if selected == 'Home':
 
 def move_requisitions_to_history(selected_date, user_id):
     # Fetch today's requisitions
-    requisitions_today = supabase.table("sales_master_log").select("*").eq("user_id", user_id).eq("sale_date", str(selected_date)).execute().data
+    requisitions_today = supabase.table("sales_master_log").select("*").eq("user_id", user_id).eq("sale_date", selected_date).execute().data
     
     if requisitions_today:
         # Get the schema of the requisition_history table
@@ -418,7 +499,7 @@ def move_requisitions_to_history(selected_date, user_id):
 
 def move_restocks_to_history(selected_date,user_id):
     # Fetch today's restocks
-    restocks_today = supabase.table("goods_bought").select("*").eq("purchase_date", str(selected_date)).execute().data
+    restocks_today = supabase.table("goods_bought").select("*").eq("purchase_date", selected_date).execute().data
     if restocks_today:
         for restock in restocks_today:
             restock.pop("total_price", None) # to hide total price column in order to update
@@ -434,15 +515,21 @@ def move_restocks_to_history(selected_date,user_id):
             else:
                 st.error(f"❌ Failed to move restock ID {restock['purchase_id']} to history.")
     else:
-        st.info("ℹ️ No restocks found for today.")
+        
+        st.markdown("""
+<div style="padding: 15px; background-color: #dff0ff; border-left: 6px solid #2196F3; border-radius: 5px;">
+    ℹ️ <strong>Info:</strong> No restocks found for today.
+</div>
+""", unsafe_allow_html=True)
+
             
 
 
 ## function to update and move the requisition and restock
 def update_inventory_balances(selected_date,user_id):
     # Fetch today's requisitions and restocks
-    requisitions_today = supabase.table("sales_master_log").select("*").eq("user_id", user_id).eq("sale_date", str(selected_date)).execute().data
-    restocks_today = supabase.table("goods_bought").select("*").eq("user_id", user_id).eq("purchase_date", str(selected_date)).execute().data
+    requisitions_today = supabase.table("sales_master_log").select("*").eq("user_id", user_id).eq("sale_date", selected_date).execute().data
+    restocks_today = supabase.table("goods_bought").select("*").eq("user_id", user_id).eq("purchase_date", selected_date).execute().data
 
    
 
@@ -450,19 +537,24 @@ def update_inventory_balances(selected_date,user_id):
     if not requisitions_today and not restocks_today:
         st.warning("⚠️ No sales or purchases to update today.")
         return
+    
+     # Combine and group by (item_id, transaction_date)
+    transaction_map = defaultdict(lambda: {"supplied_quantity": 0, "stock_out": 0, "return_quantity": 0})
+
 
     # Process restocks
-    restock_dict = defaultdict(int)
+    
     for entry in restocks_today:
-        restock_dict[entry["item_id"]] += entry.get("supplied_quantity", 0)
+        key = (entry["item_id"], entry["purchase_date"])
+        transaction_map[key]["supplied_quantity"] += entry.get("supplied_quantity", 0)
    
 
     # Process requisitions
-    requisition_dict = defaultdict(int)
-    return_dict = defaultdict(int)
+   
     for entry in requisitions_today:
-        requisition_dict[entry["item_id"]] += entry.get("quantity", 0)
-        return_dict[entry["item_id"]] += entry.get("return_quantity", 0)
+        key = (entry["item_id"], entry["sale_date"])
+        transaction_map[key]["stock_out"] += entry.get("quantity", 0)
+        transaction_map[key]["return_quantity"] += entry.get("return_quantity", 0)
 
     # Fetch existing inventory
     inventory_response = supabase.table("inventory_master_log").select("*").eq("user_id", user_id).execute().data
@@ -473,15 +565,46 @@ def update_inventory_balances(selected_date,user_id):
     failed_items = []
 
 
-    for item in inventory.itertuples():
-        item_id = item.item_id
-        item_name = item.item_name
-        prev_closing = 0 if pd.isna(item.closing_balance) else item.closing_balance
+    for (item_id, log_date), values in transaction_map.items():
+        # Normalize log_date from string or datetime to just YYYY-MM-DD string
+        if isinstance(log_date,date):
+            parsed_date = log_date
+        else:
+            parsed_date = datetime.fromisoformat(str(log_date)).date()
 
-        supplied_quantity = restock_dict.get(item_id, 0)
+            log_date = parsed_date.isoformat()
+            previous_date = (parsed_date - timedelta(days=1)).isoformat()  # this get the closing bal of the previous days
 
-        stock_out = requisition_dict.get(item_id, 0)
-        return_quantity = return_dict.get(item_id, 0)
+
+        prev_day_log = supabase.table("inventory_master_log")\
+             .select("*")\
+            .eq("user_id", user_id)\
+            .eq("item_id", item_id)\
+           .eq("log_date", previous_date)\
+            .execute().data
+
+        if prev_day_log:
+            prev_closing = int(prev_day_log[0].get("closing_balance", 0) or 0) # thi one updae the closing balance with closing balance from yesterday
+        else:
+            prev_closing = 0
+
+
+    # ✅ Use pandas to get item info
+        item_row = inventory[inventory["item_id"] == item_id]
+        if item_row.empty:
+            continue  # Skip if item not found in inventory
+
+        item_name = item_row.iloc[0]["item_name"]
+        
+         # 📦 Get transaction values
+        supplied_quantity = values.get("supplied_quantity", 0)
+        stock_out = values.get("stock_out", 0)
+        return_quantity = values.get("return_quantity", 0)
+
+
+   
+
+
 
         # Ensure integers
         try:
@@ -490,27 +613,38 @@ def update_inventory_balances(selected_date,user_id):
             
             return_quantity = int(return_quantity or 0)
             open_balance = int(prev_closing or 0)
-            total_available = open_balance + supplied_quantity + return_quantity
-            #this is to stop items that is stock out
-            if total_available <= 0:
-                st.warning(f"🚫 You are out of stock for '{item_name}'. No stock-out will be recorded.")
-                continue  # Skip updating this item
-            closing_balance = total_available - stock_out
-            closing_balance = int(closing_balance)
-
+            
+           
 ## this code is to make sure what is updated doesnt disappear
+           
             existing_log = next((entry for entry in inventory_response 
-            if entry["item_id"] == item_id and entry["log_date"] == selected_date.isoformat()),
-            None)
+                                 if entry["item_id"] == item_id and entry["log_date"] == selected_date.isoformat()), None)
+
 
              # Merge with existing values if any
-            if existing_log:
+            
+            if existing_log:            
                 supplied_quantity += int(existing_log.get("supplied_quantity", 0))
                 stock_out += int(existing_log.get("stock_out", 0))
                 return_quantity += int(existing_log.get("return_quantity", 0))
                 open_balance = int(existing_log.get("open_balance", open_balance))
-            else:
+                        
+            else:                
                 open_balance = int(prev_closing or 0)
+                
+                if supplied_quantity == 0 and stock_out == 0 and return_quantity == 0: # this one makes sure that no date is over written
+                    continue
+
+            total_available = open_balance + supplied_quantity + return_quantity # this calculate the closing bal to knw when u r out stock
+            
+            if total_available <= 0: # this ensure once you are out of stock , nodeduction can be made
+                st.warning(f"🚫 You are out of stock for '{item_name}'. No stock-out will be recorded.")
+                st.info(f"📊 Debug Info for {item_name}: OB={open_balance}, IN={supplied_quantity}, RETURN={return_quantity}, Total={total_available}")
+                continue
+
+            closing_balance = total_available - stock_out  # this updates the closing blance
+           
+               
 
             daily_log = {
                 "item_id": item_id,
@@ -520,16 +654,38 @@ def update_inventory_balances(selected_date,user_id):
                 "supplied_quantity": supplied_quantity,
                 "stock_out": stock_out,
                 "return_quantity": return_quantity,
-              
-                "log_date":selected_date.isoformat(),
+                
+                "log_date":log_date,
                 "last_updated": selected_date.isoformat()
             }
+            
+            # Check if a record for this item/date/user already exists , this is to make sure that Allow duplicates for the same item across different days
+            # ❌ But no duplicates for the same item on the same day
+            existing_log = supabase.table("inventory_master_log")\
+                 .select("*")\
+                .eq("user_id", user_id)\
+                .eq("item_id", item_id)\
+                .eq("log_date", log_date)\
+                 .execute().data
 
-            response = supabase.table("inventory_master_log").upsert(daily_log, on_conflict=["item_id", "log_date","user_id"]).execute()
+            if existing_log:
+                response = supabase.table("inventory_master_log")\
+                                .update(daily_log)\
+                             .eq("user_id", user_id)\
+                             .eq("item_id", item_id)\
+                             .eq("log_date", log_date)\
+                                 .execute()
+            else:
+                response = supabase.table("inventory_master_log")\
+                    .insert(daily_log)\
+                        .execute()
 
 
             if response.data:
                 updated_count += 1
+                st.info(f"🗓️ Log created for {item_name} on {log_date}: OB={open_balance}, IN={supplied_quantity}, OUT={stock_out}, CB={closing_balance}")
+                st.info(f"✅ Total Available (check): {total_available}")
+
             else:
                 failed_items.append(item_name)
 
@@ -550,9 +706,13 @@ if selected == 'Home':
     with col5:
         low_stock_items = get_low_stock_items(user_id)
         if low_stock_items:
-            st.warning("⚠️ The following items are low in stock:")
+            st.markdown("""
+               <div style="padding: 15px; background-color:  #fff4e5; border-left: 6px solid #ffa726; border-radius: 5px;">
+           ⚠️<strong>Warning:</strong> The following items are low in stock:
+              </div>""", unsafe_allow_html=True)
+            
             for item in low_stock_items:
-                st.write(f"🔻 {item['item_name']}: {item['closing_balance']} units left (reorder level: {item['reorder_level']})")
+                st.write(f"**🔻 {item['item_name']}: {item['closing_balance']} units left (reorder level: {item['reorder_level']})**")
         else:
             st.success("✅ All items are sufficiently stocked.")
     
@@ -582,52 +742,65 @@ if selected == 'Home':
                                 "return_quantity": return_quantity,
                                 "stock_out": 0,
                                 "supplied_quantity": 0,
-                                "log_date": str(selected_date),
-                                "last_updated": str(selected_date),}
+                                "log_date": selected_date.isoformat(),
+                                "last_updated": selected_date.isoformat()}
 
                             # Check if an entry already exists for today
                             existing_log = supabase.table("inventory_master_log")\
                                  .select("*")\
                                  .eq("user_id", user_id)\
                                  .eq("item_id", item_id)\
-                                 .eq("log_date", str(selected_date))\
+                                 .eq("log_date", selected_date)\
                                  .execute().data
 
                             if existing_log:
-                                prev_return = existing_log[0].get("return_quantity", 0)
+                                prev_return = int(existing_log[0].get("return_quantity", 0))
                                 log_data["return_quantity"] += prev_return
-                                supabase.table("inventory_master_log")\
-                                    .update(log_data)\
-                                    .eq("user_id", user_id)\
-                                    .eq("item_id", item_id)\
-                                    .eq("log_date", str(selected_date))\
-                                    .execute()
+                                response = supabase.table("inventory_master_log")\
+                                           .update(log_data)\
+                                            .eq("user_id", user_id)\
+                                            .eq("item_id", item_id)\
+                                           .eq("log_date", selected_date)\
+                                           .execute()
                             else:
-                                supabase.table("inventory_master_log")\
-                                            .upsert(log_data, on_conflict=["item_id", "log_date", "user_id"])\
-                                            .execute()
-                                           
+                                response = supabase.table("inventory_master_log")\
+                                                         .insert(log_data)\
+                                                         .execute()
                                                       
-                            update_inventory_balances(selected_date, user_id)
                             st.success(f"{return_quantity} units of '{item_name}' returned and stock updated.")
+                            st.rerun()
+                                # Show updated log for this date
+                            updated_row = inventory[
+                                        (inventory["item_id"] == item_id) &  (inventory["log_date"] == selected_date)]
+                            if not updated_row.empty:
+                                st.info("📦 Updated inventory log:")
+                                st.dataframe(updated_row)
+                            else:
+                                st.info("ℹ️ No inventory log found for this item today.")
+
+
                                           
                         except Exception as e:
                             st.error(f"Failed to process return: {e}")
+        # this add divided line                    
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
+    
     if st.button("**🔄 Update Inventory Balances**"):
+            
         update_inventory_balances(selected_date, user_id)
         move_requisitions_to_history(selected_date,user_id)  # Move today's requisitions after updating the inventory
         move_restocks_to_history(selected_date,user_id)  # Move today's restocks to history
 
 # Display Today's Logs
     with st.expander("📤 Today's Sale "):
-        requisitions_today = supabase.table("sales_master_log").select("*").eq("user_id", user_id).eq("sale_date", str(selected_date)).execute().data
+        requisitions_today = supabase.table("sales_master_log").select("*").eq("user_id", user_id).eq("sale_date", selected_date).execute().data
         st.dataframe(pd.DataFrame(requisitions_today))
 
     with st.expander("📥 Today's Restocks"):
-        restocks_today = supabase.table("goods_bought").select("*").eq("user_id", user_id).eq("purchase_date", str(selected_date)).execute().data
+        restocks_today = supabase.table("goods_bought").select("*").eq("user_id", user_id).eq("purchase_date", selected_date).execute().data
         st.dataframe(pd.DataFrame(restocks_today))
-
+    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 # Display Daily Inventory Log by Date
     st.subheader("📆 Daily Inventory Log History")
     selected_log_date = st.date_input("Select a date", value=date.today())
@@ -841,4 +1014,10 @@ if selected =='Delete':
 
 
 
+
+# ✅ That means:
+
+# Allow duplicates for the same item across different days
+
+# ❌ But no duplicates for the same item on the same day
 
