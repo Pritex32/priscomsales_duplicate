@@ -487,13 +487,14 @@ if "invoice_uploaded" not in st.session_state:
     st.session_state["invoice_uploaded"] = False
 if "invoice_file_url" not in st.session_state:
     st.session_state["invoice_file_url"] = None
-with tab1:
-      
-    st.header("🛒 Record a New Sale")
-    if st.button("🔄 Refresh Data"):
-        st.cache_data.clear()  # ✅ Clear cached data
-        st.rerun() 
-    # Employee selection
+with tab1:     
+    col7,col9=st.columns([3,1])
+    with col7:
+        st.header("🛒 Record a New Sale")
+    with col9:
+        if st.button("🔄 Refresh Data"):
+            st.cache_data.clear()  # ✅ Clear cached data
+            st.rerun() 
     
    
     employee_name=st.text_input("Employee name",value= user_name, disabled=True,key="employee_name_input")
@@ -555,7 +556,8 @@ with tab1:
                
                 # Sanitize to remove invalid characters
                 final_invoice_name = re.sub(r'[^a-zA-Z0-9_\-]', '_', final_invoice_name)
-                filename = f"{final_invoice_name}{extension}"
+                unique_id = str(uuid.uuid4())[:8]
+                filename = f"{final_invoice_name}_{unique_id}{extension}"
                 invoice_file_url = upload_invoice(invoice_file, "salesinvoices", filename, user_id)
                 st.session_state["invoice_uploaded"] = True
                 st.session_state["invoice_file_url"] = invoice_file_url
