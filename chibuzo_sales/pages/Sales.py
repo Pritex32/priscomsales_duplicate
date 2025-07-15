@@ -140,11 +140,7 @@ if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
     st.warning("Please log in first.")
     st.stop()
 
-# Main content # this shows you are currently logged in
-if st.session_state.get("logged_in"):
-    st.title(f"Welcome, {st.session_state.username}")
-else:
-    st.warning("Please log in first.")
+
 
 
 from supabase import create_client
