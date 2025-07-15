@@ -287,7 +287,7 @@ if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in
     handle_subscription_expiration(user_id)
     show_plan_status()
 
-st.title("💼 Sales & Expenses Management")
+
 
 # -------- Helper Functions --------
 import tempfile
@@ -487,6 +487,7 @@ if "invoice_uploaded" not in st.session_state:
     st.session_state["invoice_uploaded"] = False
 if "invoice_file_url" not in st.session_state:
     st.session_state["invoice_file_url"] = None
+st.title("**💼 Sales & Expenses Management**")
 with tab1:     
     col7,col9=st.columns([3,1])
     with col7:
