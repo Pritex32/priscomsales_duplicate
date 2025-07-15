@@ -417,26 +417,8 @@ if "role" not in st.session_state or st.session_state.role != "md":
 
 
 
-st.markdown("""
-    <style>
-        .form-container {
-            background-color: #f8f9fa;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            margin-bottom: 25px;
-        }
-        .form-header {
-            color: #4CAF50;
-            font-size: 26px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-    </style>
-    <div class="form-container">
-""", unsafe_allow_html=True)
 
-st.markdown('<div class="form-header">📦 Purchase Entry Form</div>', unsafe_allow_html=True)
+
 
 with tab1:
     
@@ -641,9 +623,7 @@ with tab1:
                 st.rerun()
         except Exception as e:
             st.error(f"❌ Error saving record: {e}")
-        st.markdown("</div>", unsafe_allow_html=True)
-
-
+       
 
 
 
