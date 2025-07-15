@@ -351,6 +351,7 @@ def get_employee_dict(user_id):
 
 
 # -------- Tabs --------
+st.title("**💼 Sales & Expenses Management**")
 tab1, tab2 ,tab3, tab4 ,tab5= st.tabs(["➕ Add Sale", "Payments","💸 Add Expense","Delete",'Report'])
 
 # ========== ADD SALE ==========
@@ -457,7 +458,7 @@ def search_transactions(search_query, sales_df, expenses_df, restock_df, payment
 
 
 
-st.title("**💼 Sales & Expenses Management**")
+
 # Fetch logged-in user's name and id regardless of role
 user_name = st.session_state.get("username", "Unknown User")
 user_id = st.session_state.get("user_id")
@@ -733,6 +734,7 @@ user_info = supabase.table("users").select("username").eq("user_id", user_id).si
 tenant_name = user_info.data["username"] if user_info.data else "Sales"
 # function to generate receipt
 
+st.divider()
 with tab1:
     col1,col2=st.columns(2)               
     with col1:
@@ -835,12 +837,6 @@ with tab1:
                 st.warning("No transactions found matching your search.")
         else:
             st.write("Please enter a search term to begin.")
-
-
-
-
-
-
 
 
 
