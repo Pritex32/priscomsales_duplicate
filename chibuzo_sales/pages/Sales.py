@@ -457,7 +457,7 @@ def search_transactions(search_query, sales_df, expenses_df, restock_df, payment
 
 
 
-#
+st.title("**💼 Sales & Expenses Management**")
 # Fetch logged-in user's name and id regardless of role
 user_name = st.session_state.get("username", "Unknown User")
 user_id = st.session_state.get("user_id")
@@ -487,7 +487,7 @@ if "invoice_uploaded" not in st.session_state:
     st.session_state["invoice_uploaded"] = False
 if "invoice_file_url" not in st.session_state:
     st.session_state["invoice_file_url"] = None
-st.title("**💼 Sales & Expenses Management**")
+
 with tab1:     
     col7,col9=st.columns([3,1])
     with col7:
