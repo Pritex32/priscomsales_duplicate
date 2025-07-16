@@ -706,7 +706,6 @@ else:
 
 
 
-st.header('Expense Invoice')
 @st.cache_data(ttl=7200)
 def fetch_expenses_master_data(user_id):
     try:
