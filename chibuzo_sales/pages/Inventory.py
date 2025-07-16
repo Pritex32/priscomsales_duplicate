@@ -127,7 +127,7 @@ def generate_jwt(user_id, username, role,plan="free", is_active=False, email=Non
          "plan": plan,
         "is_active": is_active,
         "email": email,
-        "exp": datetime.utcnow() + timedelta(hours=1)
+        "exp": datetime.utcnow() + timedelta(hours=4)
     }
     
     token = jwt.encode(payload, jwt_SECRET_KEY, algorithm=ALGORITHM)
@@ -158,6 +158,9 @@ def restore_login_from_jwt():
                 st.session_state.plan = user_data.get("plan", "free")
                 st.session_state.is_active = user_data.get("is_active", False)
                 st.session_state.user_email = user_data.get("email", "")
+                if user_data["role"] == "employee":
+                    st.session_state.employee_user = {"name": user_data["username"]}
+
 
 # Run this first
 restore_login_from_jwt()
