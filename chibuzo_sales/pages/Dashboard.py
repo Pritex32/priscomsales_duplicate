@@ -130,8 +130,7 @@ def restore_login_from_jwt():
                 st.session_state.clear()
                 st_javascript("""localStorage.removeItem("login_token");""", key=f"get_login_token_888")
                 st.session_state.login_failed = True
-if not st.session_state.logged_in:
-    restore_login_from_jwt()
+
 
 # Only call restore function if not already logged in
 
@@ -141,6 +140,8 @@ if "username" not in st.session_state:
     st.session_state.username = ""
 if "page" not in st.session_state:
     st.session_state.page = "Login"
+if not st.session_state.logged_in:
+    restore_login_from_jwt()
 
 def save_token_to_localstorage(token):
     st_javascript(f"""localStorage.setItem("login_token", "{token}");""",key="saved_token_login_token")
@@ -927,8 +928,7 @@ elif choice == 'Login':
                             employee_name = st.session_state.get("employee_user", {}).get("name")
                             st.success(f"✅ Welcome {employee_name} (Employee)! Redirecting to Sales...")
 
-                        time.sleep(2)
-                        switch_page("Sales")
+                       
 
         # ❗ Login validation warnings
         if login_type == "MD" and not st.session_state.get("logged_in"):
