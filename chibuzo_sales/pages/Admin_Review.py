@@ -430,7 +430,7 @@ st.header("🔍 Admin - Review Sales & Invoices")
 # refresh button
 col9,col10=st.columns([3,1])
 with col9:
-    st.caption('Confirm the Amount recieved from sales with invoice')
+    st.success('Confirm the Amount recieved from sales with invoice')
 with col10:
     if st.button("🔄 Refresh Data"):
         st.cache_data.clear()  # ✅ Clear cached data
