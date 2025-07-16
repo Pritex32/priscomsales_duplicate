@@ -109,7 +109,7 @@ def decode_jwt(token):
 
 def restore_login_from_jwt():
     if not st.session_state.get("logged_in"):
-        token = st_javascript("""localStorage.getItem("login_token");""")
+        token = st_javascript("""localStorage.getItem("login_token");""",key="get_login_token")
         if token and token != "null":
             user_data = decode_jwt(token)
             if user_data:
@@ -128,7 +128,7 @@ def restore_login_from_jwt():
             else:
                 # 🛑 Token is invalid or expired — force logout
                 st.session_state.clear()
-                st_javascript("""localStorage.removeItem("login_token");""")
+                st_javascript("""localStorage.removeItem("login_token");""", key="remove_login_token")
                 st.error("Your session has expired. Please log in again.")
 restore_login_from_jwt()
 
@@ -141,7 +141,7 @@ if "page" not in st.session_state:
 
 restore_login_from_jwt()
 def save_token_to_localstorage(token):
-    st_javascript(f"""localStorage.setItem("login_token", "{token}");""")
+    st_javascript(f"""localStorage.setItem("login_token", "{token}");""",key="saved_token_login_token")
 # to get the payment details after upgrade
 def refresh_subscription_from_jwt():
     token = st.session_state.get("jwt_token")
@@ -391,7 +391,7 @@ def login_user(email, password):
                 st.session_state.username = user["username"]
 
         # Store token in browser localStorage via JS
-                st_javascript(f"""localStorage.setItem("login_token", "{token}");""")
+                st_javascript(f"""localStorage.setItem("login_token", "{token}");""",key="remove_login_token_4")
 
                 st.success("Login successful!")
             else:
@@ -500,7 +500,7 @@ def login_employee(email, password):
 
 
     # ✅ Save the JWT to browser localStorage using JavaScript
-    st_javascript(f"""localStorage.setItem("login_token", "{jwt_token}");""")
+    st_javascript(f"""localStorage.setItem("login_token", "{jwt_token}");""",key="remove_login_token_3")
 
     # Optional visual feedback
     st.success(f"✅ Welcome {user_data.get('name')} (Employee)!")
@@ -576,7 +576,7 @@ def show_user_data():
                 # Optional: regenerate JWT
                 token = generate_jwt(user_id, username, role, plan, is_active, email)
                 st.session_state.jwt_token = token
-                st_javascript(f"""localStorage.setItem("login_token", "{token}");""")
+                st_javascript(f"""localStorage.setItem("login_token", "{token}");""",key="remove_login_token_2")
 
                 st.warning("🔔 Your subscription has expired. You are now on the Free Plan.")
 
@@ -638,7 +638,7 @@ def login_md(email, password):
     # ✅ Generate and store JWT in localStorage using JS
     jwt_token = generate_jwt(user_id=user_id, username=user.get("username") or user["email"],email=user["email"], role=role)
 
-    st_javascript(f"""localStorage.setItem("login_token", "{jwt_token}");""")
+    st_javascript(f"""localStorage.setItem("login_token", "{jwt_token}");""",key="remove_login_token_5")
 
     # ✅ Visual feedback
     display_name = user.get('username') or user['email']
@@ -881,7 +881,7 @@ elif choice == 'Login':
         with col2:
             if st.button("🚪 Logout", key="logout_dashboard"):
                 st.session_state.clear()
-                st_javascript("localStorage.removeItem('login_token');")
+                st_javascript("localStorage.removeItem('login_token');",key="remove_login_token_6")
                 st.success("You’ve been logged out.")
                 st.balloons()
                 time.sleep(1)
