@@ -87,11 +87,10 @@ def decode_jwt(token):
     try:
         return jwt.decode(token, jwt_SECRET_KEY, algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError:
-        st.warning("Token expired.")
+        return None
     except jwt.InvalidTokenError:
-        st.error("Invalid token.")
-    return None
-
+       return None
+   
 # Restore login from browser localStorage
 
 # === Restore Login from JWT ===
@@ -166,6 +165,7 @@ if not st.session_state.get("logged_in"):
     """, unsafe_allow_html=True)
     time.sleep(3)
     switch_page("Dashboard")  # Replace "Login" with your actual login page name
+   
     st.stop()
    
     
