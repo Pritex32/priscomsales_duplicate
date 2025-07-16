@@ -503,6 +503,30 @@ def login_employee(email, password):
     
 
 
+# Custom button style (applies to both)
+# to color log out and sales button
+st.markdown("""
+    <style>
+    /* Target "Go to Sales Page" button */
+    div.stButton > button:first-child {
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 6px;
+        font-weight: bold;
+        padding: 10px 16px;
+    }
+
+    /* Target "Logout" button specifically */
+    div.stButton:nth-of-type(2) > button {
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 6px;
+        font-weight: bold;
+        padding: 10px 16px;
+    }
+
+    </style>
+""", unsafe_allow_html=True)
 
 
 # to fetch subcription data
