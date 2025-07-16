@@ -141,7 +141,7 @@ if not st.session_state.get("logged_in"):
     """, unsafe_allow_html=True)
     time.sleep(3)
     switch_page("Dashboard")  # Replace "Login" with your actual login page name
-    st.stop()
+   
    
 
 
