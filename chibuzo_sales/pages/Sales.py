@@ -751,7 +751,7 @@ user_info = supabase.table("users").select("username").eq("user_id", user_id).si
 tenant_name = user_info.data["username"] if user_info.data else "Sales"
 # function to generate receipt
 
-st.divider()
+st.markdown("___")
 with tab1:
     col1,col2=st.columns(2)               
     with col1:
