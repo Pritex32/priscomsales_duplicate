@@ -91,7 +91,7 @@ def generate_jwt(user_id, username, role,plan="free", is_active=False,email=None
         "plan": plan,
         "email": email,
         "is_active": is_active,
-        "exp": datetime.utcnow() + timedelta(hours=1)
+        "exp": datetime.utcnow() + timedelta(hours=4)
     }
     
     token = jwt.encode(payload, jwt_SECRET_KEY, algorithm=ALGORITHM)
