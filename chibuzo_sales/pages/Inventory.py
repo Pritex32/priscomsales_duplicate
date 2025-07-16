@@ -450,7 +450,11 @@ if selected == 'Home':
             st.cache_data.clear()
             st.rerun()
     df_inventory = pd.DataFrame(inventory)
-    st.dataframe(df_inventory)
+    st.dataframe(df_inventory.tail(100))
+    # to download the entire data
+    csv = df_inventory.to_csv(index=False).encode('utf-8')
+    st.download_button("⬇️ Download Full Inventory CSV", data=csv, file_name='full_inventory.csv', mime='text/csv')
+
     selected_date = st.date_input("**Select Date to Update Inventory**", value=date.today())
     
 
@@ -815,7 +819,7 @@ if selected == 'Home':
 
 
     if daily_history:
-        st.dataframe(pd.DataFrame(daily_history))
+        st.dataframe(pd.DataFrame(daily_history).tail(100))
     else:
         st.info("ℹ️ No inventory log found for this date.")
 
