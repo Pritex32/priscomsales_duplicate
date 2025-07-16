@@ -1,4 +1,4 @@
-from http import cookies
+
 import streamlit as st
 hide_streamlit_style = """
     <style>
@@ -147,7 +147,7 @@ def decode_jwt(token):
 # === Restore Login from JWT ===
 def restore_login_from_jwt():
     if not st.session_state.get("logged_in"):
-        token = st_javascript("""localStorage.getItem("login_token");""",key=f"get_login_token_{uuid.uuid4()}")
+        token = st_javascript("""localStorage.getItem("login_token");""",key=f"get_login_token_1998")
         if token and token != "null":
             user_data = decode_jwt(token)
             if user_data:
@@ -164,7 +164,7 @@ def restore_login_from_jwt():
             else:
                 # 🛑 Token is invalid or expired — force logout
                 st.session_state.clear()
-                st_javascript("""localStorage.removeItem("login_token");""",key=f"get_login_token_{uuid.uuid4()}")
+                st_javascript("""localStorage.removeItem("login_token");""",key=f"get_login_token_1778")
                 st.session_state.login_failed = True
 
 # Run this first
