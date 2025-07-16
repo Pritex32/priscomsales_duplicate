@@ -122,7 +122,7 @@ restore_login_from_jwt()
 
 # === Session Validation ===
 # === Session Validation === # this stops you when you are logged out
-if st.session_state.get("login_failed"):
+if not st.session_state.get("logged_in"):
     st.markdown("""
         <div style="
             background-color: #ffe6e6;
