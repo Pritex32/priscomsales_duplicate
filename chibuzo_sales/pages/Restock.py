@@ -146,7 +146,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # === Session Validation === # this stops you when you are logged out
-if st.session_state.get("login_failed"):
+if not st.session_state.get("logged_in"):
     st.markdown("""
         <div style="
             background-color: #ffe6e6;
