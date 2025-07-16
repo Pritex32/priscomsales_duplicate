@@ -17,7 +17,7 @@ from streamlit_option_menu import option_menu
 from datetime import datetime,date, timedelta
 import json
 import time
-
+from streamlit_extras.switch_page_button import switch_page 
 from PIL import Image
 import io
 import os
@@ -52,10 +52,10 @@ def decode_jwt(token):
     try:
         return jwt.decode(token, jwt_SECRET_KEY, algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError:
-        st.warning("Token expired.")
+        return None
     except jwt.InvalidTokenError:
-        st.error("Invalid token.")
-    return None
+        return None
+    
 
 # Restore login from browser localStorage
 
