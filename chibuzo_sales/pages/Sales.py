@@ -1156,6 +1156,7 @@ with tab2:
 
 
 # To get payment table
+    st.markdown("___")
     with st.expander('View All Payments'):
         payment_df=fetch_payment_history(user_id)
         if not payment_df.empty:
@@ -1292,6 +1293,7 @@ with tab3:
     
 # Streamlit form to make a payment
 
+    st.markdown("___")
     df_expenses = fetch_expenses_master_data(user_id)
     with st.expander('View Expenses table'):
         if df_expenses is not None:
