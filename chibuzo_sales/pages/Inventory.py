@@ -191,7 +191,7 @@ if not st.session_state.get("logged_in"):
     """, unsafe_allow_html=True)
     time.sleep(3)
     switch_page("Dashboard")
-    st.stop()
+  
 
 
 if not st.session_state.get("logged_in"):
