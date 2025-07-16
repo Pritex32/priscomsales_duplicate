@@ -109,7 +109,7 @@ def decode_jwt(token):
 
 def restore_login_from_jwt():
     if not st.session_state.get("logged_in"):
-        token = st_javascript("""localStorage.getItem("login_token");""",key="get_login_token_34")
+        token = st_javascript("""localStorage.getItem("login_token");""",key=f"get_login_token_{uuid.uuid4()})
         if token and token != "null":
             user_data = decode_jwt(token)
             if user_data:
@@ -128,7 +128,7 @@ def restore_login_from_jwt():
             else:
                 # 🛑 Token is invalid or expired — force logout
                 st.session_state.clear()
-                st_javascript("""localStorage.removeItem("login_token");""", key="remove_login_token_67")
+                st_javascript("""localStorage.removeItem("login_token");""", key=f"get_login_token_{uuid.uuid4()})
                 st.error("Your session has expired. Please log in again.")
 restore_login_from_jwt()
 
