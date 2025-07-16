@@ -146,7 +146,7 @@ def decode_jwt(token):
 # === Restore Login from JWT ===
 def restore_login_from_jwt():
     if not st.session_state.get("logged_in"):
-        token = st_javascript("""localStorage.getItem("login_token");""")
+        token = st_javascript("""localStorage.getItem("login_token");""",key=f"get_login_token_{uuid.uuid4()})
         if token and token != "null":
             user_data = decode_jwt(token)
             if user_data:
@@ -163,18 +163,36 @@ def restore_login_from_jwt():
             else:
                 # 🛑 Token is invalid or expired — force logout
                 st.session_state.clear()
-                st_javascript("""localStorage.removeItem("login_token");""")
-                st.error("Your session has expired. Please log in again.")
-
+                st_javascript("""localStorage.removeItem("login_token");""",key=f"get_login_token_{uuid.uuid4()})
+                st.session_state.login_failed = True
 
 # Run this first
 restore_login_from_jwt()
 
 # === Session Validation ===
+# === Session Validation === # this stops you when you are logged out
 if not st.session_state.get("logged_in"):
-    st.warning("⏳ Waiting for session to restore from browser...")
-    st.warning('Login Again')
+    st.markdown("""
+        <div style="
+            background-color: #ffe6e6;
+            border-left: 6px solid #ff4d4d;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Segoe UI', sans-serif;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        ">
+            <h3 style="color: #cc0000; margin: 0 0 10px;">❌ Session Expired</h3>
+            <p style="color: #333; font-size: 16px; margin: 0;">
+                Your session has expired. Please log in again to continue.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
     st.stop()
+
+
+if not st.session_state.get("logged_in"):
+    st.stop()  # this stop the app from running after login expires
 
 user_id = st.session_state.get("user_id")
 if not user_id:
