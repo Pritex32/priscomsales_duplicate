@@ -125,6 +125,11 @@ def restore_login_from_jwt():
                 # ✅ This is the critical fix
                 if user_data["role"] == "employee":
                     st.session_state.employee_user = {"name": user_data["username"]}
+             else:
+                # 🛑 Token is invalid or expired — force logout
+                st.session_state.clear()
+                st_javascript("""localStorage.removeItem("login_token");""")
+                st.error("Your session has expired. Please log in again.")
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
