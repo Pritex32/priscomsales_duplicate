@@ -159,11 +159,15 @@ if not st.session_state.get("logged_in"):
         ">
             <h3 style="color: #cc0000; margin: 0 0 10px;">❌ Session Expired</h3>
             <p style="color: #333; font-size: 16px; margin: 0;">
-                Your session has expired. Please log in again to continue.
+                Your session has expired.  Redirecting to login page....
             </p>
         </div>
     """, unsafe_allow_html=True)
+    time.sleep(3)
+    switch_page("Dashboard")  # Replace "Login" with your actual login page name
     st.stop()
+   
+    
 
 
 if not st.session_state.get("logged_in"):
