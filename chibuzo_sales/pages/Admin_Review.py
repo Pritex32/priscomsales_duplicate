@@ -396,9 +396,13 @@ def fetch_sales_data(user_id):
 
 st.header("🔍 Admin - Review Sales & Invoices")
 # refresh button
-if st.button("🔄 Refresh Data"):
-    st.cache_data.clear()  # ✅ Clear cached data
-    st.rerun() 
+col9,col10=st.columns([3,1])
+with col9:
+    st.caption('Confirm the Amount recieved from sales with invoice')
+with col10:
+    if st.button("🔄 Refresh Data"):
+        st.cache_data.clear()  # ✅ Clear cached data
+        st.rerun() 
 
 st.caption('Confirm the Amount recieved from sales with invoice')
 
