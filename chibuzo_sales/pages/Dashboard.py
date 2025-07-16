@@ -890,7 +890,6 @@ elif choice == 'Login':
                 st.session_state.clear()
                 st_javascript("localStorage.removeItem('login_token');",key="remove_login_token_6")
                 st.success("You’ve been logged out.")
-                st.balloons()
                 time.sleep(1)
                 st.rerun()
 
