@@ -436,8 +436,7 @@ with col10:
         st.cache_data.clear()  # ✅ Clear cached data
         st.rerun() 
 
-st.caption('Confirm the Amount recieved from sales with invoice')
-
+st.markdown("___")
 
 # ✅ Get user ID from session once
 user_id = st.session_state.get("user_id")
