@@ -130,6 +130,8 @@ def restore_login_from_jwt():
                 st.session_state.clear()
                 st_javascript("""localStorage.removeItem("login_token");""", key=f"get_login_token_888")
                 st.session_state.login_failed = True
+if not st.session_state.logged_in:
+    restore_login_from_jwt()
 
 # Only call restore function if not already logged in
 
@@ -144,20 +146,19 @@ def save_token_to_localstorage(token):
     st_javascript(f"""localStorage.setItem("login_token", "{token}");""",key="saved_token_login_token")
 # to get the payment details after upgrade
 
-def refresh_subscription_from_jwt():
-    token = st.session_state.get("jwt_token")
-    if not token:
-        st.session_state.plan = "free"
-        st.session_state.is_active = False
-        return
+# def refresh_subscription_from_jwt():
+   # token = st.session_state.get("jwt_token")
+   # if not token:
+     #   st.session_state.plan = "free"
+      #  st.session_state.is_active = False
+      #  return
 
-    payload = decode_jwt(token)
-    st.session_state.plan = payload.get("plan", "free").lower()
-    st.session_state.is_active = payload.get("is_active", False)
+   # payload = decode_jwt(token)
+   # st.session_state.plan = payload.get("plan", "free").lower()
+   # st.session_state.is_active = payload.get("is_active", False)
 
-if not st.session_state.logged_in:
-    restore_login_from_jwt()
-    refresh_subscription_from_jwt()
+
+   
 
 
 
@@ -372,6 +373,8 @@ def get_md_subscription(md_user_id):
             "is_active": is_active
         }
     return {"plan": "free", "is_active": False}
+
+    
 # Function to Authenticate Login
 ## login function
 def login_user(email, password):
