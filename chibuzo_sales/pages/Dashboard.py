@@ -130,6 +130,7 @@ def restore_login_from_jwt():
                 st.session_state.clear()
                 st_javascript("""localStorage.removeItem("login_token");""")
                 st.error("Your session has expired. Please log in again.")
+restore_login_from_jwt()
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
