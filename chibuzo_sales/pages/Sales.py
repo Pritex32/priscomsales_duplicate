@@ -129,8 +129,29 @@ except Exception:
     st.error("❌ User ID is not a valid integer.")
     st.stop()
 
+# this changes all buttons to green
+st.markdown("""
+    <style>
+    /* Style all Streamlit buttons */
+    div.stButton > button {
+        background-color: #4CAF50;
+        color: white;
+        font-weight: bold;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 20px;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+    }
 
-# validate user
+    /* Optional: Add hover effect */
+    div.stButton > button:hover {
+        background-color: #45a049;
+        color: white;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 
 
 
