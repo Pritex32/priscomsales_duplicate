@@ -927,6 +927,8 @@ elif choice == 'Login':
                         elif login_type == "Employee":
                             employee_name = st.session_state.get("employee_user", {}).get("name")
                             st.success(f"✅ Welcome {employee_name} (Employee)! Redirecting to Sales...")
+                            time.sleep(1)
+                            st.rerun()
 
                        
 
