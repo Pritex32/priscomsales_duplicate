@@ -40,11 +40,11 @@ if "loaded" not in st.session_state:
     st.markdown("""
         <style>
         .loader {
-          border: 6px solid #f3f3f3;
-          border-top: 6px solid #00FFC6;
+          border: 4px solid #f3f3f3;
+          border-top: 4px solid #00FFC6;
           border-radius: 50%;
-          width: 50px;
-          height: 50px;
+          width: 30px;
+          height: 30px;
           animation: spin 1s linear infinite;
           margin: auto;
           position: relative;
