@@ -129,7 +129,7 @@ def restore_login_from_jwt():
                 # 🛑 Token is invalid or expired — force logout
                 st.session_state.clear()
                 st_javascript("""localStorage.removeItem("login_token");""", key=f"get_login_token_{uuid.uuid4()}")
-                st.error("Your session has expired. Please log in again.")
+                st.session_state.login_failed = True
 restore_login_from_jwt()
 
 if "logged_in" not in st.session_state:
