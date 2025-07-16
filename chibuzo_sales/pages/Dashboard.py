@@ -132,8 +132,6 @@ def restore_login_from_jwt():
                 st.session_state.login_failed = True
 
 # Only call restore function if not already logged in
-if not st.session_state.logged_in:
-    restore_login_from_jwt()
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -145,6 +143,7 @@ if "page" not in st.session_state:
 def save_token_to_localstorage(token):
     st_javascript(f"""localStorage.setItem("login_token", "{token}");""",key="saved_token_login_token")
 # to get the payment details after upgrade
+
 def refresh_subscription_from_jwt():
     token = st.session_state.get("jwt_token")
     if not token:
@@ -156,6 +155,9 @@ def refresh_subscription_from_jwt():
     st.session_state.plan = payload.get("plan", "free").lower()
     st.session_state.is_active = payload.get("is_active", False)
 
+if not st.session_state.logged_in:
+    restore_login_from_jwt()
+    refresh_subscription_from_jwt()
 
 
 
