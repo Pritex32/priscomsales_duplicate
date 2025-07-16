@@ -102,10 +102,10 @@ def decode_jwt(token):
     try:
         return jwt.decode(token, jwt_SECRET_KEY, algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError:
-        st.warning("Token expired, Login Again")
+        return None
     except jwt.InvalidTokenError:
-        st.error("Invalid token.")
-    return None
+        return None
+    
 
 def restore_login_from_jwt():
     if not st.session_state.get("logged_in"):
