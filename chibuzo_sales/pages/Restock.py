@@ -673,7 +673,7 @@ with tab1:
 
                 result = supabase.table("goods_bought").insert(purchase_data).execute()
                 st.success("✅ Goods bought record saved successfully!")
-                st.balloons()
+                
                 time.sleep(2)
                 st.rerun()
         except Exception as e:
