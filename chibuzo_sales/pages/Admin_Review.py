@@ -550,7 +550,7 @@ for sale in unverified_sales:
 user_id = st.session_state.get("user_id")
 
 
-
+st.markdown("___")
 # Assume you have a list or DataFrame of sales (e.g., from Supabase)
 # sales_list = fetch_sales_data(user_id)
 
@@ -846,7 +846,11 @@ def paginate_dataframe(df, page_size=10):
 
 # Unified Deletion UI
 def delete_invoice_ui():
-    st.header("🗑️ Delete Invoice Records")
+    
+    st.markdown(
+    "<h1 style='color: red;'>🗑️ Delete Invoice Records</h1>",
+    unsafe_allow_html=True
+)
 
     delete_category = st.selectbox("🗂️ Select Category", ["Sales", "Goods Bought", "Expenses"])
     user_id = st.session_state.get("user_id", None)
