@@ -1634,7 +1634,7 @@ with tab5:
          # --- Payment Method Breakdown ---
         if "payment_method" in filtered_sales.columns:
             # Filter for only Card, Transfer, Cash methods
-            common_methods = ["Card", "Transfer", "Cash"]
+            common_methods = ["card", "transfer", "cash"]
             method_filtered = filtered_sales[filtered_sales["payment_method"].isin(common_methods)]
             if not method_filtered.empty:
                 st.markdown("### 💳 Payment Method Summary (Card / Transfer / Cash)") 
@@ -1646,7 +1646,7 @@ with tab5:
                     .reset_index()
                     .sort_values("total_amount", ascending=False))
                 method_summary.columns = ["Payment Method", "Total Sales (₦)"]
-                st.dataframe(method_summary)
+               
 
                 # Pie chart
                 fig = px.pie(method_summary,
@@ -1654,6 +1654,13 @@ with tab5:
                                values="Total Sales (₦)",
                                title="Sales Distribution by Payment Method" )
                 st.plotly_chart(fig, use_container_width=True)
+                # Interpretation
+                top_method = method_summary.iloc[0]
+                st.markdown(f"""
+                 #### 🔍 Interpretation:
+                 - The **most commonly used payment method** is **{top_method['Payment Method']}**, contributing a total of **₦{top_method['Total Sales (₦)']:,.2f}** to overall sales.
+                 - This indicates that customers prefer using **{top_method['Payment Method']}** over other methods like {', '.join([m for m in common_methods if m != top_method['Payment Method']])}.
+                  """)
             else:
                 st.info("No sales with Card, Transfer, or Cash method.")
         else:
@@ -1661,16 +1668,25 @@ with tab5:
 
 
         # --- Pie Charts ---
+        st.markdown("___")
         st.markdown("### 🥧 Payment Breakdown")
-        col1, col2 = st.columns(2)
-        with col1:
-            if "payment_status" in filtered_sales.columns and not filtered_sales.empty:
-                fig1 = px.pie(filtered_sales, names="payment_status", title="Payment Status")
-                st.plotly_chart(fig1, use_container_width=True)
-        with col2:
-            if "payment_method" in filtered_sales.columns and not filtered_sales.empty:
-                fig2 = px.pie(filtered_sales, names="payment_method", title="Payment Method")
-                st.plotly_chart(fig2, use_container_width=True)
+       
+        if "payment_status" in filtered_sales.columns and not filtered_sales.empty:
+            fig1 = px.pie(filtered_sales, names="payment_status", title="Payment Status")
+            st.plotly_chart(fig1, use_container_width=True)
+            payment_summary = (
+                filtered_sales.groupby("payment_status")["total_amount"]
+                .sum()
+                .reset_index()
+                .sort_values("total_amount", ascending=False))
+            top_status = payment_summary.iloc[0]
+
+            st.markdown(f"""
+            ### 🔍 Interpretation:
+           - The **most common payment status** is **{top_status['payment_status']}**, accounting for a total of **₦{top_status['total_amount']:,.2f}** in sales.
+           - This suggests that most customers are **{top_status['payment_status'].lower()}**, compared to other statuses like {', '.join([s for s in payment_summary['payment_status'] if s != top_status['payment_status']])}.
+           """)
+        
         st.markdown("___")
         # --- Line Chart: Sales Over Time ---
         st.markdown("### ⏱️ Sales Over Time")
