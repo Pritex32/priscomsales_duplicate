@@ -795,9 +795,6 @@ if selected == 'Home':
                                 "user_id": user_id,
                                 "item_id": item_id,
                                 "item_name": item_name,
-                                "return_quantity": return_quantity,
-                                "stock_out": 0,
-                                "supplied_quantity": 0,
                                 "log_date": selected_date.isoformat(),
                                 "last_updated": selected_date.isoformat()}
 
@@ -810,8 +807,12 @@ if selected == 'Home':
                                  .execute().data
 
                             if existing_log:
-                                prev_return = int(existing_log[0].get("return_quantity", 0))
-                                log_data["return_quantity"] += prev_return
+                                existing_entry = existing_log[0]
+                                previous_return = int(existing_entry.get("return_quantity", 0))
+                                log_data["return_quantity"] = previous_return + return_quantity
+                                log_data["stock_out"] = existing_entry.get("stock_out", 0)
+                                log_data["supplied_quantity"] = existing_entry.get("supplied_quantity", 0)
+                               
                                 response = supabase.table("inventory_master_log")\
                                            .update(log_data)\
                                             .eq("user_id", user_id)\
@@ -819,6 +820,10 @@ if selected == 'Home':
                                            .eq("log_date", selected_date)\
                                            .execute()
                             else:
+                                # If new, insert fresh log
+                                log_data["return_quantity"] = return_quantity
+                                log_data["stock_out"] = 0
+                                log_data["supplied_quantity"] = 0
                                 response = supabase.table("inventory_master_log")\
                                                          .insert(log_data)\
                                                          .execute()
