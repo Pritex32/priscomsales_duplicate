@@ -25,5 +25,5 @@ jobs:
 
       - name: ▶️ Run Streamlit App
         run: |
-          cd https://github.com/Pritex32/priscomac_sales_software/tree/main/chibuzo_sales
+          cd main/chibuzo_sales
           streamlit run Home.py
