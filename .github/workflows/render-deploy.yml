@@ -1,4 +1,4 @@
-name: 🔁 Build and Deploy Streamlit App
+name: Deploy Streamlit App to Render
 
 on:
   push:
@@ -18,12 +18,12 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: 📦 Install dependencies
+      - name: 📂 Install dependencies
         run: |
+          
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: ▶️ Run Streamlit App
+      - name: 🚀 Trigger Render Deploy
         run: |
-          cd main/chibuzo_sales
-          streamlit run Home.py
+          curl -X POST "https://api.render.com/deploy/srv-d1g010jipnbc73a4m080?key=gnVUa1xK474"
