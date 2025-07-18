@@ -2,6 +2,7 @@ import streamlit as st
 st.set_page_config(
     page_title='SALES MANAGEMENT SYSTEM',
     page_icon='👋 ',
+    layout="wide",
 
 )
 #to hide streamlit icons 
