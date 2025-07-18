@@ -18,8 +18,8 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: 📂 Install Python dependencies from chubuzo_sales
-        working-directory: chubuzo_sales
+      - name: 📂 Install dependencies
+
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
