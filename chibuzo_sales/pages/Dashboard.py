@@ -79,8 +79,10 @@ load_dotenv()
 
 import os
 
-jwt_SECRET_KEY = os.getenv('jwt_SECRET_KEY')  # ✅ Correct usage
-ALGORITHM = os.getenv('ALGORITHM')
+
+jwt_SECRET_KEY = "4606"  # Use env vars in production
+ALGORITHM = "HS256"
+
 
 
 def generate_jwt(user_id, username, role,plan="free", is_active=False,email=None):
@@ -140,6 +142,7 @@ if "username" not in st.session_state:
     st.session_state.username = ""
 if "page" not in st.session_state:
     st.session_state.page = "Login"
+
 if not st.session_state.logged_in:
     restore_login_from_jwt()
 
@@ -868,6 +871,7 @@ elif choice == 'Login':
             user_name = st.session_state.get("user", {}).get("username", "Unknown User")
         else:  # Employee
             user_name = st.session_state.get("employee_user", {}).get("name", "Unknown User")
+        
 
         st.markdown(f""" 
         <div style='padding: 20px; background-color: #f0f8ff; border-left: 6px solid #4CAF50; border-radius: 8px;'>
@@ -877,6 +881,7 @@ elif choice == 'Login':
             </p>
         </div>
         """, unsafe_allow_html=True)
+        
 
 
         st.markdown("___")
@@ -926,11 +931,10 @@ elif choice == 'Login':
                             st.success(f"✅ Welcome {display_name} (MD)! Redirecting to Sales...")
                         elif login_type == "Employee":
                             employee_name = st.session_state.get("employee_user", {}).get("name")
-                            st.success(f"✅ Welcome {employee_name} (Employee)! Redirecting to Sales...")
-                            time.sleep(1)
-                            st.rerun()
-
-                       
+                        time.sleep(1)
+                        st.rerun()
+                      
+                        
 
         # ❗ Login validation warnings
         if login_type == "MD" and not st.session_state.get("logged_in"):
