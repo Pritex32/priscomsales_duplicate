@@ -3,7 +3,7 @@ name: Deploy Streamlit App to Render
 on:
   push:
     branches:
-      - main
+      - main  # or 'master' depending on your branch
 
 jobs:
   build-and-deploy:
@@ -18,9 +18,9 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: 📂 Install dependencies
+      - name: 📂 Install Python dependencies from chubuzo_sales
+        working-directory: chubuzo_sales
         run: |
-          cd $GITHUB_WORKSPACE/chubuzo_sales
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
