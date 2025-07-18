@@ -400,15 +400,15 @@ with st.sidebar:
 today = str(date.today()) #this is to set up the todays date
 
 # === Fetch data from Supabase ===
-@st.cache_data(ttl=60 * 5)
+@st.cache_data(ttl=7200)
 def fetch_inventory(user_id):
     return supabase.table("inventory_master_log").select("*").eq("user_id", user_id).execute().data
 
-@st.cache_data(ttl=60 * 5) # to load requisition table
+@st.cache_data(ttl=7200) # to load requisition table
 def fetch_requisitions(user_id):
     return supabase.table( "sales_master_log").select("*").eq("sale_date", today).eq("user_id", user_id).execute().data
 
-@st.cache_data(ttl=60 * 5) # this is to load restock table
+@st.cache_data(ttl=7200) # this is to load restock table
 def fetch_restocks(user_id):
     return supabase.table("goods_bought").select("*").eq("purchase_date", today).eq("user_id", user_id).execute().data
 
@@ -450,7 +450,7 @@ if selected == 'Home':
             st.cache_data.clear()
             st.rerun()
     df_inventory = pd.DataFrame(inventory)
-    st.dataframe(df_inventory.tail(100))
+    st.dataframe(df_inventory.tail(10))
     # to download the entire data
     csv = df_inventory.to_csv(index=False).encode('utf-8')
     st.download_button("⬇️ Download Full Inventory CSV", data=csv, file_name='full_inventory.csv', mime='text/csv')
