@@ -621,15 +621,19 @@ def update_inventory_balances(selected_date,user_id):
             parsed_date = datetime.fromisoformat(str(log_date)).date()
 
             log_date = parsed_date.isoformat()
-            previous_date = (parsed_date - timedelta(days=1)).isoformat()  # this get the closing bal of the previous days
+           
 
-
+         # 🔎 Find the last log date for this item before the selected date
         prev_day_log = supabase.table("inventory_master_log")\
-             .select("*")\
+            .select("*")\
             .eq("user_id", user_id)\
             .eq("item_id", item_id)\
-           .eq("log_date", previous_date)\
+            .lt("log_date", parsed_date.isoformat())\
+            .order("log_date", desc=True)\
+            .limit(1)\
             .execute().data
+
+
 
         if prev_day_log:
             prev_closing = int(prev_day_log[0].get("closing_balance", 0) or 0) # thi one updae the closing balance with closing balance from yesterday
