@@ -1110,12 +1110,15 @@ with tab2:
     per_page = 5
     total = len(transactions)
     total_pages = (total + per_page - 1) // per_page
-    page = st.number_input("📄 Page", min_value=1, max_value=total_pages, step=1)
+    if total_pages > 0:
+        page = st.number_input("📄 Page", min_value=1, max_value=total_pages, step=1)
 
-    # Paginate the list
-    start = (page - 1) * per_page
-    end = start + per_page
-    paginated_transactions = transactions[start:end]
+        # Paginate the list
+        start = (page - 1) * per_page
+        end = start + per_page
+        paginated_transactions = transactions[start:end]
+    else:
+        st.info("No pending transactions to display.")
 
    
     
