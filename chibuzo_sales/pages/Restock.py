@@ -483,11 +483,29 @@ with tab1:
     with col1:
         
         st.subheader("📥 Restocks An Item")
-        st.info('👉first add a new item before restocking the item over time')
+        st.markdown("""
+        <div style="
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-left: 5px solid #28a745;
+            border-radius: 5px;
+            font-size: 15px;
+            color: #2e7d32;
+             margin-bottom: 20px;">
+           <strong>👉 First add a new item</strong> before restocking the item over time.
+        </div>""", unsafe_allow_html=True)
+
         
 
     with col2:
-        with st.expander("➕ Add New Item"):
+        with st.expander("**➕ Add New Item**"):
+            st.markdown("""
+            <style>
+            [data-testid="stExpander"] summary {
+                color: #fd7e14;
+                font-weight: bold;
+                font-size: 16px;}
+            </style>""", unsafe_allow_html=True )
             with st.form("new_item_form"):
                 employee_name=st.text_input("user",value= user_name, disabled=True)
                 employee_id=st.text_input("user",value= user_id, disabled=True)
@@ -579,6 +597,8 @@ with tab1:
 
                         if restock_response.data:
                             st.success("✅ New item added and restocked successfully.")
+                            time.sleep(1)
+                            st.rerun()
                         else:
                             st.warning("⚠️ Item added, but restock not recorded.")
                     else:
@@ -692,10 +712,17 @@ with tab2:
         st.write('Temporary data',df)
     else:
         st.error("❌ No data found!")
+    st.markdown("___")
 
     if not df2.empty:
-        st.write('All supplies',df2)
-        st.write('Last 10 rows', df2.tail())
+        st.write('**Restock supplies Table**',df2.tail(10))
+        st.download_button(
+            label="⬇️ Download Restock Supplies as CSV",
+            data=df2.to_csv(index=False),
+            file_name="restock_supplies.csv",
+            mime="text/csv"
+        )
+        
     else:
         st.error("❌ No data found!")
 
@@ -707,7 +734,10 @@ with tab3:
         st.stop()
 
     # 1. Input the ID to delete
-    st.header("🗑️ Delete purchase Record by ID")
+   # title
+    st.markdown(
+    "<h1 style='color: red;'>🗑️ Delete purchase Record by ID</h1>",
+    unsafe_allow_html=True)
 
     # 1. Input the Restock ID and Date to delete
     restock_id_to_delete = st.text_input("Enter purchase ID to Delete", "")
@@ -848,6 +878,7 @@ with tab4:
             col5.metric("🧾 Transactions", f"{transaction_count}")
 
             # ---- Pie Chart: Payment Status ----
+            st.markdown("___")
             st.markdown("### 🥧 Payment Status Distribution")
             status_counts = filtered_df["payment_status"].value_counts()
             fig1 = px.pie(names=status_counts.index, values=status_counts.values, title="Payment Status")
@@ -864,6 +895,7 @@ with tab4:
 
 
             # ---- Pie Chart: Payment Method ----
+            st.markdown("___")
             st.markdown("### 💳 Payment Method Distribution")
             method_counts = filtered_df["payment_method"].value_counts()
             fig2 = px.pie(names=method_counts.index, values=method_counts.values, title="Payment Method")
@@ -880,6 +912,7 @@ with tab4:
 
 
             # ---- 📆 Purchases Over Time ----
+            st.markdown("___")
             st.markdown("### ⏱️ Purchases Over Time")
             # Group data by day
             time_df = (filtered_df.groupby(filtered_df["purchase_date"].dt.to_period("D"))
@@ -916,8 +949,9 @@ with tab4:
             st.plotly_chart(fig3, use_container_width=True)
 
             # ---- 🏆 Top Purchased Items ----
-            # ---- 🏆 Top Restocked Items (Table) ----
-            st.markdown("### 🏆 Top Restocked Items (by Quantity)")
+            # ---- 🏆 Top Restocked Items (Table) ---
+            st.markdown("___")
+            st.markdown("### 🏆 Top 10 Restocked Items (by Quantity)")
 
             top_items_table = (
             filtered_df.groupby("item_name").agg(
@@ -925,9 +959,19 @@ with tab4:
             Total_Spent=("total_price_paid", "sum"),
             Times_Supplied=("item_name", "count")).sort_values("Total_Quantity", ascending=False).reset_index())
 
-            st.dataframe(top_items_table)
+            st.dataframe(top_items_table.head(10))
 
 
             # ---- Table ----
+            st.markdown("___")
             st.markdown("### 📋 Filtered Restock Records")
-            st.dataframe(filtered_df.sort_values("purchase_date", ascending=False).reset_index(drop=True))
+            sorted_restock_df = filtered_df.sort_values("purchase_date", ascending=False).reset_index(drop=True)
+            st.dataframe(sorted_restock_df.head(10))
+
+           # Create CSV for download
+            csv = sorted_restock_df.to_csv(index=False)
+            st.download_button(
+                 label="⬇️ Download Restock Records as CSV",
+                 data=csv.encode('utf-8'),
+                 file_name="restock_records.csv",
+                 mime="text/csv")
