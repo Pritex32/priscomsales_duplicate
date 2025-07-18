@@ -590,8 +590,11 @@ else:
         else:
             st.error("Failed to delete row.")
 
-
-st.title('Delete Entire sheet')
+st.markdown("___")
+st.markdown(
+    "<h1 style='color: red;'>Delete Entire sheet</h1>",
+    unsafe_allow_html=True
+)
 response = supabase.table("user_sheets").select("*").eq("user_id", user_id).execute()
 user_sheets = response.data or []
 st.subheader("Your Sheets")
