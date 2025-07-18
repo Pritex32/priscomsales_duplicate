@@ -198,6 +198,7 @@ if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
 
 from supabase import create_client
 # supabase configurations
+@st.cache_resource
 def get_supabase_client():
     supabase_url = 'https://ecsrlqvifparesxakokl.supabase.co' # Your Supabase project URL
     supabase_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjc3JscXZpZnBhcmVzeGFrb2tsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2NjczMDMsImV4cCI6MjA2MDI0MzMwM30.Zts7p1C3MNFqYYzp-wo3e0z-9MLfRDoY2YJ5cxSexHk'
@@ -391,7 +392,7 @@ def upload_invoice(file, folder, filename,user_id):
 
     
 
-@st.cache_data
+@st.cache_data(ttl=7200)
 def fetch_goods_bought(user_id):
     # Fetch data from 'goods_bought' table
     response = supabase.table('goods_bought').select('*').eq("user_id", user_id).execute()
@@ -402,7 +403,7 @@ def fetch_goods_bought(user_id):
         return pd.DataFrame()  # Return empty DataFrame if no data
 
 # Fetch the data and cache it
-@st.cache_data()
+@st.cache_data(ttl=7200)
 def fetch_goods_bought_history(user_id):
     # Fetch data from 'goods_bought history' table
     response = supabase.table('goods_bought_history').select('*').eq("user_id", user_id).execute()
@@ -442,6 +443,7 @@ tab1,tab2,tab3,tab4=st.tabs(["🛒Goods_purchased",'🛢️Data','Delete','Repor
 # Get employee dict
 employee_dict = get_employee_dict(user_id)
 
+@st.cache_data(ttl=7200)
 def fetch_inventory_items(user_id):
     response = supabase.table("inventory_master_log").select("item_id, item_name").eq("user_id", user_id).execute()
       # Show the data in Streamlit
