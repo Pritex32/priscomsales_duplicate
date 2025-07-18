@@ -529,13 +529,14 @@ def move_restocks_to_history(selected_date,user_id):
     else:
         
         st.markdown("""
-<div style="padding: 15px; background-color: #dff0ff; border-left: 6px solid #2196F3; border-radius: 5px;">
+<div style="padding: 15px; background-color: #FFA500; border-left: 6px solid #2196F3; border-radius: 5px;">
     ℹ️ <strong>Info:</strong> No restocks found for today.
 </div>
 """, unsafe_allow_html=True)
 
             
-
+processed_sale_ids = set()
+processed_purchase_ids = set()
 
 ## function to update and move the requisition and restock
 def update_inventory_balances(selected_date,user_id):
@@ -557,6 +558,24 @@ def update_inventory_balances(selected_date,user_id):
     # Process restocks
     
     for entry in restocks_today:
+        purchase_id = entry.get("purchase_id")
+
+    # 🔒 Check if this purchase_id already exists in the inventory log
+        existing_purchase_log = supabase.table("inventory_master_log")\
+        .select("purchase_id")\
+        .eq("user_id", user_id)\
+        .eq("purchase_id", purchase_id)\
+        .execute().data
+
+        if existing_purchase_log:
+            st.warning(f"🚫 Purchase ID {purchase_id} already exists in inventory log. Skipping to avoid double update.")
+            continue
+         # 🧠 Check if it's already processed in this session
+        if purchase_id in processed_purchase_ids:
+            st.error(f"❌ Purchase ID {purchase_id} has already been processed. Duplicate detected.")
+            continue
+         # Add to processed list
+        processed_purchase_ids.add(purchase_id)
         key = (entry["item_id"], entry["purchase_date"])
         transaction_map[key]["supplied_quantity"] += entry.get("supplied_quantity", 0)
    
@@ -564,6 +583,23 @@ def update_inventory_balances(selected_date,user_id):
     # Process requisitions
    
     for entry in requisitions_today:
+        sale_id = entry.get("sale_id")
+         # 🔒 Check if this sale_id already exists in the inventory log
+        existing_sale_log = supabase.table("inventory_master_log")\
+        .select("sale_id")\
+        .eq("user_id", user_id)\
+        .eq("sale_id", sale_id)\
+        .execute().data
+
+        if existing_sale_log:
+            st.warning(f"🚫 Sale ID {sale_id} already exists in inventory log. Skipping to avoid double update.")
+            continue
+
+    # 🧠 Check if it's already processed in this session
+        if sale_id in processed_sale_ids:
+            st.error(f"❌ Sale ID {sale_id} has already been processed. Duplicate detected.")
+            continue
+        processed_sale_ids.add(sale_id)
         key = (entry["item_id"], entry["sale_date"])
         transaction_map[key]["stock_out"] += entry.get("quantity", 0)
         transaction_map[key]["return_quantity"] += entry.get("return_quantity", 0)
@@ -670,7 +706,11 @@ def update_inventory_balances(selected_date,user_id):
                 "log_date":log_date,
                 "last_updated": selected_date.isoformat()
             }
-            
+            # Track origin # sale id and purchase id is inserted only if the exist in entry
+            if "sale_id" in entry:
+                daily_log["sale_id"] = entry["sale_id"]
+            if "purchase_id" in entry:
+                daily_log["purchase_id"] = entry["purchase_id"]
             # Check if a record for this item/date/user already exists , this is to make sure that Allow duplicates for the same item across different days
             # ❌ But no duplicates for the same item on the same day
             existing_log = supabase.table("inventory_master_log")\
@@ -696,7 +736,8 @@ def update_inventory_balances(selected_date,user_id):
             if response.data:
                 updated_count += 1
                 st.info(f"🗓️ Log created for {item_name} on {log_date}: OB={open_balance}, IN={supplied_quantity}, OUT={stock_out}, CB={closing_balance}")
-                st.info(f"✅ Total Available (check): {total_available}")
+                time.sleep(1)
+                st.rerun()
 
             else:
                 failed_items.append(item_name)
@@ -707,6 +748,8 @@ def update_inventory_balances(selected_date,user_id):
     # Display results once
     if updated_count:
         st.success(f"✅ Inventory log updated for {updated_count} items.")
+        time.sleep(1)
+        st.rerun()
     if failed_items:
         st.error(f"❌ Failed to update: {', '.join(failed_items)}")
 
