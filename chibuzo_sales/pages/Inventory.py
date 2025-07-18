@@ -736,8 +736,7 @@ def update_inventory_balances(selected_date,user_id):
             if response.data:
                 updated_count += 1
                 st.info(f"🗓️ Log created for {item_name} on {log_date}: OB={open_balance}, IN={supplied_quantity}, OUT={stock_out}, CB={closing_balance}")
-                time.sleep(1)
-                st.rerun()
+                
 
             else:
                 failed_items.append(item_name)
@@ -748,8 +747,7 @@ def update_inventory_balances(selected_date,user_id):
     # Display results once
     if updated_count:
         st.success(f"✅ Inventory log updated for {updated_count} items.")
-        time.sleep(1)
-        st.rerun()
+       
     if failed_items:
         st.error(f"❌ Failed to update: {', '.join(failed_items)}")
 
