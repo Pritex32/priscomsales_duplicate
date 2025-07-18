@@ -593,7 +593,7 @@ with tab1:
                             "notes": notes
                         }
 
-                        restock_response = supabase.table("goods_bought").insert(restock_entry).execute()
+                        restock_response = supabase.table("goods_bought_history").insert(restock_entry).execute()
 
                         if restock_response.data:
                             st.success("✅ New item added and restocked successfully.")
