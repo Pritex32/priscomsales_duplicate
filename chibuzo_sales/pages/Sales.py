@@ -203,6 +203,8 @@ if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
 
 from supabase import create_client
 # supabase configurations
+
+@st.cache_resource
 def get_supabase_client():
     supabase_url = 'https://ecsrlqvifparesxakokl.supabase.co' # Your Supabase project URL
     supabase_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjc3JscXZpZnBhcmVzeGFrb2tsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2NjczMDMsImV4cCI6MjA2MDI0MzMwM30.Zts7p1C3MNFqYYzp-wo3e0z-9MLfRDoY2YJ5cxSexHk'
@@ -255,6 +257,7 @@ user_id = st.session_state.get("user_id")
 # this will show if the person has paid or not
 
 # ---------- PLAN ENFORCEMENT ---------- #
+@st.cache_data(ttl=7200)
 def fetch_subscription_data(user_id):
     try:
         response = supabase.table("subscription").select("*").eq("user_id", user_id).execute()
