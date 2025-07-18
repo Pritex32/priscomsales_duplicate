@@ -65,6 +65,12 @@ if "loaded" not in st.session_state:
     st.session_state.loaded = True
     st.rerun()  # 🔁 Rerun app to remove loader and show main content
 
+
+
+
+
+
+
 jwt_SECRET_KEY = "4606"  # Use env vars in production
 ALGORITHM = "HS256"
 
@@ -86,10 +92,10 @@ def decode_jwt(token):
     try:
         return jwt.decode(token, jwt_SECRET_KEY, algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError:
-        st.warning("Token expired.")
+        return None
     except jwt.InvalidTokenError:
-        st.error("Invalid token.")
-    return None
+        return None
+    
 
 # Restore login from browser localStorage
 
@@ -546,41 +552,38 @@ with tab1:
             st.cache_data.clear()  # ✅ Clear cached data
             st.rerun() 
     
-   
-    employee_name=st.text_input("Employee name",value= user_name, disabled=True,key="employee_name_input")
+    col18,col19=st.columns(2)
+    with col18:
+        employee_name=st.text_input("Employee name",value= user_name, disabled=True,key="employee_name_input")
+        employee_id=st.text_input("Employee id",value= employee_id, disabled=True,key="employee_name_input_2")
+        # Item selection with default placeholder
+        item_dict = fetch_inventory_items(user_id)
+        item_options = ["Select an item"] + list(item_dict.keys())
+        item_name = st.selectbox("Select Item", item_options, key="item_selectbox")
+        item_id = item_dict.get(item_name, None)
+        # Quantity input
+        quantity = st.number_input("Quantity Sold", min_value=1, step=1, key="quantity")
+        # Unit price input
+        unit_price = st.number_input("Unit Price", min_value=0.0, step=0.01, key="unit_price")
 
-    employee_id=st.text_input("Employee id",value= employee_id, disabled=True,key="employee_name_input_2")
+        # Auto-calculate total amount
+        total_amount = quantity * unit_price
+        st.info(f"💰 Total Amount: ₦{total_amount:,.2f}")
+        # Sale info
+        sale_date = st.date_input("Sale Date", value=date.today(), key="sale_date")
+        customer_name = st.text_input("Customer Name", key="customer_name")
+        customer_phone = st.text_input("Customer Phone Number", key="customer_phone")
+    with col19:
+        payment_method = st.selectbox("Payment Method", ["cash", "card", "transfer"], key="payment_method")
+        payment_status = st.selectbox("Payment Status", ["paid", "credit", "partial"], key="payment_status")
+        due_date = st.date_input("Due Date", value=date.today(), key="due_date") if payment_status != "paid" else None
+        invoice_number = st.text_input("Invoice Number (optional)", key="invoice_number")
+        notes = st.text_area("Notes", key="notes")
 
-    # Item selection with default placeholder
-    item_dict = fetch_inventory_items(user_id)
-    item_options = ["Select an item"] + list(item_dict.keys())
-    item_name = st.selectbox("Select Item", item_options, key="item_selectbox")
-    item_id = item_dict.get(item_name, None)
-    # Quantity input
-    quantity = st.number_input("Quantity Sold", min_value=1, step=1, key="quantity")
-
-    # Unit price input
-    unit_price = st.number_input("Unit Price", min_value=0.0, step=0.01, key="unit_price")
-
-    # Auto-calculate total amount
-    total_amount = quantity * unit_price
-    st.info(f"💰 Total Amount: ₦{total_amount:,.2f}")
-
-    # Sale info
-    sale_date = st.date_input("Sale Date", value=date.today(), key="sale_date")
-    customer_name = st.text_input("Customer Name", key="customer_name")
-    customer_phone = st.text_input("Customer Phone Number", key="customer_phone")
-
-    payment_method = st.selectbox("Payment Method", ["cash", "card", "transfer"], key="payment_method")
-    payment_status = st.selectbox("Payment Status", ["paid", "credit", "partial"], key="payment_status")
-    due_date = st.date_input("Due Date", value=date.today(), key="due_date") if payment_status != "paid" else None
-    invoice_number = st.text_input("Invoice Number (optional)", key="invoice_number")
-    notes = st.text_area("Notes", key="notes")
-
-    # Upload invoice
-    invoice_file_url = None
-    invoice_file = st.file_uploader("Upload Invoice (PDF/Image)", type=["pdf", "jpg", "jpeg", "png"], key="invoice_upload")
-    invoice_name = st.text_input("Enter desired invoice name (without extension)", value=f"invoice_{employee_id}_{date.today().isoformat()}", key='sale_key_invoice')
+        # Upload invoice
+        invoice_file_url = None
+        invoice_file = st.file_uploader("Upload Invoice (PDF/Image)", type=["pdf", "jpg", "jpeg", "png"], key="invoice_upload")
+        invoice_name = st.text_input("Enter desired invoice name (without extension)", value=f"invoice_{employee_id}_{date.today().isoformat()}", key='sale_key_invoice')
    
     # Partial payment
     partial_payment_amount = None
@@ -913,6 +916,15 @@ with tab1:
             st.dataframe(sales.data)
             st.write('Temporary Data')
             st.dataframe(sales2.data)
+            sales2_df = pd.DataFrame(sales.data)
+            if not sales2_df.empty:
+                st.download_button(
+                label="⬇️ Download All Sales Data as CSV",
+                data=sales2_df.to_csv(index=False),
+                file_name="sales_data.csv",
+                mime="text/csv"  )
+            else:
+                st.info("ℹ️ No temporary sales data available for download.")
 
     with col2:
         with st.expander('View Expenses',expanded=False):
@@ -991,20 +1003,20 @@ def insert_payment(user_id, sale_id, purchase_id, amount, payment_method, notes,
     }).execute()
 
 
-def update_related_tables(user_id, sale_id, purchase_id, new_amount_paid, new_status,outstanding_amount, expense_id=None):
+def update_related_tables(user_id, sale_id, purchase_id, new_amount_paid, new_status,outstanding_amount , expense_id=None):
     if sale_id:
         supabase.table("sales_master_history").update({
             "amount_paid": new_amount_paid,
             "payment_status": new_status,
-            "amount_balance": outstanding_amount
-        }).eq("sale_history_id ", sale_id).execute()
+            "amount_balance": outstanding_amount 
+        }).eq("sale_id", sale_id).eq("user_id", user_id).execute()
     
     if purchase_id:
         supabase.table("goods_bought_history").update({
             "total_price_paid": new_amount_paid,
             "payment_status": new_status,
-            "amount_balance": outstanding_amount
-        }).eq("purchase_id", purchase_id).execute()
+            "amount_balance":outstanding_amount
+        }).eq("purchase_id", purchase_id).eq("user_id", user_id).execute()
         # Calculate the amount balance (what's still owed)
         
     
@@ -1012,8 +1024,8 @@ def update_related_tables(user_id, sale_id, purchase_id, new_amount_paid, new_st
         supabase.table("expenses_master").update({
             "amount_paid": new_amount_paid,
             "payment_status": new_status,
-            "amount_balance": outstanding_amount
-        }).eq("expense_id", expense_id).execute()
+            "amount_balance":outstanding_amount
+        }).eq("expense_id", expense_id).eq("user_id", user_id).execute()
 
 
 
@@ -1029,8 +1041,9 @@ def update_payment_status(table_name, id_column, record_id,user_id):
         record_query = supabase.table('expenses_master').select("total_amount", "payment_status").eq("user_id", user_id).eq(id_column, record_id).single().execute()
         total_amount_key = "total_amount"
     elif table_name == 'sales_master_history':
-        record_query = supabase.table('sales_master_history').select("total_amount", "payment_status").eq("user_id", user_id).eq('sale_history_id', record_id).single().execute()
+        record_query = supabase.table('sales_master_history').select("total_amount", "payment_status").eq("user_id", user_id).eq(id_column, record_id).single().execute()
         total_amount_key = "total_amount"
+        st.write("🔍 Debug: Sales Master History Result", record_query.data)
     elif table_name == 'goods_bought_history':
         record_query = supabase.table('goods_bought_history').select("total_cost", "payment_status").eq("user_id", user_id).eq(id_column, record_id).single().execute()
         total_amount_key = "total_cost"
@@ -1038,7 +1051,8 @@ def update_payment_status(table_name, id_column, record_id,user_id):
         return None  # Invalid table
     total_amount = record_query.data[total_amount_key]
     current_status = record_query.data["payment_status"]
-
+     
+    outstanding_amount = total_amount - total_paid
     # Step 3: Determine new payment status
     # If it's already paid, we don't change anything
     if current_status == "paid":
@@ -1056,27 +1070,63 @@ def update_payment_status(table_name, id_column, record_id,user_id):
         new_status = "partial"
 
     # Step 4: Update the main record's payment status and amount_paid
-    supabase.table('payments').update({
-        "payment_status": new_status,
-        "amount_paid": total_paid
-    }).eq(id_column, record_id).eq("user_id", user_id).execute()
-
+    supabase.table(table_name).update({
+    "payment_status": new_status,
+    "amount_paid": total_paid,
+    "amount_balance":outstanding_amount}).eq(id_column, record_id).eq("user_id", user_id).execute()
     return new_status
 
-# restock table
+
+
+# for pagination
+
+
 
 
 with tab2:
-    st.title("💰 View Customers with Pending Payments")
-    st.caption("Review and Mark Customers with Outstanding Balances.")
-    
-    
-# to get the debtors information and displays it on the payment page
+    st.markdown("""
+    <h2 style='color: green; font-weight: 600;'>💰 View Customers with Pending Payments</h2>""", unsafe_allow_html=True)
+    col11,col12=st.columns([3,1])
+    with col11:
+        st.markdown("""
+        <div style='
+             font-size: 16px;
+             font-weight: 500;
+             color: #6c757d;
+             background-color: #f8f9fa;
+             padding: 10px 15px;
+             border-left: 5px solid #00b894;
+             border-radius: 5px;
+             margin-bottom: 10px;'>
+            📋 <strong>Review and Mark Customers with Outstanding Balances</strong>
+        </div>""", unsafe_allow_html=True)
+    with col12:
+         # Align button vertically
+        if st.button("🔄 Refresh", use_container_width=True,key='payment_refersh'):
+            st.cache_data.clear()
+            st.rerun()
+    # Pagination setup
     transactions = get_pending_transactions(user_id)
-     
-    for tx in transactions:
+    per_page = 5
+    total = len(transactions)
+    total_pages = (total + per_page - 1) // per_page
+    page = st.number_input("📄 Page", min_value=1, max_value=total_pages, step=1)
+
+    # Paginate the list
+    start = (page - 1) * per_page
+    end = start + per_page
+    paginated_transactions = transactions[start:end]
+
+   
+    
+
+    
+  
+   
+    for tx in paginated_transactions:
+        
         # Identify transaction type
-        sale_id = tx.get('sale_history_id')
+        sale_id = tx.get('sale_id')
         purchase_id = tx.get('purchase_id')
         expense_id = tx.get('expense_id')
 
@@ -1088,7 +1138,7 @@ with tab2:
             tx.get('restock_date') or 
             'unknown'
         )
-
+        
         # Get names
         customer_name = tx.get('customer_name', 'Unknown Customer')
         supplier_name = tx.get('supplier_name', 'Unknown Supplier')
@@ -1101,13 +1151,13 @@ with tab2:
         total_amount = (
             tx.get('total_cost') or  # restock: total cost (total amount)
             tx.get('total_amount') or  # sales: total amount
-            tx.get('expense_total_amount') or  # expenses: total amount
+            tx.get('total_amount') or  # expenses: total amount
              0.0)
         
         amount_paid = (
               tx.get('total_price_paid') or  # restock: total price paid (amount paid)
               tx.get('amount_paid') or  # sales: amount paid
-              tx.get('expense_amount_paid') or  # expenses: amount paid
+              tx.get('amount_paid') or  # expenses: amount paid
               0.0)
         
         # Calculate outstanding amount safely
@@ -1143,12 +1193,13 @@ with tab2:
 
         # Make sure outstanding transactions (partial or credit) can be updated
         if payment_status in ['partial', 'credit']:
+            
             col1, col2 = st.columns(2)
             with col1:
                 update_type = st.radio(
                     f"Select update type",
                     ["Partial Payment", "Fully Paid"],
-                    key=f"update_type_{sale_id or purchase_id or expense_id or str(uuid.uuid4())}"
+                    key=f"update_type_{sale_id or purchase_id or expense_id}"
                 )
             with col2:
                 if update_type == "Partial Payment":
@@ -1157,30 +1208,60 @@ with tab2:
                            f"Amount paying now (₦)",
                            min_value=0.0,
                            max_value=outstanding_amount,
-                           key=f"partial_amount_{sale_id or purchase_id or expense_id or str(uuid.uuid4())}")
+                           key=f"partial_amount_{update_type}_{sale_id or purchase_id or expense_id}")
                     else:
                         st.warning("❗ Outstanding amount is zero or negative. Cannot accept partial payment.")
                         partial_amount = 0.0
                 else:
                     partial_amount = outstanding_amount
+            btn_key = f"update_btn_{update_type}_{sale_id or purchase_id or expense_id or 'fallback_180'}"
 
-            if st.button(f"💰 Update Payment", key=f"update_btn_{sale_id or purchase_id or expense_id or str(uuid.uuid4())}"):
-                new_amount_paid = amount_paid + partial_amount
-                new_status = "paid" if new_amount_paid >= total_amount else "partial"
+            if st.button(f"💰 Update Payment",key=btn_key ):
+                if partial_amount is None or partial_amount <= 0:
+                    st.warning("Please enter a valid payment amount.")
+                else:
+                    new_amount_paid = amount_paid + partial_amount
+                    new_status = "paid" if new_amount_paid >= total_amount else "partial"
+                    new_outstanding = total_amount - new_amount_paid
 
+                    st.write("🧮 New Amount Paid:", new_amount_paid)
+                    st.write("📉 New Outstanding:", new_outstanding)
+                    st.write("🔄 New Status:", new_status)        
+                
                 # Insert payment record
-                insert_payment(
-                    user_id, sale_id, purchase_id, partial_amount, 
-                    payment_method, f"{update_type} via dashboard", transaction_date
-                )
-
-                # Update related tables
-                update_related_tables(user_id, sale_id, purchase_id, new_amount_paid, new_status, outstanding_amount,expense_id)
-
-                st.success(f"✅ Payment updated! New status: **{new_status.upper()}**")
+                    insert_payment(
+                        user_id, sale_id, purchase_id, partial_amount, 
+                        payment_method, f"{update_type} via dashboard", transaction_date )
+                    update_related_tables(user_id, sale_id, purchase_id, new_amount_paid, new_status, outstanding_amount,expense_id)
+                    
+                    if sale_id:
+                        table_name = "sales_master_history"
+                        id_column = "sale_id"
+                        record_id = sale_id
+                        st.write("🧾 Transaction Type: Sale")
+                    elif purchase_id:
+                        table_name = "goods_bought_history"
+                        id_column = "purchase_id"
+                        record_id = purchase_id
+                    elif expense_id:
+                        table_name = "expenses_master"
+                        id_column = "expense_id"
+                        record_id = expense_id
+                    else:
+                        st.error("❌ No valid transaction ID found.")
+                        st.stop()
+                    if table_name:
+                        new_status = update_payment_status(table_name, id_column, record_id, user_id)
+              
+                    # Recalculate total paid
+                    
+                    update_related_tables(user_id, sale_id, purchase_id, new_amount_paid, new_status, new_outstanding,expense_id)
+             
+                    st.success(f"✅ Payment updated! New status: **{new_status.upper()}**")
                 # 💥 REFRESH transactions from the database
-                transactions = get_pending_transactions(user_id)
-                st.rerun()
+                    transactions = get_pending_transactions(user_id)
+                    st.rerun()
+
 
 
 
@@ -1191,8 +1272,14 @@ with tab2:
     with st.expander('View All Payments'):
         payment_df=fetch_payment_history(user_id)
         if not payment_df.empty:
-            st.write('All payments',payment_df)
-            st.write('Last 10 rows', payment_df.tail(10))
+            st.write('All payments',payment_df.tail(10))
+            # Download button for all payments
+            st.download_button(
+                label="⬇️ Download All Payments as CSV",
+                data=payment_df.to_csv(index=False),
+                file_name="all_payments.csv",
+                 mime="text/csv")
+            
         else:
             st.error("❌ No data found!")# 
 
@@ -1242,21 +1329,29 @@ def update_payment(expense_id, payment_amount,user_id):
 
 
 with tab3:
-    st.header("Record a New Expense")
+    col13,col14=st.columns([3,1])
+    with col13:
+        st.title("Record a New Expense")
+    with col14:
+        if st.button("🔄 Refresh", use_container_width=True,key='Expenses_refersh_333'):
+            st.cache_data.clear()
+            st.rerun()
 
-    
-    employee_name=st.text_input("user",value= user_name, disabled=True,key="expense_name_input")
+    col15,col16=st.columns(2)
+    with col15:
+        employee_name=st.text_input("user",value= user_name, disabled=True,key="expense_name_input")
 
-    employee_id=st.text_input("user",value= user_id, disabled=True)
+        employee_id=st.text_input("user",value= user_id, disabled=True)
 
-    expense_date = st.date_input("Expense Date", value=date.today(), key="exp_date")
-    vendor_name = st.text_input("Vendor Name")
-    total_exp_amount = st.number_input("Total Amount", min_value=0.0, key="amt2")
-    exp_payment_method = st.selectbox("Payment Method", ["cash", "card", "transfer"], key="pm2")
-    exp_payment_status = st.selectbox("Payment Status", ["paid", "credit", "partial"], key="ps2")
-    exp_due_date = st.date_input("Due Date", value=date.today(), key="dd2") if exp_payment_status != "paid" else None
-    exp_invoice_number = st.text_input("Invoice Number (optional)", key="inv2")
-    exp_notes = st.text_area("Notes", key="note2")
+        expense_date = st.date_input("Expense Date", value=date.today(), key="exp_date")
+        vendor_name = st.text_input("Vendor Name")
+        total_exp_amount = st.number_input("Total Amount", min_value=0.0, key="amt2")
+    with col16:
+        exp_payment_method = st.selectbox("Payment Method", ["cash", "card", "transfer"], key="pm2")
+        exp_payment_status = st.selectbox("Payment Status", ["paid", "credit", "partial"], key="ps2")
+        exp_due_date = st.date_input("Due Date", value=date.today(), key="dd2") if exp_payment_status != "paid" else None
+        exp_invoice_number = st.text_input("Invoice Number (optional)", key="inv2")
+        exp_notes = st.text_area("Notes", key="note2")
 
     # Show amount paid only for credit or partial payments
     amount_paid = None
@@ -1314,7 +1409,8 @@ with tab3:
             "invoice_number": exp_invoice_number,
             "invoice_file_url": exp_invoice_file_url,
             "notes": exp_notes,
-            "amount_paid": amount_paid if amount_paid is not None else total_exp_amount  # Full if "paid"
+            "amount_paid": amount_paid if amount_paid is not None else total_exp_amount,  # Full if "paid"
+            "amount_balance":remaining_balance 
         }
         supabase.table("expenses_master").insert(exp_data).execute()
         st.success("✅ Expense recorded successfully!")
@@ -1327,17 +1423,24 @@ with tab3:
     st.markdown("___")
     df_expenses = fetch_expenses_master_data(user_id)
     with st.expander('View Expenses table'):
-        if df_expenses is not None:
+        if df_expenses is not None and not df_expenses.empty:
             st.write('expenses table')
-            st.dataframe(df_expenses)  # Display the DataFrame in Streamlit
+            st.dataframe(df_expenses.tail(10))
+            st.download_button(
+                label="⬇️ Download Expenses Data as CSV",
+                data=df_expenses.to_csv(index=False),
+                file_name="expenses_data.csv",
+                mime="text/csv")  # Display the DataFrame in Streamlit
         else:
-            st.write("Error fetching data from the database.")
+            st.info("No recorded expenses found.")
 
 
 
    
 with tab4:
-    st.header("🗑️ Delete Sale or Expense Record by table ID")
+    
+    st.markdown(
+    "<h1 style='color: red;'>🗑️ Delete Sale or Expense Record by table ID</h1>", unsafe_allow_html=True)
     
     if "role" not in st.session_state or st.session_state.role != "md":
         st.warning("🚫 You are not authorized to view this page.")
@@ -1476,7 +1579,7 @@ with tab5:
         # Let users pick any date, defaulting to 30 days ago and today
         col1, col2 = st.columns(2)
         with col1:
-            start_date = st.date_input("Start Date", value=default_start)
+            start_date = st.date_input("Select Start Date", value=default_start)
         with col2:
             end_date = st.date_input("End Date", value=default_end)
 
@@ -1513,6 +1616,7 @@ with tab5:
         expenses_credit = (filtered_expenses["total_amount"] - filtered_expenses["amount_paid"]).sum()
 
         profit = total_paid - expenses_paid
+        st.markdown("___")
 
         col1, col2, col3 = st.columns(3)
         col1.metric("💰 Total Sales", f"₦{total_sales:,.2f}")
@@ -1526,6 +1630,7 @@ with tab5:
 
         st.metric("📈 Estimated Profit", f"₦{profit:,.2f}")
 
+        st.markdown("___")
          # --- Payment Method Breakdown ---
         if "payment_method" in filtered_sales.columns:
             # Filter for only Card, Transfer, Cash methods
@@ -1566,7 +1671,7 @@ with tab5:
             if "payment_method" in filtered_sales.columns and not filtered_sales.empty:
                 fig2 = px.pie(filtered_sales, names="payment_method", title="Payment Method")
                 st.plotly_chart(fig2, use_container_width=True)
-
+        st.markdown("___")
         # --- Line Chart: Sales Over Time ---
         st.markdown("### ⏱️ Sales Over Time")
         if not filtered_sales.empty:
@@ -1598,15 +1703,16 @@ with tab5:
             st.info("ℹ️ Not enough data points to determine a trend.")
 
         # --- Top Products ---
-        st.markdown("### 🏆 Top Selling Products")
+        st.markdown("___")
+        st.markdown("### 🏆 Top 10 Selling Products")
         if "item_name" in filtered_sales.columns and not filtered_sales.empty:
             top_products = filtered_sales.groupby("item_name").agg(
                 Quantity_Sold=("quantity", "sum"),
                 Total_Sales=("total_amount", "sum"),
                 Sales_Count=("item_name", "count")
             ).sort_values("Quantity_Sold", ascending=False).reset_index()
-            st.dataframe(top_products)
-            
+            st.dataframe(top_products.head(10))
+        st.markdown("___")    
         st.markdown("### Low Selling Products")
         if "item_name" in filtered_sales.columns:
             low_products = filtered_sales.groupby("item_name").agg(
@@ -1615,33 +1721,47 @@ with tab5:
         ).sort_values("Quantity_Sold").reset_index()
         st.dataframe(low_products.head(10))
 
-
+        st.markdown("___")
         # --- Top Customers ---
-        st.markdown("### 👤 Top Customers")
+        st.markdown("### 👤 Top 10 Customers")
         if "customer_name" in filtered_sales.columns and not filtered_sales.empty:
             top_customers = filtered_sales.groupby("customer_name").agg(
                 Total_Spent=("total_amount", "sum"),
                 Purchases=("customer_name", "count")
             ).sort_values("Total_Spent", ascending=False).reset_index()
-            st.dataframe(top_customers)
+            st.dataframe(top_customers.head(10))
 
         # --- Credit Sales ---
-        st.markdown("### 🧾 Credit Sales")
-        credit_sales = filtered_sales[filtered_sales["amount_paid"] < filtered_sales["total_amount"]]
-        st.dataframe(credit_sales)
+        st.markdown("___")
+        st.markdown("### 🧾 Top 10 Credit Sales")
+        credit_sales = filtered_sales[filtered_sales["amount_paid"] == 0]
+        st.dataframe(credit_sales.head(10))
 
         # --- Partial Payments ---
-        st.markdown("### ⚖️ Partial Payments")
+        st.markdown("___")
+        st.markdown("### ⚖️ Showing top 10 partial payment records")
         partial_sales = filtered_sales[
             (filtered_sales["amount_paid"] > 0) & (filtered_sales["amount_paid"] < filtered_sales["total_amount"])
         ]
-        st.dataframe(partial_sales)
+        st.dataframe(partial_sales.head(10))
 
-        # --- All Sales ---
-        st.markdown("### 📋 All Sales Records")
-        st.dataframe(filtered_sales.sort_values("sale_date", ascending=False).reset_index(drop=True))
-
+        
         # --- Unpaid Expenses ---
-        st.markdown("### 🧾 Unpaid Expenses")
+        st.markdown("___")
+        st.markdown("### 🧾 Showing Top 10 Unpaid Expenses")
         unpaid_expenses = filtered_expenses[filtered_expenses["amount_paid"] < filtered_expenses["total_amount"]]
-        st.dataframe(unpaid_expenses)
+        st.dataframe(unpaid_expenses.head(10))
+
+
+        st.markdown("### 📋 Showing Top 10 All Sales Records ")
+        # Convert DataFrame to CSV
+        filtered_sorted = filtered_sales.sort_values("sale_date", ascending=False).reset_index(drop=True)
+        st.dataframe(filtered_sorted.head(10))
+        csv = filtered_sorted.to_csv(index=False).encode('utf-8')
+
+        # Add download button
+        st.download_button(
+            label="⬇️ Download Sales Records as CSV",
+            data=csv,
+            file_name="sales_records.csv",
+            mime="text/csv")
