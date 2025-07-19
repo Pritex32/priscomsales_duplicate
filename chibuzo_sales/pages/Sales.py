@@ -492,22 +492,23 @@ payment_df=fetch_payment_history(user_id)
 # function to serach through all tables and get information
 def search_transactions(search_query, sales_df, expenses_df, restock_df, payment_df):
     search_query_lower = search_query.strip().lower()
+    def safe_filter(df):
+        if df is not None:
+            return df[df.apply(lambda row: row.astype(str).str.contains(search_query_lower).any(), axis=1)]
+        return pd.DataFrame()  # 
     
     # Filter Sales Data
-    filtered_sales = sales_df[sales_df.apply(lambda row: row.astype(str).str.contains(search_query_lower).any(), axis=1)]
-    
-    # Filter Expenses Data
-    filtered_expenses = expenses_df[expenses_df.apply(lambda row: row.astype(str).str.contains(search_query_lower).any(), axis=1)]
-    
-    # Filter Restock Data
-    filtered_restock = restock_df[restock_df.apply(lambda row: row.astype(str).str.contains(search_query_lower).any(), axis=1)]
-    
-    # Filter Payment Data
-    filtered_payment = payment_df[payment_df.apply(lambda row: row.astype(str).str.contains(search_query_lower).any(), axis=1)]
-    
+    # Apply to all DataFrames
+    filtered_sales = safe_filter(sales_df)
+    filtered_expenses = safe_filter(expenses_df)
+    filtered_restock = safe_filter(restock_df)
+    filtered_payment = safe_filter(payment_df)
     # Combine filtered data
-    combined_filtered_data = pd.concat([filtered_sales, filtered_expenses, filtered_restock, filtered_payment])
-    
+    combined_filtered_data = pd.concat(
+        [filtered_sales, filtered_expenses, filtered_restock, filtered_payment],
+        ignore_index=True
+    )
+      
     return combined_filtered_data
 
 
