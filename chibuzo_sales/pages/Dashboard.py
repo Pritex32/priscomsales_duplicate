@@ -773,7 +773,7 @@ elif choice == "Register":
                             st.rerun()          
                             
                         else:
-                            st.error(result)
+                            st.error("❌ Registration failed. Please try again. Make sure all details are correct and the email isn't already registered.")
                 else:
                     st.warning("⚠️ Please fill in all fields.")
 
@@ -864,7 +864,7 @@ elif choice == 'Delete Account':
                 st.rerun()
 
             else:
-                st.error(f"❌ Deletion failed: {delete_result.error}")
+                st.error("❌ Failed to delete the account. Please try again later.")
 
 
 
@@ -936,13 +936,14 @@ elif choice == 'Login':
                     # ✅ After successful login
                     if success:
                         display_name = st.session_state.get("username") or st.session_state.get("user", {}).get("email")
-
-                        if login_type == "MD":
-                            st.success(f"✅ Welcome {display_name} (MD)! Redirecting to Sales...")
-                        elif login_type == "Employee":
-                            employee_name = st.session_state.get("employee_user", {}).get("name")
-                        time.sleep(1)
-                        st.rerun()
+                        with st.spinner("🔄 Logging you in..."):
+                            if login_type == "MD":
+                                st.success(f"✅ Welcome {display_name} (MD)! Redirecting to Sales...")
+                            elif login_type == "Employee":
+                                employee_name = st.session_state.get("employee_user", {}).get("name")
+                                st.success(f"✅ Welcome {employee_name} (Employee)! Redirecting...")
+                            time.sleep(1.5)
+                            st.rerun()
                       
                         
 
