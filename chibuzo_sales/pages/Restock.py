@@ -794,6 +794,9 @@ with tab3:
                         supabase.table("goods_bought").delete()\
                             .eq("purchase_id", selected_restock["purchase_id"])\
                             .eq("purchase_date", selected_restock["purchase_date"]).eq("user_id", user_id).execute()
+                    supabase.table("payments").delete()\
+                         .eq("purchase_id", selected_restock["purchase_id"])\
+                         .eq("user_id", user_id).execute()
 
                     # 6. Optionally, update inventory if the record exists
                     item_id = selected_restock.get("item_id")
@@ -805,7 +808,7 @@ with tab3:
                             .select("supplied_quantity")\
                             .eq("item_id", item_id)\
                             .eq("user_id", user_id)\
-                            .single().execute().data
+                            .limit(1).execute().data
                         
                         if inventory_item:
                             # Deduct the added supply from inventory (since we are deleting the restock)
