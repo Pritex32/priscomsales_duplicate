@@ -188,9 +188,7 @@ def get_supabase_client():
         # st.write(e)
         st.stop()
     
-# Initialize Supabase client
-supabase = get_supabase_client() # use this to call the supabase database
- # Make sure to return the client
+
 
 # Initialize Supabase client
 supabase = get_supabase_client() # use this to call the supabase database
@@ -355,13 +353,12 @@ def register_user(username, email, email_confirmation,password_hash, role,plan):
                st.success("✅ MD was also registered as an employee.")
                
         except Exception as e:
-            st.warning(f"⚠️ Could not verify/create employee record: {e}")
+            st.warning(f"⚠️ Could not verify/create employee record.")
         return "✅ Registration successful! Kindly login."
     
          
     except Exception as e:
-        return f"Error: {str(e)}"
-
+        return "❌ Something went wrong. Please try again later."
 
 
 
@@ -429,7 +426,7 @@ def login_user(email, password):
 
         return None
     except Exception as e:
-        print(f"Login error: {e}")  # Add error logging
+        st.error("❌ Login failed. Please check your credentials or try again later.")
         return None
 
 
@@ -443,7 +440,7 @@ def fetch_subscription_data(user_id):
         response = supabase.table("subscription").select("*").eq("user_id", user_id).execute()
         return pd.DataFrame(response.data) if response.data else pd.DataFrame()
     except Exception as e:
-        st.error(f"Error fetching subscription data: {e}")
+        st.error(f"Error fetching subscription data.")
         return pd.DataFrame()
 
 
@@ -1006,7 +1003,7 @@ if st.session_state.get("logged_in") and st.session_state.get("role") == "md":
                             else:
                                 st.error("❌ Failed to create employee account.")
                     except Exception as e:
-                        st.error(f"⚠️ Error: {str(e)}")
+                        st.error("⚠️ Something went wrong while creating the employee account. Please try again later.")
 
 
 
