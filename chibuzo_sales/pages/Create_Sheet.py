@@ -248,8 +248,7 @@ def get_supabase_client():
         # st.write(e)
         st.stop()
     
-# Initialize Supabase client
-supabase = get_supabase_client() # use this to call the supabase database
+
 
 # Initialize Supabase client
 supabase = get_supabase_client() # use this to call the supabase database
@@ -272,7 +271,7 @@ def restore_subscription_info():
     except Exception as e:
         st.session_state.plan = "free"
         st.session_state.is_active = False
-        st.warning(f"⚠️ Could not fetch subscription info: {e}")
+        st.warning(f"⚠️ Could not fetch subscription info.")
 
 
 if "plan" not in st.session_state or "is_active" not in st.session_state:
@@ -298,7 +297,7 @@ def fetch_subscription_data(user_id):
         response = supabase.table("subscription").select("*").eq("user_id", user_id).execute()
         return pd.DataFrame(response.data) if response.data else pd.DataFrame()
     except Exception as e:
-        st.error(f"Error fetching subscription data: {e}")
+        st.error(f"Error fetching subscription data.")
         return pd.DataFrame()
 
 
@@ -374,7 +373,7 @@ def handle_subscription_expiration(user_id):
             st.warning("🔔 Your Pro subscription has expired. You've been downgraded to the Free Plan.")
 
     except Exception as e:
-        st.error(f"Subscription check failed: {e}")
+        st.error(f"Subscription check failed.")
 
 if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in"):
     block_if_subscription_expired()
