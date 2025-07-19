@@ -1032,9 +1032,9 @@ if "user_id" not in st.session_state or "user_email" not in st.session_state:
 user_id = st.session_state["user_id"]
 email = st.session_state["user_email"]
 
-if st.button("Upgrade to Pro (₦10000)"):
+if st.button("Upgrade to Pro (₦200)"):
     st.info('Upgrade to 1 month plan,you will have complete access to all your sales data.')
-    result = initialize_payment(email, 10000, user_id)
+    result = initialize_payment(email, 200, user_id)
     
     if result.get("status") and "data" in result:
         auth_url = result["data"].get("authorization_url")
@@ -1083,13 +1083,32 @@ st.session_state.is_active = True
 
 # transaction is saved on the subcription table
 def save_transaction(user_id, reference, amount, status):
-    supabase.table("subscription").insert({
-        "user_id": user_id,
-        "reference": reference,
-        "amount": amount,
-        "status": status
-    }).execute()
+    # Check if user already has a subscription
+    existing = supabase.table("subscription").select("id").eq("user_id", user_id).execute()
 
+    if existing.data:
+        # Update existing subscription record
+        supabase.table("subscription").update({
+            "reference": reference,
+            "amount": amount,
+            "status": status,
+            "plan": "pro",
+            "is_active": True,
+            "started_at": date.today().isoformat(),
+            "expires_at": (date.today() + timedelta(days=30)).isoformat()
+        }).eq("user_id", user_id).execute()
+    else:
+        # Insert new subscription record
+        supabase.table("subscription").insert({
+            "user_id": user_id,
+            "reference": reference,
+            "amount": amount,
+            "status": status,
+            "plan": "pro",
+            "is_active": True,
+            "started_at": date.today().isoformat(),
+            "expires_at": (date.today() + timedelta(days=30)).isoformat()
+        }).execute()
 
 # ✅ 3. Handle Paystack payment verification
 query_params = st.query_params
