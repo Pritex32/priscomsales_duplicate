@@ -1501,7 +1501,7 @@ with tab4:
                 quantity_sold = selected_sale.get("quantity")
 
                 if item_id and quantity_sold:
-                    inventory_item = supabase.table("inventory_master_log").select("stock_out").eq("item_id", item_id).eq("user_id", user_id).single().execute().data
+                    inventory_item = supabase.table("inventory_master_log").select("stock_out").eq("item_id", item_id).eq("user_id", user_id).limit(1).execute().data
                     if inventory_item:
                         current_quantity = inventory_item.get("stock_out", 0)
                         new_quantity = max(current_quantity - quantity_sold, 0)
@@ -1524,6 +1524,8 @@ with tab4:
         if st.button("🗑️ Delete This Expense Record"):
             try:
                 supabase.table("expenses_master").delete().eq("expense_id", selected_expense["expense_id"]).eq("user_id", user_id).execute()
+                 # ✅ Delete related payments for expense
+                supabase.table("payments").delete().eq("expense_id", selected_expense["expense_id"]).eq("user_id", user_id).execute()
                 st.success("✅ Expense record deleted successfully.")
                 st.rerun()
             except Exception as e:
