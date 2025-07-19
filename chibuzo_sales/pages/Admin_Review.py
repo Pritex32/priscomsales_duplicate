@@ -434,9 +434,9 @@ def upload_invoice(file, folder, filename,user_id):
             if error_info.get("statusCode") == 409:
                 st.error("⚠️ This invoice already exists. Please rename the file or upload a different one.")
             else:
-                st.error(f"❌ Failed to upload invoice: {error_info.get('message', str(e))}")
+                st.error("❌ Failed to upload invoice due to a system issue. Please try again later.")
         else:  # error_info is a string, just display it
-            st.error(f"❌ Failed to upload invoice: {error_info}")
+            st.error("❌ Failed to upload invoice due to a system issue. Please try again later."))
 
     return None
 
