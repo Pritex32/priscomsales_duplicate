@@ -1493,6 +1493,8 @@ with tab4:
                 # 2. Delete from sales_master_log
                 if sales_log_data:
                     supabase.table("sales_master_log").delete().eq("sale_id", selected_sale["sale_id"]).eq("user_id", user_id).execute()
+                # 3. Delete related payments
+                supabase.table("payments").delete().eq("sale_id", selected_sale["sale_id"]).eq("user_id", user_id).execute()
 
                 # 3. Update inventory: subtract the sold quantity from stock_out
                 item_id = selected_sale.get("item_id")
