@@ -1230,10 +1230,7 @@ with tab2:
                     new_amount_paid = amount_paid + partial_amount
                     new_status = "paid" if new_amount_paid >= total_amount else "partial"
                     new_outstanding = total_amount - new_amount_paid
-
-                    st.write("🧮 New Amount Paid:", new_amount_paid)
-                    st.write("📉 New Outstanding:", new_outstanding)
-                    st.write("🔄 New Status:", new_status)        
+                   
                 
                 # Insert payment record
                     insert_payment(
@@ -1245,7 +1242,7 @@ with tab2:
                         table_name = "sales_master_history"
                         id_column = "sale_id"
                         record_id = sale_id
-                        st.write("🧾 Transaction Type: Sale")
+                       
                     elif purchase_id:
                         table_name = "goods_bought_history"
                         id_column = "purchase_id"
