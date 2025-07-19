@@ -457,7 +457,7 @@ def fetch_sales_data(user_id, limit=10):
     if not sales_df.empty:
         return sales_df
     else:
-        print("No sales data found or an error occurred.")
+        st.info("No sales data found or an error occurred.")
         return pd.DataFrame()
 
 @st.cache_data(ttl=7200)
@@ -470,7 +470,7 @@ def fetch_expenses_master_data(user_id):
     if not expenses_df.empty:
         return expenses_df
     else:
-        print("No data found or an error occurred.")
+        st.info("No data found or an error occurred.")
 
 # Fetch and display the payment data
 @st.cache_data(ttl=7200) # cache data for 2 hrs
