@@ -464,7 +464,7 @@ def fetch_sales_data(user_id, limit=10):
     if not sales_df.empty:
         return sales_df
     else:
-        st.info("No sales data found or an error occurred.")
+        print("No sales data found or an error occurred.")
         return pd.DataFrame()
 
 @st.cache_data(ttl=7200)
@@ -477,7 +477,7 @@ def fetch_expenses_master_data(user_id):
     if not expenses_df.empty:
         return expenses_df
     else:
-        st.info("No data found or an error occurred.")
+        print("No data found or an error occurred.")
 
 # Fetch and display the payment data
 @st.cache_data(ttl=7200) # cache data for 2 hrs
@@ -1117,26 +1117,18 @@ with tab2:
             st.cache_data.clear()
             st.rerun()
     # Pagination setup
-    transactions = get_pending_transactions(user_id)
+     transactions = get_pending_transactions(user_id)
     per_page = 5
     total = len(transactions)
     total_pages = (total + per_page - 1) // per_page
-    if total_pages > 0:
-        page = st.number_input("📄 Page", min_value=1, max_value=total_pages, step=1)
+    page = st.number_input("📄 Page", min_value=1, max_value=total_pages, step=1)
 
-        # Paginate the list
-        start = (page - 1) * per_page
-        end = start + per_page
-        paginated_transactions = transactions[start:end]
-    else:
-        st.info("No pending transactions to display.")
+    # Paginate the list
+    start = (page - 1) * per_page
+    end = start + per_page
+    paginated_transactions = transactions[start:end]
 
-   
-    
-
-    
-  
-   
+     
     for tx in paginated_transactions:
         
         # Identify transaction type
