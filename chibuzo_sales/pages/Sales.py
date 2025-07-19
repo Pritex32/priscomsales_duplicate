@@ -1117,153 +1117,160 @@ with tab2:
             st.cache_data.clear()
             st.rerun()
     # Pagination setup
-     transactions = get_pending_transactions(user_id)
+    transactions = get_pending_transactions(user_id)
     per_page = 5
     total = len(transactions)
-    total_pages = (total + per_page - 1) // per_page
-    page = st.number_input("📄 Page", min_value=1, max_value=total_pages, step=1)
+    if total == 0:
+        st.info("ℹ️ No pending transactions found.")
+    else:
+        total_pages = max(1, (total + per_page - 1) // per_page)  # Ensure at least 1 page
+        page = st.number_input("📄 Page", min_value=1, max_value=total_pages, step=1)
 
-    # Paginate the list
-    start = (page - 1) * per_page
-    end = start + per_page
-    paginated_transactions = transactions[start:end]
-
-     
-    for tx in paginated_transactions:
-        
-        # Identify transaction type
-        sale_id = tx.get('sale_id')
-        purchase_id = tx.get('purchase_id')
-        expense_id = tx.get('expense_id')
+    # Safely paginate
+        start = (page - 1) * per_page
+        end = min(start + per_page, total)
+        paginated_transactions = transactions[start:end]
+        if not paginated_transactions:
+            st.warning("⚠️ No transactions on this page.")
+        else:  
+            for tx in paginated_transactions:      
+                 # Identify transaction type
+                sale_id = tx.get('sale_id')
+                purchase_id = tx.get('purchase_id')
+                expense_id = tx.get('expense_id')
 
         # Get transaction date from the correct table
-        transaction_date = (
-            tx.get('sale_date') or 
-            tx.get('purchase_date') or 
-            tx.get('expense_date') or 
-            tx.get('restock_date') or 
-            'unknown'
-        )
+                transaction_date = (
+                   tx.get('sale_date') or 
+                   tx.get('purchase_date') or 
+                   tx.get('expense_date') or 
+                   tx.get('restock_date') or 
+                   'unknown' )
         
         # Get names
-        customer_name = tx.get('customer_name', 'Unknown Customer')
-        supplier_name = tx.get('supplier_name', 'Unknown Supplier')
-        expense_name = tx.get('vendor_name', 'Unknown Expense')
+                customer_name = tx.get('customer_name', 'Unknown Customer')
+                supplier_name = tx.get('supplier_name', 'Unknown Supplier')
+                expense_name = tx.get('vendor_name', 'Unknown Expense')
 
         # Get amounts
-        total_amount = tx.get('total_amount') or 0.0
-        amount_paid = tx.get('amount_paid') or 0.0
+                total_amount = tx.get('total_amount') or 0.0
+                amount_paid = tx.get('amount_paid') or 0.0
 
-        total_amount = (
-            tx.get('total_cost') or  # restock: total cost (total amount)
-            tx.get('total_amount') or  # sales: total amount
-            tx.get('total_amount') or  # expenses: total amount
-             0.0)
+                total_amount = (
+                    tx.get('total_cost') or  # restock: total cost (total amount)
+                    tx.get('total_amount') or  # sales: total amount
+                    tx.get('total_amount') or  # expenses: total amount
+                    0.0)
         
-        amount_paid = (
-              tx.get('total_price_paid') or  # restock: total price paid (amount paid)
-              tx.get('amount_paid') or  # sales: amount paid
-              tx.get('amount_paid') or  # expenses: amount paid
-              0.0)
+                amount_paid = (
+                    tx.get('total_price_paid') or  # restock: total price paid (amount paid)
+                    tx.get('amount_paid') or  # sales: amount paid
+                    tx.get('amount_paid') or  # expenses: amount paid
+                     0.0)
         
-        # Calculate outstanding amount safely
-        total_amount = float(total_amount)
-        amount_paid = float(amount_paid)
-        outstanding_amount = total_amount - amount_paid
+                # Calculate outstanding amount safely
+                total_amount = float(total_amount)
+                amount_paid = float(amount_paid)
+                outstanding_amount = total_amount - amount_paid
 
         
 
-        # Get status, payment method, due date
-        payment_status = tx.get('payment_status', 'unknown')
-        payment_method = tx.get('payment_method', 'unknown')
-        due_date = tx.get('due_date', 'unknown')
+                # Get status, payment method, due date
+                payment_status = tx.get('payment_status', 'unknown')
+                payment_method = tx.get('payment_method', 'unknown')
+                due_date = tx.get('due_date', 'unknown')
 
-        st.write("---")
-        if sale_id:
-            st.write(f"**Type:** Sale")
-            st.write(f"**Customer:** {customer_name}")
-        elif purchase_id:
-            st.write(f"**Type:** Purchase")
-            st.write(f"**Supplier:** {supplier_name}")
-        elif expense_id:
-            st.write(f"**Type:** Expense")
-            st.write(f"**Expense Item:** {expense_name}")
+                st.write("---")
+                if sale_id:
+                    st.write(f"**Type:** Sale")
+                    st.write(f"**Customer:** {customer_name}")
+                elif purchase_id:
+                    st.write(f"**Type:** Purchase")
+                    st.write(f"**Supplier:** {supplier_name}")
+                elif expense_id:
+                    st.write(f"**Type:** Expense")
+                    st.write(f"**Expense Item:** {expense_name}")
 
-        st.write(f"**Total Amount:** ₦{total_amount}")
-        st.write(f"**Amount Paid:** ₦{amount_paid}")
-        st.write(f"**Outstanding Amount:** ₦{outstanding_amount}")
-        st.write(f"**Payment Status:** {payment_status}")
-        st.write(f"**Payment Method:** {payment_method}")
-        st.write(f"**Due Date:** {due_date}")
-        st.write(f"**Transaction Date:** {transaction_date}")
+                st.write(f"**Total Amount:** ₦{total_amount}")
+                st.write(f"**Amount Paid:** ₦{amount_paid}")
+                st.write(f"**Outstanding Amount:** ₦{outstanding_amount}")
+                st.write(f"**Payment Status:** {payment_status}")
+                st.write(f"**Payment Method:** {payment_method}")
+                st.write(f"**Due Date:** {due_date}")
+                st.write(f"**Transaction Date:** {transaction_date}")
 
-        # Make sure outstanding transactions (partial or credit) can be updated
-        if payment_status in ['partial', 'credit']:
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                update_type = st.radio(
+                # Make sure outstanding transactions (partial or credit) can be updated
+                if payment_status in ['partial', 'credit']: 
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        update_type = st.radio(
                     f"Select update type",
                     ["Partial Payment", "Fully Paid"],
                     key=f"update_type_{sale_id or purchase_id or expense_id}"
                 )
-            with col2:
-                if update_type == "Partial Payment":
-                    if outstanding_amount > 0:
-                        partial_amount = st.number_input(
-                           f"Amount paying now (₦)",
-                           min_value=0.0,
-                           max_value=outstanding_amount,
-                           key=f"partial_amount_{update_type}_{sale_id or purchase_id or expense_id}")
-                    else:
-                        st.warning("❗ Outstanding amount is zero or negative. Cannot accept partial payment.")
-                        partial_amount = 0.0
-                else:
-                    partial_amount = outstanding_amount
-            btn_key = f"update_btn_{update_type}_{sale_id or purchase_id or expense_id or 'fallback_180'}"
+                    with col2:
+                        if update_type == "Partial Payment":
+                            if outstanding_amount > 0:
+                                partial_amount = st.number_input(
+                                    f"Amount paying now (₦)",
+                                    min_value=0.0,
+                                    max_value=outstanding_amount,
+                                    key=f"partial_amount_{update_type}_{sale_id or purchase_id or expense_id}")
+                            else:
+                                st.warning("❗ Outstanding amount is zero or negative. Cannot accept partial payment.")
+                                partial_amount = 0.0
+                        else:
+                            partial_amount = outstanding_amount
+                    btn_key = f"update_btn_{update_type}_{sale_id or purchase_id or expense_id or 'fallback_180'}"
 
-            if st.button(f"💰 Update Payment",key=btn_key ):
-                if partial_amount is None or partial_amount <= 0:
-                    st.warning("Please enter a valid payment amount.")
-                else:
-                    new_amount_paid = amount_paid + partial_amount
-                    new_status = "paid" if new_amount_paid >= total_amount else "partial"
-                    new_outstanding = total_amount - new_amount_paid
-                   
+                    if st.button(f"💰 Update Payment",key=btn_key ):
+                        if partial_amount is None or partial_amount <= 0:
+                            st.warning("Please enter a valid payment amount.")
+                        else:
+                            new_amount_paid = amount_paid + partial_amount
+                            new_status = "paid" if new_amount_paid >= total_amount else "partial"
+                            new_outstanding = total_amount - new_amount_paid
+
+                            st.write("🧮 New Amount Paid:", new_amount_paid)
+                            st.write("📉 New Outstanding:", new_outstanding)
+                            st.write("🔄 New Status:", new_status)        
                 
-                # Insert payment record
-                    insert_payment(
-                        user_id, sale_id, purchase_id, partial_amount, 
-                        payment_method, f"{update_type} via dashboard", transaction_date )
-                    update_related_tables(user_id, sale_id, purchase_id, new_amount_paid, new_status, outstanding_amount,expense_id)
+                            # Insert payment record
+                            insert_payment(
+                                user_id, sale_id, purchase_id, partial_amount, 
+                                payment_method, f"{update_type} via dashboard", transaction_date )
+                            update_related_tables(user_id, sale_id, purchase_id, new_amount_paid, new_status, outstanding_amount,expense_id)
                     
-                    if sale_id:
-                        table_name = "sales_master_history"
-                        id_column = "sale_id"
-                        record_id = sale_id
-                       
-                    elif purchase_id:
-                        table_name = "goods_bought_history"
-                        id_column = "purchase_id"
-                        record_id = purchase_id
-                    elif expense_id:
-                        table_name = "expenses_master"
-                        id_column = "expense_id"
-                        record_id = expense_id
-                    else:
-                        st.error("❌ No valid transaction ID found.")
-                        st.stop()
-                    if table_name:
-                        new_status = update_payment_status(table_name, id_column, record_id, user_id)
+                            if sale_id:
+                                table_name = "sales_master_history"
+                                id_column = "sale_id"
+                                record_id = sale_id
+
+                            elif purchase_id:
+                                table_name = "goods_bought_history"
+                                id_column = "purchase_id"
+                                record_id = purchase_id
+                            elif expense_id:
+                                table_name = "expenses_master"
+                                id_column = "expense_id"
+                                record_id = expense_id
+                            else:
+                                st.error("❌ No valid transaction ID found.")
+                                st.stop()
+                            if table_name:
+                                new_status = update_payment_status(table_name, id_column, record_id, user_id)
               
-                    # Recalculate total paid
+                            # Recalculate total paid
                     
-                    update_related_tables(user_id, sale_id, purchase_id, new_amount_paid, new_status, new_outstanding,expense_id)
-             
-                    st.success(f"✅ Payment updated! New status: **{new_status.upper()}**")
-                # 💥 REFRESH transactions from the database
-                    transactions = get_pending_transactions(user_id)
-                    st.rerun()
+                            update_related_tables(user_id, sale_id, purchase_id, new_amount_paid, new_status, new_outstanding,expense_id)
+                
+                            st.success(f"✅ Payment updated! New status: **{new_status.upper()}**")
+                             # 💥 REFRESH transactions from the database
+                            transactions = get_pending_transactions(user_id)
+                            st.rerun()
+
+
+
 
 
 
