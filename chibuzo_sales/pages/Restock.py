@@ -718,7 +718,7 @@ with tab2:
     df = fetch_goods_bought(user_id)
     df2=fetch_goods_bought_history(user_id)
      
-# Display the DataFrame in Streamlit
+    # Display the DataFrame in Streamlit
     if not df.empty:
         st.write('Temporary data',df)
     else:
