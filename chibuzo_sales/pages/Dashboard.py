@@ -1109,9 +1109,7 @@ if reference:
         save_transaction(user_id, reference, amount, status)
         
         st.success("🎉 Payment successful! Your Pro subscription is now active.")
-        
-        st.write("User ID extracted:", user_id)
-        st.write("Full reference:", reference)
+                
     else:
         st.error("❌ Payment failed or could not be verified.")
 else:
