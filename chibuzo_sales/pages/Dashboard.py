@@ -773,7 +773,7 @@ elif choice == "Register":
                             st.rerun()          
                             
                         else:
-                            st.error("❌ Registration failed. Please try again. Make sure all details are correct and the email isn't already registered.")
+                            st.error(result)
                 else:
                     st.warning("⚠️ Please fill in all fields.")
 
