@@ -798,7 +798,7 @@ with tab1:
                 st.rerun()
 
             except Exception as e:
-                st.error(f"❌ Failed to update sales record with payment.")
+                st.error(f"❌ Failed to update sales record with payment: {e}")
 # ...existing code...
 
 
