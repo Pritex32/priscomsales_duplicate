@@ -630,7 +630,7 @@ with tab1:
                 extension = os.path.splitext(invoice_file.name)[1]
                 # Use user-entered name, or fallback if blank
                 # Prepare fallback item name
-                fallback_item_name = item_name.strip().replace(" ", "_") if item_name and item_name != "Select an item" else "no_item"
+                fallback_item_name = "_".join([i.strip().replace(" ", "_") for i in selected_items]) if selected_items else "no_item"
                 # Build default filename if invoice_name is empty
                 default_name = f"invoice_{user_id}_{fallback_item_name}_{sale_date}"
                 final_invoice_name = invoice_name.strip() or default_name
