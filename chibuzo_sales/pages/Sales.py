@@ -705,7 +705,7 @@ with tab1:
             "sale_date": str(sale_date),
             "customer_name": customer_name,
             'customer_phone': customer_phone if customer_phone else None,
-            "items": item_data,  # Save all items as a list
+            "item_name": item_data,  # Save all items as a list
             "grand_total": grand_total,
             "amount_paid": amount_paid,
             "amount_balance": amount_balance,
