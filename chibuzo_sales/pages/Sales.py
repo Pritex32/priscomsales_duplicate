@@ -554,19 +554,19 @@ if "invoice_uploaded" not in st.session_state:
 if "invoice_file_url" not in st.session_state:
     st.session_state["invoice_file_url"] = None
 
-with tab1:     
-    col7,col9=st.columns([3,1])
+with tab1:
+    col7, col9 = st.columns([3, 1])
     with col7:
         st.header("🛒 Record a New Sale")
     with col9:
         if st.button("🔄 Refresh Data"):
             st.cache_data.clear()  # ✅ Clear cached data
-            st.rerun() 
-    
-    col18,col19=st.columns(2)
+            st.rerun()
+
+    col18, col19 = st.columns(2)
     with col18:
-        employee_name=st.text_input("Employee name",value= user_name, disabled=True,key="employee_name_input")
-        employee_id=st.text_input("Employee id",value= employee_id, disabled=True,key="employee_name_input_2")
+        employee_name = st.text_input("Employee name", value=user_name, disabled=True, key="employee_name_input")
+        employee_id = st.text_input("Employee id", value=employee_id, disabled=True, key="employee_name_input_2")
         # Item selection with default placeholder
         item_dict = fetch_inventory_items(user_id)
         item_options = ["Select an item"] + list(item_dict.keys())
@@ -612,7 +612,7 @@ with tab1:
         invoice_file_url = None
         invoice_file = st.file_uploader("Upload Invoice (PDF/Image)", type=["pdf", "jpg", "jpeg", "png"], key="invoice_upload")
         invoice_name = st.text_input("Enter desired invoice name (without extension)", value=f"invoice_{employee_id}_{date.today().isoformat()}", key='sale_key_invoice')
-   
+
     # Partial payment
     partial_payment_amount = None
     partial_payment_date = None
@@ -634,7 +634,7 @@ with tab1:
                 # Build default filename if invoice_name is empty
                 default_name = f"invoice_{user_id}_{fallback_item_name}_{sale_date}"
                 final_invoice_name = invoice_name.strip() or default_name
-               
+
                 # Sanitize to remove invalid characters
                 final_invoice_name = re.sub(r'[^a-zA-Z0-9_\-]', '_', final_invoice_name)
                 unique_id = str(uuid.uuid4())[:8]
@@ -657,7 +657,7 @@ with tab1:
                 st.download_button("📥 Download PDF for Preview", invoice_file, file_name=invoice_file.name)
                 st.info("👆 Click the button above to preview the PDF file.")
 
-     # Optional re-upload
+    # Optional re-upload
     if st.session_state.get("invoice_uploaded"):
         if st.button("🔁 Re-upload Invoice"):
             st.session_state["invoice_uploaded"] = False
@@ -672,12 +672,11 @@ with tab1:
         if not st.session_state.get("invoice_uploaded"):
             st.error("❌ Please upload an invoice before saving the sale.")
             st.stop()
-        invoice_file_url = st.session_state.get("invoice_file_url")      
+        invoice_file_url = st.session_state.get("invoice_file_url")
         if not selected_items:
             st.error("❌ Please select a valid item before saving.")
             st.stop()
-              
-                 
+
         amount_paid = 0.0
         amount_balance = total_amount
 
@@ -698,7 +697,6 @@ with tab1:
         if invoice_file is None:
             st.error("❌ Please upload an invoice or proof of payment before saving.")
             st.stop()
-        
 
         for item in item_data:
             sale_data = {
@@ -717,16 +715,17 @@ with tab1:
                 "amount_balance": amount_balance,
                 "payment_method": payment_method,
                 "payment_status": payment_status,
-                 "due_date": str(due_date) if due_date else None,
+                "due_date": str(due_date) if due_date else None,
                 "invoice_number": invoice_number,
                 "invoice_file_url": invoice_file_url,
-                "notes": notes,}
+                "notes": notes,
+            }
 
             try:
                 result = supabase.table("sales_master_log").insert(sale_data).execute()
                 new_sale_id = result.data[0]["sale_id"]
                 st.success(f"✅ Sale of '{item['item_name']}' recorded successfully!")
-            
+
                 # Insert payment record if paid or partial
                 if payment_status in ["paid", "partial", "credit"]:
                     st.subheader("💳 Recording Payment...")
@@ -744,20 +743,21 @@ with tab1:
                     pay_amount = 0
                     pay_date = date.today()
                     pay_note = "Credit sale"
-        
-                 # Prepare payment record with reference to sales_master_log
+
+                # Prepare payment record with reference to sales_master_log
                 payment_data = {
-                "sale_log_id": new_sale_id,  # FK to sales_master_log
-                "payment_date": str(pay_date),
-                "amount": pay_amount,
-                "payment_method": payment_method if payment_status != "credit" else "none",
-                "notes": pay_note    }
+                    "sale_log_id": new_sale_id,  # FK to sales_master_log
+                    "payment_date": str(pay_date),
+                    "amount": pay_amount,
+                    "payment_method": payment_method if payment_status != "credit" else "none",
+                    "notes": pay_note
+                }
 
                 # Insert payment record once
                 payment_result = supabase.table("payments").insert(payment_data).execute()
                 payment_id = payment_result.data[0]["payment_id"]
                 st.success(f"💸 Payment recorded successfully.")
-            
+
                 # Update sale record with payment info and status
                 update_data = {"payment_id": payment_id}
 
@@ -771,7 +771,7 @@ with tab1:
                     update_data["amount_paid"] = 0
                     update_data["payment_status"] = "credit"
                     st.success("📝 Credit sale recorded without payment.")
-             
+
                 supabase.table("sales_master_log").update(update_data).eq("sale_id", new_sale_id).execute()
                 # ✅ Clear form values before rerun
                 for key in [
@@ -796,12 +796,10 @@ with tab1:
                         del st.session_state[key]
 
                 st.rerun()
-            
+
             except Exception as e:
-                  st.error(f"❌ Failed to update sales record with payment.")
-
-   
-
+                st.error(f"❌ Failed to update sales record with payment.")
+# ...existing code...
 
 
 # to get the user name of the owner and then use it to customize the receipt
