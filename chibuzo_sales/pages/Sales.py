@@ -700,28 +700,27 @@ with tab1:
             st.stop()
         
 
-
-        sale_data = {
-            "employee_id": employee_id,
-            "employee_name": employee_name,
-            "user_id": user_id,
-            "sale_date": str(sale_date),
-            "customer_name": customer_name,
-            'customer_phone': customer_phone if customer_phone else None,
-            "item_id": item["item_id"],
-            "item_name": item["item_name"],
-            "quantity": item["quantity"],
-            "unit_price": item["unit_price"],
-            "total": item["total"],
-            "amount_paid": amount_paid,
-            "amount_balance": amount_balance,
-            "payment_method": payment_method,
-            "payment_status": payment_status,
-            "due_date": str(due_date) if due_date else None,
-            "invoice_number": invoice_number,
-            "invoice_file_url": invoice_file_url,
-            "notes": notes,
-        }
+        for item in item_data:
+            sale_data = {
+                "employee_id": employee_id,
+                "employee_name": employee_name,
+                "user_id": user_id,
+                "sale_date": str(sale_date),
+                "customer_name": customer_name,
+                'customer_phone': customer_phone if customer_phone else None,
+                "item_id": item["item_id"],
+                "item_name": item["item_name"],
+                "quantity": item["quantity"],
+                "unit_price": item["unit_price"],
+                "total": item["total"],
+                "amount_paid": amount_paid,
+                "amount_balance": amount_balance,
+                "payment_method": payment_method,
+                "payment_status": payment_status,
+                 "due_date": str(due_date) if due_date else None,
+                "invoice_number": invoice_number,
+                "invoice_file_url": invoice_file_url,
+                "notes": notes,}
 
         try:
             result = supabase.table("sales_master_log").insert(sale_data).execute()
