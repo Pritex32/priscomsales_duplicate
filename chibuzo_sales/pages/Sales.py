@@ -599,6 +599,7 @@ with tab1:
                 "total_amount": total_amount
             })
             grand_total += total_amount
+            
 
         st.success(f"🧾 Grand Total: ₦{grand_total:,.2f}")
         sale_date = st.date_input("Sale Date", value=date.today(), key="sale_date")
@@ -674,6 +675,7 @@ with tab1:
             st.error("❌ Please upload an invoice before saving the sale.")
             st.stop()
         invoice_file_url = st.session_state.get("invoice_file_url")
+        
         if not valid_selected_items:
             st.error("❌ Please select a valid item before saving.")
             st.stop()
@@ -711,8 +713,9 @@ with tab1:
                 "item_name": item["item_name"],
                 "quantity": item["quantity"],
                 "unit_price": item["unit_price"],
+                "grand_total": grand_total,
                 "total_amount": item["total_amount"],
-                "amount_paid": amount_paid,
+                "amount_paid": 0.0,
                 "amount_balance": amount_balance,
                 "payment_method": payment_method,
                 "payment_status": payment_status,
@@ -725,7 +728,10 @@ with tab1:
             try:
                 result = supabase.table("sales_master_log").insert(sale_data).execute()
                 new_sale_id = result.data[0]["sale_id"]
+                sale_ids.append((new_sale_id, item["total_amount"]))
                 st.success(f"✅ Sale of '{item['item_name']}' recorded successfully!")
+            except Exception as e:
+                st.error(f"❌ Failed to insert sale for item '{item['item_name']}': {e}")
 
                 # Insert payment record if paid or partial
                 if payment_status in ["paid", "partial", "credit"]:
@@ -733,26 +739,25 @@ with tab1:
 
                 # Determine payment data based on status
                 if payment_status == "paid":
-                    pay_amount = grand_total
+                    pay_amount = item["total_amount"]   
                     pay_date = date.today()
                     pay_note = ""
                 elif payment_status == "partial":
-                    pay_amount = partial_payment_amount
+                    pay_amount = round((partial_payment_amount * item["total_amount"]) / grand_total, 2)
                     pay_date = partial_payment_date
                     pay_note = partial_payment_note
                 else:  # credit
-                    pay_amount = 0
+                    pay_amount = 0.0
                     pay_date = date.today()
                     pay_note = "Credit sale"
 
                 # Prepare payment record with reference to sales_master_log
                 payment_data = {
-                    "sale_log_id": new_sale_id,  # FK to sales_master_log
+                    "sale_log_id": sale_ids[0][0],  # just the first sale_id
                     "payment_date": str(pay_date),
-                    "amount": pay_amount / len(item_data),
+                    "amount": pay_amount,
                     "payment_method": payment_method if payment_status != "credit" else "none",
-                    "notes": pay_note
-                }
+                    "notes": pay_note}
 
                 # Insert payment record once
                 payment_result = supabase.table("payments").insert(payment_data).execute()
@@ -760,12 +765,13 @@ with tab1:
                 st.success(f"💸 Payment recorded successfully.")
 
                 # Update sale record with payment info and status
+                # Update sale with correct payment info
                 update_data = {
-                      "payment_id": payment_id,
-                      "payment_status": payment_status,
-                      "amount_paid": pay_amount / len(item_data),
-                       "amount_balance": item["total_amount"] - (pay_amount / len(item_data))}
-
+                 "payment_id": payment_id,
+                 "payment_status": status,
+                 "amount_paid": amount_paid if amount_paid is not None else 0.0,
+                 "amount_balance": amount_balance}
+                      
                 if payment_status == "paid" or amount_balance == 0.0:
                     update_data["payment_status"] = "paid"
                     st.success("✅ Sale status updated to PAID.")
