@@ -570,17 +570,34 @@ with tab1:
         # Item selection with default placeholder
         item_dict = fetch_inventory_items(user_id)
         item_options = ["Select an item"] + list(item_dict.keys())
-        item_name = st.selectbox("Select Item", item_options, key="item_selectbox")
-        item_id = item_dict.get(item_name, None)
-        # Quantity input
-        quantity = st.number_input("Quantity Sold", min_value=1, step=1, key="quantity")
-        # Unit price input
-        unit_price = st.number_input("Unit Price", min_value=0.0, step=0.01, key="unit_price")
+        selected_items = st.multiselect("Select Item(s)", item_options, key="item_multiselect")
 
-        # Auto-calculate total amount
-        total_amount = quantity * unit_price
-        st.info(f"💰 Total Amount: ₦{total_amount:,.2f}")
-        # Sale info
+        item_data = []
+        grand_total = 0.0
+
+        for item in selected_items:
+            item_id = item_dict[item]
+            safe_key = re.sub(r'\W+', '_', item)  # For unique keys
+
+            col_a, col_b = st.columns(2)
+            with col_a:
+                quantity = st.number_input(f"Quantity Sold for '{item}'", min_value=1, step=1, key=f"qty_{safe_key}")
+            with col_b:
+                unit_price = st.number_input(f"Unit Price for '{item}'", min_value=0.0, step=0.01, key=f"price_{safe_key}")
+
+            total_amount = quantity * unit_price
+            st.info(f"💰 Total for '{item}': ₦{total_amount:,.2f}")
+
+            item_data.append({
+                "item_name": item,
+                "item_id": item_id,
+                "quantity": quantity,
+                "unit_price": unit_price,
+                "total": total_amount
+            })
+            grand_total += total_amount
+
+        st.success(f"🧾 Grand Total: ₦{grand_total:,.2f}")
         sale_date = st.date_input("Sale Date", value=date.today(), key="sale_date")
         customer_name = st.text_input("Customer Name", key="customer_name")
         customer_phone = st.text_input("Customer Phone Number", key="customer_phone")
@@ -691,11 +708,11 @@ with tab1:
             "sale_date": str(sale_date),
             "customer_name": customer_name,
             'customer_phone': customer_phone if customer_phone else None,
-            "item_id": item_id,
-            "item_name": item_name,
-            "quantity": quantity,
-            "unit_price": unit_price,
-            "total_amount": total_amount,
+            "item_id": item["item_id"],
+            "item_name": item["item_name"],
+            "quantity": item["quantity"],
+            "unit_price": item["unit_price"],
+            "total": item["total"],
             "amount_paid": amount_paid,
             "amount_balance": amount_balance,
             "payment_method": payment_method,
@@ -1365,10 +1382,16 @@ with tab3:
 
     # Show amount paid only for credit or partial payments
     amount_paid = None
+    remaining_balance = 0.0  # default no balance
+
     if exp_payment_status in ["credit", "partial"]:
         amount_paid = st.number_input("Amount Paid", min_value=0.0, max_value=total_exp_amount, key="amt_paid")
         remaining_balance = total_exp_amount - amount_paid
         st.info(f"💰 Remaining Balance: {remaining_balance:.2f}")
+    else:
+        # For "paid", remaining balance is zero, amount_paid is full
+        amount_paid = total_exp_amount
+        remaining_balance = 0.0
 
     # Upload invoice if not fully paid
     # Upload Invoice File (Optional)
