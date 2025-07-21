@@ -573,7 +573,6 @@ with tab1:
         selected_items = st.multiselect("Select Item(s)", item_options, key="item_multiselect")
         valid_selected_items = [item for item in selected_items if item != "Select an item"]
 
-
         item_data = []
         grand_total = 0.0
 
@@ -595,7 +594,7 @@ with tab1:
                 "item_id": item_id,
                 "quantity": quantity,
                 "unit_price": unit_price,
-                "total_amount": total_amount
+                "total": total_amount
             })
             grand_total += total_amount
 
@@ -621,7 +620,7 @@ with tab1:
     partial_payment_note = None
     if payment_status == "partial":
         st.subheader("💰 Enter Partial Payment Details")
-        partial_payment_amount = st.number_input("Partial Payment Amount", min_value=0.0, max_value=total_amount, value=0.0, key="partial_amount")
+        partial_payment_amount = st.number_input("Partial Payment Amount", min_value=0.0, max_value=grand_total, value=0.0, key="partial_amount")
         partial_payment_date = st.date_input("Partial Payment Date", value=date.today(), key="partial_date")
         partial_payment_note = st.text_area("Partial Payment Notes (optional)", key="partial_notes")
 
@@ -631,9 +630,7 @@ with tab1:
             try:
                 extension = os.path.splitext(invoice_file.name)[1]
                 # Use user-entered name, or fallback if blank
-                # Prepare fallback item name
-                fallback_item_name = "_".join([i.strip().replace(" ", "_") for i in selected_items]) if selected_items else "no_item"
-                # Build default filename if invoice_name is empty
+                fallback_item_name = "_".join([i.strip().replace(" ", "_") for i in valid_selected_items]) if valid_selected_items else "no_item"
                 default_name = f"invoice_{user_id}_{fallback_item_name}_{sale_date}"
                 final_invoice_name = invoice_name.strip() or default_name
 
@@ -680,10 +677,10 @@ with tab1:
             st.stop()
 
         amount_paid = 0.0
-        amount_balance = total_amount
+        amount_balance = grand_total
 
         if payment_status == "paid":
-            amount_paid = total_amount
+            amount_paid = grand_total
             amount_balance = 0.0
         elif payment_status == "partial":
             if partial_payment_amount is None or partial_payment_amount <= 0:
@@ -691,116 +688,109 @@ with tab1:
                 st.stop()
             else:
                 amount_paid = partial_payment_amount
-                amount_balance = total_amount - partial_payment_amount
+                amount_balance = grand_total - partial_payment_amount
         elif payment_status == "credit":
             amount_paid = 0.0
-            amount_balance = total_amount
+            amount_balance = grand_total
 
         if invoice_file is None:
             st.error("❌ Please upload an invoice or proof of payment before saving.")
             st.stop()
 
-        for item in item_data:
-            sale_data = {
-                "employee_id": employee_id,
-                "employee_name": employee_name,
-                "user_id": user_id,
-                "sale_date": str(sale_date),
-                "customer_name": customer_name,
-                'customer_phone': customer_phone if customer_phone else None,
-                "item_id": item["item_id"],
-                "item_name": item["item_name"],
-                "quantity": item["quantity"],
-                "unit_price": item["unit_price"],
-                "total_amount": item["total_amount"],
-                "amount_paid": amount_paid,
-                "amount_balance": amount_balance,
-                "payment_method": payment_method,
-                "payment_status": payment_status,
-                "due_date": str(due_date) if due_date else None,
-                "invoice_number": invoice_number,
-                "invoice_file_url": invoice_file_url,
-                "notes": notes,
+        # Insert sale record (with all items as a list)
+        sale_data = {
+            "employee_id": employee_id,
+            "employee_name": employee_name,
+            "user_id": user_id,
+            "sale_date": str(sale_date),
+            "customer_name": customer_name,
+            'customer_phone': customer_phone if customer_phone else None,
+            "items": item_data,  # Save all items as a list
+            "grand_total": grand_total,
+            "amount_paid": amount_paid,
+            "amount_balance": amount_balance,
+            "payment_method": payment_method,
+            "payment_status": payment_status,
+            "due_date": str(due_date) if due_date else None,
+            "invoice_number": invoice_number,
+            "invoice_file_url": invoice_file_url,
+            "notes": notes,
+        }
+
+        try:
+            result = supabase.table("sales_master_log").insert(sale_data).execute()
+            new_sale_id = result.data[0]["sale_id"]
+            st.success(f"✅ Sale recorded successfully!")
+
+            # Insert payment record once for the whole sale
+            if payment_status in ["paid", "partial", "credit"]:
+                st.subheader("💳 Recording Payment...")
+
+            if payment_status == "paid":
+                pay_amount = grand_total
+                pay_date = date.today()
+                pay_note = ""
+            elif payment_status == "partial":
+                pay_amount = partial_payment_amount
+                pay_date = partial_payment_date
+                pay_note = partial_payment_note
+            else:  # credit
+                pay_amount = 0
+                pay_date = date.today()
+                pay_note = "Credit sale"
+
+            payment_data = {
+                "sale_log_id": new_sale_id,  # FK to sales_master_log
+                "payment_date": str(pay_date),
+                "amount": pay_amount,
+                "payment_method": payment_method if payment_status != "credit" else "none",
+                "notes": pay_note
             }
 
-            try:
-                result = supabase.table("sales_master_log").insert(sale_data).execute()
-                new_sale_id = result.data[0]["sale_id"]
-                st.success(f"✅ Sale of '{item['item_name']}' recorded successfully!")
+            payment_result = supabase.table("payments").insert(payment_data).execute()
+            payment_id = payment_result.data[0]["payment_id"]
+            st.success(f"💸 Payment recorded successfully.")
 
-                # Insert payment record if paid or partial
-                if payment_status in ["paid", "partial", "credit"]:
-                    st.subheader("💳 Recording Payment...")
+            update_data = {"payment_id": payment_id}
 
-                # Determine payment data based on status
-                if payment_status == "paid":
-                    pay_amount = total_amount
-                    pay_date = date.today()
-                    pay_note = ""
-                elif payment_status == "partial":
-                    pay_amount = partial_payment_amount
-                    pay_date = partial_payment_date
-                    pay_note = partial_payment_note
-                else:  # credit
-                    pay_amount = 0
-                    pay_date = date.today()
-                    pay_note = "Credit sale"
+            if payment_status == "paid" or amount_balance == 0.0:
+                update_data["payment_status"] = "paid"
+                st.success("✅ Sale status updated to PAID.")
+            elif payment_status == "partial":
+                update_data["payment_status"] = "partial"
+                st.success("⚠️ Partial payment recorded, balance remains.")
+            elif payment_status == "credit":
+                update_data["amount_paid"] = 0
+                update_data["payment_status"] = "credit"
+                st.success("📝 Credit sale recorded without payment.")
 
-                # Prepare payment record with reference to sales_master_log
-                payment_data = {
-                    "sale_log_id": new_sale_id,  # FK to sales_master_log
-                    "payment_date": str(pay_date),
-                    "amount": pay_amount,
-                    "payment_method": payment_method if payment_status != "credit" else "none",
-                    "notes": pay_note
-                }
+            supabase.table("sales_master_log").update(update_data).eq("sale_id", new_sale_id).execute()
+            # ✅ Clear form values before rerun
+            for key in [
+                "item_selectbox",
+                "quantity",
+                "unit_price",
+                "sale_date",
+                "customer_name",
+                "customer_phone",
+                "payment_method",
+                "payment_status",
+                "due_date",
+                "invoice_number",
+                "notes",
+                "invoice_upload",
+                "sale_key_invoice",
+                "partial_amount",
+                "partial_date",
+                "partial_notes"
+            ]:
+                if key in st.session_state:
+                    del st.session_state[key]
 
-                # Insert payment record once
-                payment_result = supabase.table("payments").insert(payment_data).execute()
-                payment_id = payment_result.data[0]["payment_id"]
-                st.success(f"💸 Payment recorded successfully.")
+            st.rerun()
 
-                # Update sale record with payment info and status
-                update_data = {"payment_id": payment_id}
-
-                if payment_status == "paid" or amount_balance == 0.0:
-                    update_data["payment_status"] = "paid"
-                    st.success("✅ Sale status updated to PAID.")
-                elif payment_status == "partial":
-                    update_data["payment_status"] = "partial"
-                    st.success("⚠️ Partial payment recorded, balance remains.")
-                elif payment_status == "credit":
-                    update_data["amount_paid"] = 0
-                    update_data["payment_status"] = "credit"
-                    st.success("📝 Credit sale recorded without payment.")
-
-                supabase.table("sales_master_log").update(update_data).eq("sale_id", new_sale_id).execute()
-                # ✅ Clear form values before rerun
-                for key in [
-                    "item_selectbox",
-                    "quantity",
-                    "unit_price",
-                    "sale_date",
-                    "customer_name",
-                    "customer_phone",
-                    "payment_method",
-                    "payment_status",
-                    "due_date",
-                    "invoice_number",
-                    "notes",
-                    "invoice_upload",
-                    "sale_key_invoice",
-                    "partial_amount",
-                    "partial_date",
-                    "partial_notes"
-                ]:
-                    if key in st.session_state:
-                        del st.session_state[key]
-
-                st.rerun()
-
-            except Exception as e:
-                st.error(f"❌ Failed to update sales record with payment: {e}")
+        except Exception as e:
+            st.error(f"❌ Failed to update sales record with payment.")
 # ...existing code...
 
 
