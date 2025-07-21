@@ -571,11 +571,13 @@ with tab1:
         item_dict = fetch_inventory_items(user_id)
         item_options = ["Select an item"] + list(item_dict.keys())
         selected_items = st.multiselect("Select Item(s)", item_options, key="item_multiselect")
+        valid_selected_items = [item for item in selected_items if item != "Select an item"]
+
 
         item_data = []
         grand_total = 0.0
 
-        for item in selected_items:
+        for item in valid_selected_items:
             item_id = item_dict[item]
             safe_key = re.sub(r'\W+', '_', item)  # For unique keys
 
@@ -673,7 +675,7 @@ with tab1:
             st.error("❌ Please upload an invoice before saving the sale.")
             st.stop()
         invoice_file_url = st.session_state.get("invoice_file_url")
-        if not selected_items:
+        if not valid_selected_items:
             st.error("❌ Please select a valid item before saving.")
             st.stop()
 
