@@ -596,7 +596,7 @@ with tab1:
                 "item_id": item_id,
                 "quantity": quantity,
                 "unit_price": unit_price,
-                "total": total_amount
+                "total_amount": total_amount
             })
             grand_total += total_amount
 
@@ -711,7 +711,7 @@ with tab1:
                 "item_name": item["item_name"],
                 "quantity": item["quantity"],
                 "unit_price": item["unit_price"],
-                "total": item["total"],
+                "total_amount": item["total_amount"],
                 "amount_paid": amount_paid,
                 "amount_balance": amount_balance,
                 "payment_method": payment_method,
@@ -760,7 +760,11 @@ with tab1:
                 st.success(f"💸 Payment recorded successfully.")
 
                 # Update sale record with payment info and status
-                update_data = {"payment_id": payment_id}
+                 update_data = {
+                      "payment_id": payment_id,
+                      "payment_status": payment_status,
+                      "amount_paid": pay_amount / len(item_data),
+                       "amount_balance": item["total_amount"] - (pay_amount / len(item_data))}
 
                 if payment_status == "paid" or amount_balance == 0.0:
                     update_data["payment_status"] = "paid"
