@@ -753,7 +753,7 @@ with tab1:
 
                 # Prepare payment record with reference to sales_master_log
                 payment_data = {
-                    "sale_log_id": sale_ids[0][0],  # just the first sale_id
+                    "sale_log_id": sale_id[0][0],  # just the first sale_id
                     "payment_date": str(pay_date),
                     "amount": pay_amount,
                     "payment_method": payment_method if payment_status != "credit" else "none",
