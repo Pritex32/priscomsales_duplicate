@@ -760,7 +760,7 @@ with tab1:
                 st.success(f"💸 Payment recorded successfully.")
 
                 # Update sale record with payment info and status
-                 update_data = {
+                update_data = {
                       "payment_id": payment_id,
                       "payment_status": payment_status,
                       "amount_paid": pay_amount / len(item_data),
