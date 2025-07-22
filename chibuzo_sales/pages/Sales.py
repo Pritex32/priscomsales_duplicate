@@ -681,7 +681,8 @@ with tab1:
             st.stop()
 
         
-
+        amount_paid = grand_total
+        amount_balance = 0.0
         if payment_status == "paid":
             amount_paid = grand_total
             amount_balance = 0.0
@@ -749,7 +750,7 @@ with tab1:
                     pay_amount = 0.0
                     pay_date = date.today()
                     pay_note = "Credit sale"
-
+                
                 # Prepare payment record with reference to sales_master_log
                 payment_data = {
                     "sale_log_id": sale_ids[0][0],  # just the first sale_id
@@ -764,6 +765,13 @@ with tab1:
                 st.success(f"💸 Payment recorded successfully.")
 
                 # Update sale record with payment info and status
+                st.write("🔎 Debug values before update:")
+                st.write("payment_id:", payment_id)
+                st.write("payment_status:", payment_status)
+                st.write("amount_paid:", amount_paid)
+                st.write("amount_balance:", amount_balance)
+                st.write("sale_ids:", sale_ids)
+
                 # Update sale with correct payment info
                 for sale_id, _ in sale_ids:
                     try:
