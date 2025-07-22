@@ -902,6 +902,10 @@ with tab1:
             if file_size_mb > max_size_mb:
                 st.error(f"❌ File too large! Please upload a file under {max_size_mb}MB.")
             else:
+                image = Image.open(logo_file)
+                png_bytes_io = io.BytesIO()
+                image.save(png_bytes_io, format="PNG")
+                png_bytes_io.seek(0)
                 unique_id = str(uuid.uuid4())
                 file_path = f"{user_id}/logo_{unique_id}.png"
                 supabase.storage.from_("logos").upload(file_path, logo_file.read(), {"content-type": logo_file.type})
