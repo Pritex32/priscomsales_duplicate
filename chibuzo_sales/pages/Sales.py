@@ -986,7 +986,7 @@ with tab1:
                             urllib.request.urlretrieve(logo_url, temp_logo_path)
                             # Resize logo dynamically
                             img = Image.open(temp_logo_path)
-                            max_width = 40  # mm
+                            max_width = 20  # mm
                             aspect_ratio = img.height / img.width
                             height = max_width * aspect_ratio  # maintain aspect ratio
                             pdf.image(temp_logo_path, x=10, y=10, w=max_width, h=height)
