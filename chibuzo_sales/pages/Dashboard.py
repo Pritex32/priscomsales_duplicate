@@ -1050,9 +1050,9 @@ if "user_id" not in st.session_state or "user_email" not in st.session_state:
 user_id = st.session_state["user_id"]
 email = st.session_state["user_email"]
 
-if st.button("Upgrade to Pro (₦200)"):
+if st.button("Upgrade to Pro (₦20000)"):
     st.info('Upgrade to 1 month plan,you will have complete access to all your sales data.')
-    result = initialize_payment(email, 200, user_id)
+    result = initialize_payment(email, 20000, user_id)
     
     if result.get("status") and "data" in result:
         auth_url = result["data"].get("authorization_url")
