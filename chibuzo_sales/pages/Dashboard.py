@@ -427,7 +427,7 @@ def sync_plan_from_db(user_id):
             st.session_state.is_active = False
 
     except Exception as e:
-        st.error(f"❌ Failed to sync subscription info: {e}")
+        st.error(f"❌ Failed to sync subscription info.")
     
 # Function to Authenticate Login
 ## login function
