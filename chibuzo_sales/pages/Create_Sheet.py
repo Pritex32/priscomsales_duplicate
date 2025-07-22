@@ -97,7 +97,8 @@ def restore_login_from_jwt():
 
 
 # Run this first
-restore_login_from_jwt()
+if st.session_state.get("logged_in"):
+    restore_login_from_jwt()
 
 # === Session Validation ===
 # === Session Validation === # this stops you when you are logged out
