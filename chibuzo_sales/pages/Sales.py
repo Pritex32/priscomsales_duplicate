@@ -34,7 +34,7 @@ import jwt
 import streamlit.components.v1 as components
 from streamlit_javascript import st_javascript
 # 🔐 Same secret key must be used across all pages
-from weasyprint import HTML
+
 from io import BytesIO
 import urllib.request
 import base64
