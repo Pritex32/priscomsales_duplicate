@@ -463,7 +463,7 @@ if selected == 'Home':
     # Sort by log_date (newest first)
     df_inventory = df_inventory.sort_values(by="log_date", ascending=False)
 
-    st.dataframe(df_inventory.head(10))
+    st.dataframe(df_inventory.tail(10))
     # to download the entire data
     csv = df_inventory.to_csv(index=False).encode('utf-8')
     st.download_button("⬇️ Download Full Inventory CSV", data=csv, file_name='full_inventory.csv', mime='text/csv')
