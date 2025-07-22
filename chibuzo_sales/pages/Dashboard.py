@@ -992,7 +992,8 @@ elif choice == 'Login':
                             time.sleep(1.5)
                             st.rerun()
                       
-                        
+        if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in"):
+            sync_plan_from_db(user_id)                
 
         # ❗ Login validation warnings
         if login_type == "MD" and not st.session_state.get("logged_in"):
@@ -1058,8 +1059,7 @@ if st.session_state.get("logged_in") and st.session_state.get("role") == "md":
 
 
 
-if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in"):
-    sync_plan_from_db(user_id)
+
 
 
 
