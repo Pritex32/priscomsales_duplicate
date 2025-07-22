@@ -495,9 +495,7 @@ if selected == 'Home':
             st.cache_data.clear()
             st.rerun()
     df_inventory = pd.DataFrame(inventory)
-    # Sort by log_date (newest first)
-    df_inventory = df_inventory.sort_values(by="log_date", ascending=False)
-
+   
     st.dataframe(df_inventory.tail(10))
     # to download the entire data
     csv = df_inventory.to_csv(index=False).encode('utf-8')
