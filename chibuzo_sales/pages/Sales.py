@@ -128,7 +128,7 @@ def sync_plan_from_db(user_id):
             """, unsafe_allow_html=True)
     except Exception as e:
         st.error("Failed to sync subscription info.")
-sync_plan_from_db(user_id)
+
 # === Restore Login from JWT ===
 def restore_login_from_jwt():
     if not st.session_state.get("logged_in"):
@@ -378,6 +378,7 @@ def handle_subscription_expiration(user_id):
     except Exception as e:
         st.error(f"Subscription check failed.")
 if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in"):
+    sync_plan_from_db(user_id)
     block_if_subscription_expired()
     # 🔍 Check if Pro subscription has expired
     handle_subscription_expiration(user_id)
