@@ -101,34 +101,7 @@ def decode_jwt(token):
 
 
 
-# === Restore Login from JWT ===
-def restore_login_from_jwt():
-    if not st.session_state.get("logged_in"):
-        token = st_javascript("""localStorage.getItem("login_token");""")
-        if token and token != "null":
-            user_data = decode_jwt(token)
-            if user_data:
-                st.session_state.logged_in = True
-                st.session_state.user_id = int(user_data["user_id"])
-                st.session_state.username = user_data["username"]
-                st.session_state.role = user_data["role"]
-                st.session_state.role = user_data["role"]
-                st.session_state.plan = user_data.get("plan", "free")
-                st.session_state.is_active = user_data.get("is_active", False)
-                st.session_state.user_email = user_data.get("email", "")
-                if user_data["role"] == "employee":
-                    st.session_state.employee_user = {"name": user_data["username"]}
-            else:
-                # 🛑 Token is invalid or expired — force logout
-                st.session_state.clear()
-                st_javascript("""localStorage.removeItem("login_token");""")
-                st.session_state.login_failed = True
 
-
-# Run this first
-# Run this first
-if st.session_state.get("logged_in"):
-    restore_login_from_jwt()
 
 # === Session Validation ===
 # === Session Validation === # this stops you when you are logged out
@@ -155,20 +128,6 @@ if not st.session_state.get("logged_in"):
    
 
 
-if not st.session_state.get("logged_in"):
-    st.stop()  # this stop the app from running after login expires
-
-
-user_id = st.session_state.get("user_id")
-if not user_id:
-    st.error("❌ No valid user ID in session. Please log in again.")
-    st.stop()
-
-try:
-    user_id = int(user_id)
-except Exception:
-    st.error("❌ User ID is not a valid integer.")
-    st.stop()
 
 # this changes all buttons to green
 st.markdown("""
@@ -228,6 +187,51 @@ def get_supabase_client():
 supabase = get_supabase_client() # use this to call the supabase database
 
 
+
+
+if not st.session_state.get("logged_in"):
+    st.stop()  # this stop the app from running after login expires
+
+
+user_id = st.session_state.get("user_id")
+if not user_id:
+    st.error("❌ No valid user ID in session. Please log in again.")
+    st.stop()
+
+try:
+    user_id = int(user_id)
+except Exception:
+    st.error("❌ User ID is not a valid integer.")
+    st.stop()
+
+# === Restore Login from JWT ===
+def restore_login_from_jwt():
+    if not st.session_state.get("logged_in"):
+        token = st_javascript("""localStorage.getItem("login_token");""")
+        if token and token != "null":
+            user_data = decode_jwt(token)
+            if user_data:
+                st.session_state.logged_in = True
+                st.session_state.user_id = int(user_data["user_id"])
+                st.session_state.username = user_data["username"]
+                st.session_state.role = user_data["role"]
+                st.session_state.role = user_data["role"]
+                st.session_state.plan = user_data.get("plan", "free")
+                st.session_state.is_active = user_data.get("is_active", False)
+                st.session_state.user_email = user_data.get("email", "")
+                if user_data["role"] == "employee":
+                    st.session_state.employee_user = {"name": user_data["username"]}
+            else:
+                # 🛑 Token is invalid or expired — force logout
+                st.session_state.clear()
+                st_javascript("""localStorage.removeItem("login_token");""")
+                st.session_state.login_failed = True
+
+
+# Run this first
+# Run this first
+if st.session_state.get("logged_in"):
+    restore_login_from_jwt()
 
 
 
@@ -350,7 +354,7 @@ def handle_subscription_expiration(user_id):
     except Exception as e:
         st.error(f"Subscription check failed.")
 if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in"):
-    sync_plan_from_db(user_id)
+   
     block_if_subscription_expired()
     # 🔍 Check if Pro subscription has expired
     handle_subscription_expiration(user_id)
