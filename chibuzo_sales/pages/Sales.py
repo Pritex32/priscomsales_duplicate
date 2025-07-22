@@ -680,8 +680,7 @@ with tab1:
             st.error("❌ Please select a valid item before saving.")
             st.stop()
 
-        amount_paid = 0.0
-        amount_balance = grand_total
+        
 
         if payment_status == "paid":
             amount_paid = grand_total
@@ -766,11 +765,16 @@ with tab1:
 
                 # Update sale record with payment info and status
                 # Update sale with correct payment info
-                update_data = {
-                 "payment_id": payment_id,
-                 "payment_status": status,
-                 "amount_paid": amount_paid if amount_paid is not None else 0.0,
-                 "amount_balance": amount_balance}
+                for sale_id, _ in sale_ids:
+                    try:
+                       supabase.table("sales_master_log").update({
+                       "payment_id": payment_id,
+                       "payment_status": payment_status,
+                       "amount_paid": amount_paid if amount_paid is not None else 0.0,
+                       "amount_balance": amount_balance }).eq("sale_id", sale_id).execute()
+                    except Exception as e:
+                        st.error(f"❌ Failed to update sales record with payment: {e}")
+
                       
                 if payment_status == "paid" or amount_balance == 0.0:
                     update_data["payment_status"] = "paid"
