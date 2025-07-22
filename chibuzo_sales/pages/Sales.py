@@ -975,53 +975,94 @@ with tab1:
                         - **Notes:** {selected_sale.get('notes', 'None')}   """)
 
                         # PDF generation and download button
-                        pdf = FPDF()
-                        pdf.add_page()
-                        pdf.set_font("Arial", size=12)
-                        if logo_url:
-                            temp_logo_path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
-                            urllib.request.urlretrieve(logo_url, temp_logo_path)
-                            img = Image.open(temp_logo_path)
-                            max_width = 40  # mm
-                            aspect_ratio = img.height / img.width
-                            height = max_width * aspect_ratio
-                            pdf.image(temp_logo_path, x=10, y=10, w=max_width, h=height)
-                            pdf.set_y(10 + height + 5)
-                            pdf.set_y(45)
-                        else:
-                            pdf.set_y(20)
-                        pdf.cell(200, 10, txt=f"{tenant_name} SALES RECEIPT", ln=True, align="C")
-                        pdf.ln(10)
-                        if account_number and bank_name:
-                            pdf.cell(200, 10, txt=f"Bank Account: {account_number} - {bank_name}", ln=True, align="C")
-                            pdf.ln(5)
-                        for key, value in {
-                            "Sale ID": selected_sale["sale_id"],
-                            "Employee": selected_sale.get("employee_name", "N/A"),
-                            "Date": selected_sale["sale_date"],
-                            "Customer": selected_sale["customer_name"],
-                            "Item": selected_sale["item_name"],
-                            "Quantity": selected_sale["quantity"],
-                            "Unit Price": f"NGN{selected_sale['unit_price']:,.2f}",
-                            "Total": f"NGN{selected_sale['total_amount']:,.2f}",
-                            "Amount Paid": f"NGN{selected_sale.get('amount_paid', 0):,.2f}",
-                            "Balance": f"NGN{selected_sale.get('amount_balance', 0):,.2f}",
-                            "Payment Method": selected_sale["payment_method"],
-                            "Payment Status": selected_sale["payment_status"],
-                            "Notes": selected_sale.get("notes", "None")
-                        }.items():
-                            pdf.cell(200, 10, txt=f"{key}: {value}", ln=True)
+                        if st.button("Download Receipt PDF", key="download_selected_receipt_btn"):
+                            pdf = FPDF()
+                            pdf.add_page()
+                            pdf.set_auto_page_break(auto=True, margin=15)
 
-                        receipt_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
-                        pdf.output(receipt_file)
+                            # Add logo if available
+                            if logo_url:
+                                try:
+                                    temp_logo_path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
+                                    urllib.request.urlretrieve(logo_url, temp_logo_path)
+                                    img = Image.open(temp_logo_path)
+                                    max_width = 30  # mm
+                                    aspect_ratio = img.height / img.width
+                                    height = max_width * aspect_ratio
+                                    pdf.image(temp_logo_path, x=90, y=10, w=max_width, h=height)
+                                    pdf.ln(height + 15)
+                                except Exception:
+                                    pdf.ln(20)
+                            else:
+                                pdf.ln(20)
 
-                        with open(receipt_file, "rb") as f:
-                            st.download_button(
-                                label="📥 Download Receipt PDF",
-                                data=f,
-                                file_name=f"receipt_{selected_sale['sale_id']}.pdf",
-                                mime="application/pdf"
-                            )
+                            # Title
+                            pdf.set_font("Arial", "B", 18)
+                            pdf.set_text_color(76, 175, 80)  # Green
+                            pdf.cell(0, 12, f"{tenant_name} SALES RECEIPT", ln=True, align="C")
+                            pdf.set_text_color(0, 0, 0)
+                            pdf.set_font("Arial", "", 12)
+                            pdf.ln(4)
+
+                            # Bank info
+                            if account_number and bank_name:
+                                pdf.set_font("Arial", "B", 12)
+                                pdf.cell(0, 10, f"Bank Account: {account_number} - {bank_name}", ln=True, align="C")
+                                pdf.set_font("Arial", "", 12)
+                                pdf.ln(2)
+
+                            # Draw a line
+                            pdf.set_draw_color(76, 175, 80)
+                            pdf.set_line_width(0.5)
+                            pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+                            pdf.ln(6)
+
+                            # Receipt details as a table
+                            fields = [
+                                ("Sale ID", selected_sale["sale_id"]),
+                                ("Employee Name", selected_sale.get("employee_name", "N/A")),
+                                ("Sale Date", selected_sale["sale_date"]),
+                                ("Customer", selected_sale["customer_name"]),
+                                ("Item", selected_sale["item_name"]),
+                                ("Quantity", selected_sale["quantity"]),
+                                ("Unit Price", f"₦{selected_sale['unit_price']:,.2f}"),
+                                ("Total Amount", f"₦{selected_sale['total_amount']:,.2f}"),
+                                ("Amount Paid", f"₦{selected_sale.get('amount_paid', 0):,.2f}"),
+                                ("Balance", f"₦{selected_sale.get('amount_balance', 0):,.2f}"),
+                                ("Payment Method", selected_sale["payment_method"]),
+                                ("Payment Status", selected_sale["payment_status"]),
+                                ("Notes", selected_sale.get("notes", "None"))
+                            ]
+
+                            # Table styling
+                            col1_width = 50
+                            col2_width = 120
+                            pdf.set_font("Arial", "", 12)
+                            for label, value in fields:
+                                pdf.set_fill_color(240, 240, 240)
+                                pdf.cell(col1_width, 10, f"{label}:", border=0, align="R", fill=True)
+                                pdf.set_font("Arial", "B", 12)
+                                pdf.cell(col2_width, 10, str(value), border=0, align="L", fill=False)
+                                pdf.ln(8)
+                                pdf.set_font("Arial", "", 12)
+
+                            pdf.ln(10)
+                            pdf.set_font("Arial", "I", 11)
+                            pdf.set_text_color(120, 120, 120)
+                            pdf.cell(0, 10, "Thank you for your business!", ln=True, align="C")
+                            pdf.set_text_color(0, 0, 0)
+
+                            # Save and download
+                            receipt_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
+                            pdf.output(receipt_file)
+
+                            with open(receipt_file, "rb") as f:
+                                st.download_button(
+                                    label="📥 Download Receipt PDF",
+                                    data=f,
+                                    file_name=f"receipt_{selected_sale['sale_id']}.pdf",
+                                    mime="application/pdf"
+                                )
         except Exception as e:
             st.error(f"❌ Failed to fetch sales: {e}")
                             
