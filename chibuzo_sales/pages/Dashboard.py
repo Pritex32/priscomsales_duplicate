@@ -579,7 +579,7 @@ def show_user_data():
             expires_at = date.fromisoformat(expires_at_str)
             today = date.today()
 
-            if today > expires_at:
+            if today > expires_at  and (plan != "free" or is_active):
                 # ❌ Subscription expired
                 plan = "free"
                 is_active = False
@@ -657,7 +657,14 @@ def login_md(email, password):
 
 
     # ✅ Generate and store JWT in localStorage using JS
-    jwt_token = generate_jwt(user_id=user_id, username=user.get("username") or user["email"],email=user["email"], role=role)
+    jwt_token = generate_jwt(
+    user_id=user_id,
+    username=user.get("username") or user["email"],
+    email=user["email"],
+    role=role,
+    plan=st.session_state.plan,
+    is_active=st.session_state.subscription_active
+)
 
     st_javascript(f"""localStorage.setItem("login_token", "{jwt_token}");""",key="remove_login_token_5")
 
