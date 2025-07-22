@@ -360,6 +360,7 @@ if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in
     # 🔍 Check if Pro subscription has expired
     handle_subscription_expiration(user_id)
     show_plan_status()
+    
 def upload_invoice(file, folder, filename,user_id):
     bucket = "salesinvoices"  # Make sure the bucket name matches your Supabase Storage bucket
     path_in_bucket = f"{folder}/{filename}"
