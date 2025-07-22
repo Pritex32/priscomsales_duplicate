@@ -127,7 +127,7 @@ def sync_plan_from_db(user_id):
                 </script>
             """, unsafe_allow_html=True)
     except Exception as e:
-        st.error("Failed to sync subscription info:{e}")
+        st.error("Failed to sync subscription info: {e}")
 
 # === Restore Login from JWT ===
 def restore_login_from_jwt():
@@ -772,7 +772,7 @@ with tab1:
                 sale_ids.append((new_sale_id, item["total_amount"]))
                 st.success(f"✅ Sale of '{item['item_name']}' recorded successfully!")
             except Exception as e:
-                st.error(f"❌ Failed to insert sale for item '{item['item_name']}': {e}")
+                st.error(f"❌ Failed to insert sale for item '{item['item_name']}': ")
 
                 # Insert payment record if paid or partial
                 if payment_status in ["paid", "partial", "credit"]:
@@ -853,8 +853,9 @@ with tab1:
                 st.rerun()
 
             except Exception as e:
-                st.error(f"❌ Failed to update sales record with payment: {e}")
+                st.error(f"❌ Failed to update sales record with payment: ")
 # ...existing code...
+
 
 # to get the user name of the owner and then use it to customize the receipt
 def safe_text(text): # to convert the naira text to be downloadable
