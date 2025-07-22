@@ -34,6 +34,11 @@ import jwt
 import streamlit.components.v1 as components
 from streamlit_javascript import st_javascript
 # 🔐 Same secret key must be used across all pages
+from weasyprint import HTML
+from io import BytesIO
+import urllib.request
+import base64
+
 
 
 
@@ -987,6 +992,102 @@ with tab1:
                         </div>
                         """
                         st.markdown(receipt_html, unsafe_allow_html=True)
+
+                        # ✅ Add PDF download button
+                        from weasyprint import HTML
+                        from io import BytesIO
+                        import urllib.request
+                        import base64
+
+                        if st.button("📥 Download Receipt PDF"):
+                            try:
+                                logo_img_tag = ""
+                                if logo_url:
+                                    logo_ext = logo_url.split(".")[-1].split("?")[0]
+                                    logo_data = urllib.request.urlopen(logo_url).read()
+                                    logo_base64 = base64.b64encode(logo_data).decode("utf-8")
+                                    logo_img_tag = f'<img src="data:image/{logo_ext};base64,{logo_base64}" style="width:100px;"/>'
+
+                                pdf_html = f"""
+                                <html>
+                                <head>
+                                <style>
+                                    body {{
+                                        font-family: Arial, sans-serif;
+                                        padding: 24px;
+                                        background-color: #f9f9f9;
+                                    }}
+                                    .receipt-box {{
+                                        border: 2px solid #4CAF50;
+                                        border-radius: 10px;
+                                        padding: 24px;
+                                        max-width: 600px;
+                                        margin: auto;
+                                        background: white;
+                                    }}
+                                    table {{
+                                        width: 100%;
+                                        font-size: 14px;
+                                        border-collapse: collapse;
+                                    }}
+                                    td {{
+                                        padding: 4px 0;
+                                        vertical-align: top;
+                                    }}
+                                    h2 {{
+                                        color: #4CAF50;
+                                        text-align: center;
+                                    }}
+                                    .footer {{
+                                        text-align: center;
+                                        color: #888;
+                                        font-size: 12px;
+                                        margin-top: 20px;
+                                    }}
+                                </style>
+                                </head>
+                                <body>
+                                    <div class="receipt-box">
+                                        <div style="text-align:center;">
+                                            {logo_img_tag}
+                                            <h2>{tenant_name} SALES RECEIPT</h2>
+                                        </div>
+                                        <hr>
+                                        <table>
+                                            <tr><td><b>Sale ID:</b></td><td>{selected_sale['sale_id']}</td></tr>
+                                            <tr><td><b>Employee Name:</b></td><td>{selected_sale.get('employee_name', 'N/A')}</td></tr>
+                                            <tr><td><b>Sale Date:</b></td><td>{selected_sale['sale_date']}</td></tr>
+                                            <tr><td><b>Customer:</b></td><td>{selected_sale['customer_name']}</td></tr>
+                                            <tr><td><b>Item:</b></td><td>{selected_sale['item_name']}</td></tr>
+                                            <tr><td><b>Quantity:</b></td><td>{selected_sale['quantity']}</td></tr>
+                                            <tr><td><b>Unit Price:</b></td><td>₦{selected_sale['unit_price']:,.2f}</td></tr>
+                                            <tr><td><b>Total Amount:</b></td><td>₦{selected_sale['total_amount']:,.2f}</td></tr>
+                                            <tr><td><b>Amount Paid:</b></td><td>₦{selected_sale.get('amount_paid', 0):,.2f}</td></tr>
+                                            <tr><td><b>Balance:</b></td><td>₦{selected_sale.get('amount_balance', 0):,.2f}</td></tr>
+                                            <tr><td><b>Payment Method:</b></td><td>{selected_sale['payment_method']}</td></tr>
+                                            <tr><td><b>Payment Status:</b></td><td>{selected_sale['payment_status']}</td></tr>
+                                            <tr><td><b>Bank Account:</b></td><td>{account_number} - {bank_name}</td></tr>
+                                            <tr><td><b>Notes:</b></td><td>{selected_sale.get('notes', 'None')}</td></tr>
+                                        </table>
+                                        <div class="footer">Thank you for your business!</div>
+                                    </div>
+                                </body>
+                                </html>
+                                """
+
+                                pdf_io = BytesIO()
+                                HTML(string=pdf_html).write_pdf(pdf_io)
+                                pdf_io.seek(0)
+
+                                st.download_button(
+                                    label="⬇️ Download Receipt as PDF",
+                                    data=pdf_io.getvalue(),
+                                    file_name=f"receipt_{selected_sale['sale_id']}.pdf",
+                                    mime="application/pdf"
+                                )
+
+                            except Exception as e:
+                                st.error(f"❌ Error generating PDF: {e}")
 
         except Exception as e:
             st.error(f"❌ Failed to fetch sales: {e}")
