@@ -83,7 +83,8 @@ def restore_login_from_jwt():
                 st.session_state.login_failed = True
 
 # Run this first
-restore_login_from_jwt()
+if st.session_state.get("logged_in"):
+    restore_login_from_jwt()
 
 # this makes all button green color
 st.markdown("""
