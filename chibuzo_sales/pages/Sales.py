@@ -955,84 +955,41 @@ with tab1:
 
                     # Optional: edit the date if needed
 
-                    # 🔁 Step 3: Show Receipt Details
+                    # 🔁 Step 3: Show Receipt Details (HTML)
                     if st.button(" Show Receipt", key="show_receipt_btn"):
-                        if logo_url:
-                            st.image(logo_url, width=150)
-                        st.markdown(f"""   
-                        ###  Sales Receipt
-                        - **Sale ID:** {selected_sale['sale_id']}
-                        - **Employee Name:** {selected_sale.get('employee_name', 'N/A')}
-                        - **Sale Date:** {selected_sale['sale_date']}
-                        - **Customer:** {selected_sale['customer_name']}
-                        - **Item:** {selected_sale['item_name']}
-                        - **Quantity:** {selected_sale['quantity']}
-                        - **Unit Price:** ₦{selected_sale['unit_price']:,.2f}
-                        - **Total Amount:** ₦{selected_sale['total_amount']:,.2f}
-                        - **Amount Paid:** ₦{selected_sale.get('amount_paid', 0):,.2f}
-                        - **Balance:** ₦{selected_sale.get('amount_balance', 0):,.2f}
-                        - **Payment Method:** {selected_sale['payment_method']}
-                        - **Payment Status:** {selected_sale['payment_status']}
-                        - **Bank Account:** {account_number} - {bank_name}
-                        - **Notes:** {selected_sale.get('notes', 'None')}   """)
-
-                    # 🔁 Step 4: PDF generation
-                    if st.button("Download Receipt PDF", key="download_selected_receipt_btn"):
-                        pdf = FPDF()
-                        pdf.add_page()
-                        # Add logo from URL if exists
-                        if logo_url:
-                            temp_logo_path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
-                            urllib.request.urlretrieve(logo_url, temp_logo_path)
-                            # Resize logo dynamically
-                            img = Image.open(temp_logo_path)
-                            max_width = 20  # mm
-                            aspect_ratio = img.height / img.width
-                            height = max_width * aspect_ratio  # maintain aspect ratio
-                            pdf.image(temp_logo_path, x=10, y=10, w=max_width, h=height)
-                            pdf.set_y(10 + height + 5)  # move below the logo
-
-                            pdf.set_y(45)
-                        else:
-                            pdf.set_y(20)
-                        pdf.set_font("Arial", size=12)
-                        pdf.cell(200, 10, txt=safe_text(f"{tenant_name} SALES RECEIPT"), ln=True, align="C")
-                        pdf.ln(10)
-                        # Add bank info
-                        if account_number and bank_name:
-                            pdf.set_font("Arial", size=12)
-                            pdf.cell(200, 10, txt=f"Bank Account: {account_number} - {bank_name}", ln=True, align="C")
-                            pdf.ln(5)
-                        pdf.set_font("Arial", size=12)
-                        for key, value in {
-                            "Sale ID": selected_sale["sale_id"],
-                            "Employee": selected_sale.get("employee_name", "N/A"),
-                            "Date": selected_sale["sale_date"],
-                            "Customer": selected_sale["customer_name"],
-                            "Item": selected_sale["item_name"],
-                            "Quantity": selected_sale["quantity"],
-                            "Unit Price": f"NGN{selected_sale['unit_price']:,.2f}",
-                            "Total": f"NGN{selected_sale['total_amount']:,.2f}",
-                            "Amount Paid": f"NGN{selected_sale.get('amount_paid', 0):,.2f}",
-                            "Balance": f"NGN{selected_sale.get('amount_balance', 0):,.2f}",
-                            "Payment Method": selected_sale["payment_method"],
-                            "Payment Status": selected_sale["payment_status"],
-                            "Notes": selected_sale.get("notes", "None")
-                        }.items():
-                            pdf.cell(200, 10, txt=f"{key}: {value}", ln=True)
-
-                        receipt_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
-                        pdf.output(receipt_file)
-
-                        with open(receipt_file, "rb") as f:
-                            base64_pdf = base64.b64encode(f.read()).decode("utf-8")
-
-                            download_link = f'<a href="data:application/pdf;base64,{base64_pdf}" download="receipt_{selected_sale["sale_id"]}.pdf">📥 Download Receipt PDF</a>'
-                            st.markdown(download_link, unsafe_allow_html=True)
+                        receipt_html = f"""
+                        <div style="border:2px solid #4CAF50; border-radius:10px; padding:24px; max-width:500px; background:#f9f9f9;">
+                            <div style="text-align:center;">
+                                {'<img src="' + logo_url + '" width="100"/>' if logo_url else ''}
+                                <h2 style="color:#4CAF50;">{tenant_name} SALES RECEIPT</h2>
+                            </div>
+                            <hr>
+                            <table style="width:100%; font-size:16px;">
+                                <tr><td><b>Sale ID:</b></td><td>{selected_sale['sale_id']}</td></tr>
+                                <tr><td><b>Employee Name:</b></td><td>{selected_sale.get('employee_name', 'N/A')}</td></tr>
+                                <tr><td><b>Sale Date:</b></td><td>{selected_sale['sale_date']}</td></tr>
+                                <tr><td><b>Customer:</b></td><td>{selected_sale['customer_name']}</td></tr>
+                                <tr><td><b>Item:</b></td><td>{selected_sale['item_name']}</td></tr>
+                                <tr><td><b>Quantity:</b></td><td>{selected_sale['quantity']}</td></tr>
+                                <tr><td><b>Unit Price:</b></td><td>₦{selected_sale['unit_price']:,.2f}</td></tr>
+                                <tr><td><b>Total Amount:</b></td><td>₦{selected_sale['total_amount']:,.2f}</td></tr>
+                                <tr><td><b>Amount Paid:</b></td><td>₦{selected_sale.get('amount_paid', 0):,.2f}</td></tr>
+                                <tr><td><b>Balance:</b></td><td>₦{selected_sale.get('amount_balance', 0):,.2f}</td></tr>
+                                <tr><td><b>Payment Method:</b></td><td>{selected_sale['payment_method']}</td></tr>
+                                <tr><td><b>Payment Status:</b></td><td>{selected_sale['payment_status']}</td></tr>
+                                <tr><td><b>Bank Account:</b></td><td>{account_number} - {bank_name}</td></tr>
+                                <tr><td><b>Notes:</b></td><td>{selected_sale.get('notes', 'None')}</td></tr>
+                            </table>
+                            <hr>
+                            <div style="text-align:center; color:#888; font-size:14px;">
+                                Thank you for your business!
+                            </div>
+                        </div>
+                        """
+                        st.markdown(receipt_html, unsafe_allow_html=True)
 
         except Exception as e:
             st.error(f"❌ Failed to fetch sales: {e}")
-
                             
     with col2:
         search_query = st.text_input("🔍 Search by Customer/Supplier Name or Invoice Number")
