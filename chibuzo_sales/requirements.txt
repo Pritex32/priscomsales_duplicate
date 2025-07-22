@@ -22,4 +22,6 @@ supabase==2.14.0
 sqlalchemy==2.0.30
 psycopg2-binary==2.9.10
 weasyprint==61.0
+pdfkit==1.0.0
+
 
