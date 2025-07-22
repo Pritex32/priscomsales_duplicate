@@ -905,7 +905,7 @@ with tab1:
                 supabase.storage.from_("logos").upload(file_path, logo_file.read(), {"content-type": logo_file.type})
                 logo_url = f"https://ecsrlqvifparesxakokl.supabase.co/storage/v1/object/public/logos/{file_path}"
 
-                supabase.table("users").update({"logo_url": logo_url}).eq("id", user_id).execute()
+                supabase.table("users").update({"logo_url": logo_url}).eq("user_id", user_id).execute()
                 st.success("✅ Logo uploaded successfully.")
         else:
             logo_url = user_data.get("logo_url", "")
