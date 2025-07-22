@@ -1047,7 +1047,10 @@ def sync_plan_from_db(user_id):
             """, unsafe_allow_html=True)
     except Exception as e:
         st.error("Failed to sync subscription info.")
-sync_plan_from_db(user_id)
+
+if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in"):
+    
+    sync_plan_from_db(user_id)
 
 
 
