@@ -772,13 +772,7 @@ with tab1:
                 payment_id = payment_result.data[0]["payment_id"]
                 st.success(f"💸 Payment recorded successfully.")
 
-                # Update sale record with payment info and status
-                st.write("🔎 Debug values before update:")
-                st.write("payment_id:", payment_id)
-                st.write("payment_status:", payment_status)
-                st.write("amount_paid:", amount_paid)
-                st.write("amount_balance:", amount_balance)
-                st.write("sale_ids:", sale_ids)
+                
 
                 # Update sale with correct payment info
                 update_data = {
@@ -1272,9 +1266,7 @@ with tab2:
                             new_status = "paid" if new_amount_paid >= total_amount else "partial"
                             new_outstanding = total_amount - new_amount_paid
 
-                            st.write("🧮 New Amount Paid:", new_amount_paid)
-                            st.write("📉 New Outstanding:", new_outstanding)
-                            st.write("🔄 New Status:", new_status)        
+                              
                 
                             # Insert payment record
                             insert_payment(
