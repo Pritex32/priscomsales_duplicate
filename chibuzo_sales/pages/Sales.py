@@ -246,7 +246,7 @@ def sync_plan_from_db(user_id):
             st.session_state.is_active = False
 
     except Exception as e:
-        st.error(f"❌ Failed to sync subscription info: {e}")
+        st.error(f"❌ Failed to sync subscription info: ")
 
 # === Restore Login from JWT ===
 def restore_login_from_jwt():
