@@ -908,7 +908,7 @@ with tab1:
                 png_bytes_io.seek(0)
                 unique_id = str(uuid.uuid4())
                 file_path = f"{user_id}/logo_{unique_id}.png"
-                supabase.storage.from_("logos").upload(file_path, logo_file.read(), {"content-type": logo_file.type})
+                supabase.storage.from_("logos").upload(file_path, png_bytes_io, {"content-type": "image/png"})
                 logo_url = f"https://ecsrlqvifparesxakokl.supabase.co/storage/v1/object/public/logos/{file_path}"
 
                 supabase.table("users").update({"logo_url": logo_url}).eq("user_id", user_id).execute()
