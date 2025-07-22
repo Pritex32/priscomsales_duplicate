@@ -187,7 +187,14 @@ def get_supabase_client():
 supabase = get_supabase_client() # use this to call the supabase database
 
 
-
+@st.cache_data(ttl=7200)
+def fetch_subscription_data(user_id):
+    try:
+        response = supabase.table("subscription").select("*").eq("user_id", user_id).execute()
+        return pd.DataFrame(response.data) if response.data else pd.DataFrame()
+    except Exception as e:
+        st.error(f"Error fetching subscription data.")
+        return pd.DataFrame()
 
 if not st.session_state.get("logged_in"):
     st.stop()  # this stop the app from running after login expires
@@ -272,14 +279,7 @@ user_id = st.session_state.get("user_id")
 # this will show if the person has paid or not
 
 # ---------- PLAN ENFORCEMENT ---------- #
-@st.cache_data(ttl=7200)
-def fetch_subscription_data(user_id):
-    try:
-        response = supabase.table("subscription").select("*").eq("user_id", user_id).execute()
-        return pd.DataFrame(response.data) if response.data else pd.DataFrame()
-    except Exception as e:
-        st.error(f"Error fetching subscription data.")
-        return pd.DataFrame()
+
 
 
 # to prevent usage after plan expired on employee
