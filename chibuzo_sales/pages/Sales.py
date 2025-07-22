@@ -99,37 +99,7 @@ def decode_jwt(token):
         return None
     
 
-# Restore login from browser localStorage
-def sync_plan_from_db(user_id):
-    try:
-        response = supabase.table("subscription").select("*").eq("user_id", user_id).order("expires_at", desc=True).limit(1).execute()
-        data = response.data
 
-        if data:
-            sub = data[0]
-            plan = sub.get("plan", "free")
-            is_active = sub.get("is_active", False)
-
-            # Update session
-            st.session_state.plan = plan
-            st.session_state.is_active = is_active
-
-            # Update token with correct plan
-            username = st.session_state.get("username", "")
-            role = st.session_state.get("role", "user")
-            email = st.session_state.get("user_email", "")
-
-            token = generate_jwt(user_id, username, role, plan, is_active, email)
-            st.session_state.jwt_token = token
-
-            # Update localStorage with new token
-            st.markdown(f"""
-                <script>
-                    localStorage.setItem("login_token", "{token}");
-                </script>
-            """, unsafe_allow_html=True)
-    except Exception as e:
-        st.error(f"❌ Failed to sync subscription info: {e}")
 
 # === Restore Login from JWT ===
 def restore_login_from_jwt():
