@@ -892,7 +892,7 @@ with tab1:
             user_data = {"user_id": user_id, "account_number": "", "bank_name": "", "logo_url": ""}
 
         # ➕ Upload logo
-        st.markdown("### 🖼 Upload Company Logo (optional)")
+        st.markdown("##### 🖼 Upload Company Logo max 10mb (optional)")
         logo_file = st.file_uploader("Upload PNG or JPG logo", type=["png", "jpg", "jpeg"])
         if logo_file:
             file_size_mb = logo_file.size / (1024 * 1024)
@@ -902,7 +902,7 @@ with tab1:
             else:
                 unique_id = str(uuid.uuid4())
                 file_path = f"{user_id}/logo_{unique_id}.png"
-                supabase.storage().from_("logos").upload(file_path, logo_file.read(), {"content-type": logo_file.type})
+                supabase.storage.from_("logos").upload(file_path, logo_file.read(), {"content-type": logo_file.type})
                 logo_url = f"https://ecsrlqvifparesxakokl.supabase.co/storage/v1/object/public/logos/{file_path}"
 
                 supabase.table("users").update({"logo_url": logo_url}).eq("id", user_id).execute()
