@@ -994,7 +994,40 @@ with tab1:
                         # Add bank info
                         if account_number and bank_name:
                             pdf.set_font("Arial", size=12)
-                            pdf.cell(200, 10, txt=f"Bank Account: {account_number} - {bank_name}", ln=    with col2:
+                            pdf.cell(200, 10, txt=f"Bank Account: {account_number} - {bank_name}", ln=True, align="C")
+                            pdf.ln(5)
+                        pdf.set_font("Arial", size=12)
+                        for key, value in {
+                            "Sale ID": selected_sale["sale_id"],
+                            "Employee": selected_sale.get("employee_name", "N/A"),
+                            "Date": selected_sale["sale_date"],
+                            "Customer": selected_sale["customer_name"],
+                            "Item": selected_sale["item_name"],
+                            "Quantity": selected_sale["quantity"],
+                            "Unit Price": f"NGN{selected_sale['unit_price']:,.2f}",
+                            "Total": f"NGN{selected_sale['total_amount']:,.2f}",
+                            "Amount Paid": f"NGN{selected_sale.get('amount_paid', 0):,.2f}",
+                            "Balance": f"NGN{selected_sale.get('amount_balance', 0):,.2f}",
+                            "Payment Method": selected_sale["payment_method"],
+                            "Payment Status": selected_sale["payment_status"],
+                            "Notes": selected_sale.get("notes", "None")
+                        }.items():
+                            pdf.cell(200, 10, txt=f"{key}: {value}", ln=True)
+
+                        receipt_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
+                        pdf.output(receipt_file)
+
+                        with open(receipt_file, "rb") as f:
+                            base64_pdf = base64.b64encode(f.read()).decode("utf-8")
+
+                            download_link = f'<a href="data:application/pdf;base64,{base64_pdf}" download="receipt_{selected_sale["sale_id"]}.pdf">📥 Download Receipt PDF</a>'
+                            st.markdown(download_link, unsafe_allow_html=True)
+
+        except Exception as e:
+            st.error(f"❌ Failed to fetch sales: {e}")
+
+                            
+ with col2:
         search_query = st.text_input("🔍 Search by Customer/Supplier Name or Invoice Number")
 
 # Perform search if query is provided
@@ -1007,8 +1040,6 @@ with tab1:
                 st.warning("No transactions found matching your search.")
         else:
             st.write("Please enter a search term to begin.")
-
-
 
 
 
