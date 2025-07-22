@@ -903,12 +903,13 @@ with tab1:
                 st.error(f"❌ File too large! Please upload a file under {max_size_mb}MB.")
             else:
                 image = Image.open(logo_file)
-                png_bytes_io = io.BytesIO()
-                image.save(png_bytes_io, format="PNG")
-                png_bytes_io.seek(0)
+                temp_png = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+                image.save(temp_png, format="PNG")
+                temp_png.close()
                 unique_id = str(uuid.uuid4())
                 file_path = f"{user_id}/logo_{unique_id}.png"
-                supabase.storage.from_("logos").upload(file_path, png_bytes_io, {"content-type": "image/png"})
+                with open(temp_png.name, "rb") as f:
+                    supabase.storage.from_("logos").upload(file_path, f, {"content-type": "image/png"})
                 logo_url = f"https://ecsrlqvifparesxakokl.supabase.co/storage/v1/object/public/logos/{file_path}"
 
                 supabase.table("users").update({"logo_url": logo_url}).eq("user_id", user_id).execute()
