@@ -127,7 +127,7 @@ def sync_plan_from_db(user_id):
                 </script>
             """, unsafe_allow_html=True)
     except Exception as e:
-        st.error("Failed to sync subscription info.")
+        st.error("Failed to sync subscription info:{e}")
 
 # === Restore Login from JWT ===
 def restore_login_from_jwt():
