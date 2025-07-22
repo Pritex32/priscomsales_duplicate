@@ -1177,6 +1177,9 @@ def update_payment_status(table_name, id_column, record_id,user_id):
 
 
 with tab2:
+    if "role" not in st.session_state or st.session_state.role != "md":
+        st.warning("🚫 You are not authorized to view this page.")
+        st.stop()
     st.markdown("""
     <h2 style='color: green; font-weight: 600;'>💰 View Customers with Pending Payments</h2>""", unsafe_allow_html=True)
     col11,col12=st.columns([3,1])
