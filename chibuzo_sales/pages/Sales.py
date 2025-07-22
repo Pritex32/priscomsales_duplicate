@@ -781,16 +781,13 @@ with tab1:
                 st.write("sale_ids:", sale_ids)
 
                 # Update sale with correct payment info
-                for sale_id, _ in sale_ids:
-                    try:
-                       supabase.table("sales_master_log").update({
-                       "payment_id": payment_id,
-                       "payment_status": payment_status,
-                       "amount_paid": amount_paid if amount_paid is not None else 0.0,
-                       "amount_balance": amount_balance }).eq("sale_id", sale_id).execute()
-                    except Exception as e:
-                        st.error(f"❌ Failed to update sales record with payment: {e}")
+                update_data = {
+                "payment_id": payment_id,
+                "payment_status": payment_status,
+                "amount_paid": item_paid,
+                "amount_balance": item_balance }
 
+                supabase.table("sales_master_log").update(update_data).eq("sale_id", new_sale_id).execute()
                       
                 if payment_status == "paid" or amount_balance == 0.0:
                     update_data["payment_status"] = "paid"
