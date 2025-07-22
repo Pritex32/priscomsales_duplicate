@@ -887,6 +887,7 @@ tenant_name = user_info.data["username"] if user_info.data else "Sales"
 
 
 max_size_mb = 10
+
 with tab1:
     st.markdown("___")
     col1, col2 = st.columns(2)
@@ -903,7 +904,6 @@ with tab1:
         logo_file = st.file_uploader("Upload PNG or JPG logo", type=["png", "jpg", "jpeg"])
         if logo_file:
             file_size_mb = logo_file.size / (1024 * 1024)
-
             if file_size_mb > max_size_mb:
                 st.error(f"❌ File too large! Please upload a file under {max_size_mb}MB.")
             else:
@@ -916,7 +916,6 @@ with tab1:
                 with open(temp_png.name, "rb") as f:
                     supabase.storage.from_("logos").upload(file_path, f, {"content-type": "image/png"})
                 logo_url = f"https://ecsrlqvifparesxakokl.supabase.co/storage/v1/object/public/logos/{file_path}"
-
                 supabase.table("users").update({"logo_url": logo_url}).eq("user_id", user_id).execute()
                 st.success("✅ Logo uploaded successfully.")
         else:
@@ -943,12 +942,8 @@ with tab1:
                 st.warning("No sales found for this user.")
             else:
                 available_dates = sorted({s["sale_date"] for s in sales}, reverse=True)
-
-                # Convert strings to date objects
                 date_options = [datetime.strptime(d, "%Y-%m-%d").date() for d in available_dates]
                 selected_date = st.date_input("Select Sale Date", value=date_options[0])
-
-                # 🔁 Step 3: Filter sales by selected date
                 sales_for_date = [s for s in sales if s["sale_date"] == selected_date.strftime("%Y-%m-%d")]
 
                 if not sales_for_date:
@@ -958,137 +953,75 @@ with tab1:
                     selected_sale_label = st.selectbox("Select a sale to generate receipt", list(sale_options.keys()))
                     selected_sale = sale_options[selected_sale_label]
 
-                    # Optional: edit the date if needed
-
-                    # 🔁 Step 3: Show Receipt Details (HTML)
+                    # Show Receipt Details
                     if st.button(" Show Receipt", key="show_receipt_btn"):
-                        receipt_html = f"""
-                        <div style="border:2px solid #4CAF50; border-radius:10px; padding:24px; max-width:500px; background:#f9f9f9;">
-                            <div style="text-align:center;">
-                                {'<img src="' + logo_url + '" width="100"/>' if logo_url else ''}
-                                <h2 style="color:#4CAF50;">{tenant_name} SALES RECEIPT</h2>
-                            </div>
-                            <hr>
-                            <table style="width:100%; font-size:16px;">
-                                <tr><td><b>Sale ID:</b></td><td>{selected_sale['sale_id']}</td></tr>
-                                <tr><td><b>Employee Name:</b></td><td>{selected_sale.get('employee_name', 'N/A')}</td></tr>
-                                <tr><td><b>Sale Date:</b></td><td>{selected_sale['sale_date']}</td></tr>
-                                <tr><td><b>Customer:</b></td><td>{selected_sale['customer_name']}</td></tr>
-                                <tr><td><b>Item:</b></td><td>{selected_sale['item_name']}</td></tr>
-                                <tr><td><b>Quantity:</b></td><td>{selected_sale['quantity']}</td></tr>
-                                <tr><td><b>Unit Price:</b></td><td>₦{selected_sale['unit_price']:,.2f}</td></tr>
-                                <tr><td><b>Total Amount:</b></td><td>₦{selected_sale['total_amount']:,.2f}</td></tr>
-                                <tr><td><b>Amount Paid:</b></td><td>₦{selected_sale.get('amount_paid', 0):,.2f}</td></tr>
-                                <tr><td><b>Balance:</b></td><td>₦{selected_sale.get('amount_balance', 0):,.2f}</td></tr>
-                                <tr><td><b>Payment Method:</b></td><td>{selected_sale['payment_method']}</td></tr>
-                                <tr><td><b>Payment Status:</b></td><td>{selected_sale['payment_status']}</td></tr>
-                                <tr><td><b>Bank Account:</b></td><td>{account_number} - {bank_name}</td></tr>
-                                <tr><td><b>Notes:</b></td><td>{selected_sale.get('notes', 'None')}</td></tr>
-                            </table>
-                            <hr>
-                            <div style="text-align:center; color:#888; font-size:14px;">
-                                Thank you for your business!
-                            </div>
-                        </div>
-                        """
-                        st.markdown(receipt_html, unsafe_allow_html=True)
+                        if logo_url:
+                            st.image(logo_url, width=150)
+                        st.markdown(f"""   
+                        ###  Sales Receipt
+                        - **Sale ID:** {selected_sale['sale_id']}
+                        - **Employee Name:** {selected_sale.get('employee_name', 'N/A')}
+                        - **Sale Date:** {selected_sale['sale_date']}
+                        - **Customer:** {selected_sale['customer_name']}
+                        - **Item:** {selected_sale['item_name']}
+                        - **Quantity:** {selected_sale['quantity']}
+                        - **Unit Price:** ₦{selected_sale['unit_price']:,.2f}
+                        - **Total Amount:** ₦{selected_sale['total_amount']:,.2f}
+                        - **Amount Paid:** ₦{selected_sale.get('amount_paid', 0):,.2f}
+                        - **Balance:** ₦{selected_sale.get('amount_balance', 0):,.2f}
+                        - **Payment Method:** {selected_sale['payment_method']}
+                        - **Payment Status:** {selected_sale['payment_status']}
+                        - **Bank Account:** {account_number} - {bank_name}
+                        - **Notes:** {selected_sale.get('notes', 'None')}   """)
 
-                        # ✅ Add PDF download button
-                        from weasyprint import HTML
-                        from io import BytesIO
-                        import urllib.request
-                        import base64
+                        # PDF generation and download button
+                        pdf = FPDF()
+                        pdf.add_page()
+                        pdf.set_font("Arial", size=12)
+                        if logo_url:
+                            temp_logo_path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
+                            urllib.request.urlretrieve(logo_url, temp_logo_path)
+                            img = Image.open(temp_logo_path)
+                            max_width = 40  # mm
+                            aspect_ratio = img.height / img.width
+                            height = max_width * aspect_ratio
+                            pdf.image(temp_logo_path, x=10, y=10, w=max_width, h=height)
+                            pdf.set_y(10 + height + 5)
+                            pdf.set_y(45)
+                        else:
+                            pdf.set_y(20)
+                        pdf.cell(200, 10, txt=f"{tenant_name} SALES RECEIPT", ln=True, align="C")
+                        pdf.ln(10)
+                        if account_number and bank_name:
+                            pdf.cell(200, 10, txt=f"Bank Account: {account_number} - {bank_name}", ln=True, align="C")
+                            pdf.ln(5)
+                        for key, value in {
+                            "Sale ID": selected_sale["sale_id"],
+                            "Employee": selected_sale.get("employee_name", "N/A"),
+                            "Date": selected_sale["sale_date"],
+                            "Customer": selected_sale["customer_name"],
+                            "Item": selected_sale["item_name"],
+                            "Quantity": selected_sale["quantity"],
+                            "Unit Price": f"NGN{selected_sale['unit_price']:,.2f}",
+                            "Total": f"NGN{selected_sale['total_amount']:,.2f}",
+                            "Amount Paid": f"NGN{selected_sale.get('amount_paid', 0):,.2f}",
+                            "Balance": f"NGN{selected_sale.get('amount_balance', 0):,.2f}",
+                            "Payment Method": selected_sale["payment_method"],
+                            "Payment Status": selected_sale["payment_status"],
+                            "Notes": selected_sale.get("notes", "None")
+                        }.items():
+                            pdf.cell(200, 10, txt=f"{key}: {value}", ln=True)
 
-                        if st.button("📥 Download Receipt PDF"):
-                            try:
-                                logo_img_tag = ""
-                                if logo_url:
-                                    logo_ext = logo_url.split(".")[-1].split("?")[0]
-                                    logo_data = urllib.request.urlopen(logo_url).read()
-                                    logo_base64 = base64.b64encode(logo_data).decode("utf-8")
-                                    logo_img_tag = f'<img src="data:image/{logo_ext};base64,{logo_base64}" style="width:100px;"/>'
+                        receipt_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
+                        pdf.output(receipt_file)
 
-                                pdf_html = f"""
-                                <html>
-                                <head>
-                                <style>
-                                    body {{
-                                        font-family: Arial, sans-serif;
-                                        padding: 24px;
-                                        background-color: #f9f9f9;
-                                    }}
-                                    .receipt-box {{
-                                        border: 2px solid #4CAF50;
-                                        border-radius: 10px;
-                                        padding: 24px;
-                                        max-width: 600px;
-                                        margin: auto;
-                                        background: white;
-                                    }}
-                                    table {{
-                                        width: 100%;
-                                        font-size: 14px;
-                                        border-collapse: collapse;
-                                    }}
-                                    td {{
-                                        padding: 4px 0;
-                                        vertical-align: top;
-                                    }}
-                                    h2 {{
-                                        color: #4CAF50;
-                                        text-align: center;
-                                    }}
-                                    .footer {{
-                                        text-align: center;
-                                        color: #888;
-                                        font-size: 12px;
-                                        margin-top: 20px;
-                                    }}
-                                </style>
-                                </head>
-                                <body>
-                                    <div class="receipt-box">
-                                        <div style="text-align:center;">
-                                            {logo_img_tag}
-                                            <h2>{tenant_name} SALES RECEIPT</h2>
-                                        </div>
-                                        <hr>
-                                        <table>
-                                            <tr><td><b>Sale ID:</b></td><td>{selected_sale['sale_id']}</td></tr>
-                                            <tr><td><b>Employee Name:</b></td><td>{selected_sale.get('employee_name', 'N/A')}</td></tr>
-                                            <tr><td><b>Sale Date:</b></td><td>{selected_sale['sale_date']}</td></tr>
-                                            <tr><td><b>Customer:</b></td><td>{selected_sale['customer_name']}</td></tr>
-                                            <tr><td><b>Item:</b></td><td>{selected_sale['item_name']}</td></tr>
-                                            <tr><td><b>Quantity:</b></td><td>{selected_sale['quantity']}</td></tr>
-                                            <tr><td><b>Unit Price:</b></td><td>₦{selected_sale['unit_price']:,.2f}</td></tr>
-                                            <tr><td><b>Total Amount:</b></td><td>₦{selected_sale['total_amount']:,.2f}</td></tr>
-                                            <tr><td><b>Amount Paid:</b></td><td>₦{selected_sale.get('amount_paid', 0):,.2f}</td></tr>
-                                            <tr><td><b>Balance:</b></td><td>₦{selected_sale.get('amount_balance', 0):,.2f}</td></tr>
-                                            <tr><td><b>Payment Method:</b></td><td>{selected_sale['payment_method']}</td></tr>
-                                            <tr><td><b>Payment Status:</b></td><td>{selected_sale['payment_status']}</td></tr>
-                                            <tr><td><b>Bank Account:</b></td><td>{account_number} - {bank_name}</td></tr>
-                                            <tr><td><b>Notes:</b></td><td>{selected_sale.get('notes', 'None')}</td></tr>
-                                        </table>
-                                        <div class="footer">Thank you for your business!</div>
-                                    </div>
-                                </body>
-                                </html>
-                                """
-
-                                pdf_io = BytesIO()
-                                HTML(string=pdf_html).write_pdf(pdf_io)
-                                pdf_io.seek(0)
-
-                                st.download_button(
-                                    label="⬇️ Download Receipt as PDF",
-                                    data=pdf_io.getvalue(),
-                                    file_name=f"receipt_{selected_sale['sale_id']}.pdf",
-                                    mime="application/pdf"
-                                )
-
-                            except Exception as e:
-                                st.error(f"❌ Error generating PDF: {e}")
-
+                        with open(receipt_file, "rb") as f:
+                            st.download_button(
+                                label="📥 Download Receipt PDF",
+                                data=f,
+                                file_name=f"receipt_{selected_sale['sale_id']}.pdf",
+                                mime="application/pdf"
+                            )
         except Exception as e:
             st.error(f"❌ Failed to fetch sales: {e}")
                             
