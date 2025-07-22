@@ -681,8 +681,7 @@ with tab1:
             st.stop()
 
         
-        amount_paid = grand_total
-        amount_balance = 0.0
+      
         if payment_status == "paid":
             amount_paid = grand_total
             amount_balance = 0.0
@@ -702,6 +701,15 @@ with tab1:
             st.stop()
         sale_ids = [] 
         for item in item_data:
+            # Calculate per-item payment
+            if payment_status == "paid":
+                item_paid = item["total_amount"]
+            elif payment_status == "partial":
+                item_paid = round((partial_payment_amount * item["total_amount"]) / grand_total, 2)
+            else:  # credit
+                item_paid = 0.0
+
+            item_balance = item["total_amount"] - item_paid
             sale_data = {
                 "employee_id": employee_id,
                 "employee_name": employee_name,
@@ -715,8 +723,8 @@ with tab1:
                 "unit_price": item["unit_price"],
                 "grand_total": grand_total,
                 "total_amount": item["total_amount"],
-                "amount_paid": 0.0,
-                "amount_balance": amount_balance,
+                "amount_paid": item_paid,
+                "amount_balance": item_balance,
                 "payment_method": payment_method,
                 "payment_status": payment_status,
                 "due_date": str(due_date) if due_date else None,
@@ -739,11 +747,11 @@ with tab1:
 
                 # Determine payment data based on status
                 if payment_status == "paid":
-                    pay_amount = item["total_amount"]   
+                    pay_amount = item_paid
                     pay_date = date.today()
                     pay_note = ""
                 elif payment_status == "partial":
-                    pay_amount = round((partial_payment_amount * item["total_amount"]) / grand_total, 2)
+                    pay_amount = item_paid
                     pay_date = partial_payment_date
                     pay_note = partial_payment_note
                 else:  # credit
