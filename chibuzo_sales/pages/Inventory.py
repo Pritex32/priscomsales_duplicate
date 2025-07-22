@@ -246,7 +246,40 @@ supabase = get_supabase_client() # use this to call the supabase database
 
 
 
+def sync_plan_from_db(user_id):
+    try:
+        response = supabase.table("subscription").select("*").eq("user_id", user_id).order("expires_at", desc=True).limit(1).execute()
+        data = response.data
 
+        if data:
+            sub = data[0]
+            plan = sub.get("plan", "free")
+            is_active = sub.get("is_active", False)
+
+            # Update session
+            st.session_state.plan = plan
+            st.session_state.is_active = is_active
+
+            # Update token with correct plan
+            username = st.session_state.get("username", "")
+            role = st.session_state.get("role", "user")
+            email = st.session_state.get("user_email", "")
+
+            token = generate_jwt(user_id, username, role, plan, is_active, email)
+            st.session_state.jwt_token = token
+
+            # Update localStorage with new token
+            st.markdown(f"""
+                <script>
+                    localStorage.setItem("login_token", "{token}");
+                </script>
+            """, unsafe_allow_html=True)
+        else:
+            st.session_state.plan = "free"
+            st.session_state.is_active = False
+
+    except Exception as e:
+        st.error(f"❌ Failed to sync subscription info: ")
 
 
 # this restores and shows if the person is on free plan or pro
@@ -388,7 +421,7 @@ def handle_subscription_expiration(user_id):
         st.error(f"Subscription check failed.")
 
 if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in"):
-    
+    sync_plan_from_db(user_id)
     # 🔍 Check if Pro subscription has expired
     handle_subscription_expiration(user_id)
     block_free_user_if_limit_exceeded()
