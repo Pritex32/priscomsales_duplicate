@@ -1027,19 +1027,19 @@ with tab1:
             st.error(f"❌ Failed to fetch sales: {e}")
 
                             
- with col2:
-     search_query = st.text_input("🔍 Search by Customer/Supplier Name or Invoice Number")
+    with col2:
+        search_query = st.text_input("🔍 Search by Customer/Supplier Name or Invoice Number")
 
-     # Perform search if query is provided
-     if search_query:
-         filtered_data = search_transactions(search_query, sales_df, expenses_df, restock_df, payment_df)
+        # Perform search if query is provided
+        if search_query:
+            filtered_data = search_transactions(search_query, sales_df, expenses_df, restock_df, payment_df)
     
-         if not filtered_data.empty:    
-             st.write(filtered_data)
+            if not filtered_data.empty:    
+                st.write(filtered_data)
+            else:
+                st.warning("No transactions found matching your search.")
         else:
-            st.warning("No transactions found matching your search.")
-     else:
-         st.write("Please enter a search term to begin.")
+            st.write("Please enter a search term to begin.")
 
 
 
