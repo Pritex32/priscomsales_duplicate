@@ -472,7 +472,7 @@ def upload_invoice(file, folder, filename,user_id):
             else:
                 st.error("❌ Failed to upload invoice due to a system issue. Please try again later.")
         else:  # error_info is a string, just display it
-            st.error("❌ Failed to upload invoice due to a system issue. Please try again later."))
+            st.error("❌ Failed to upload invoice due to a system issue. Please try again later.")
 
     return None
 
