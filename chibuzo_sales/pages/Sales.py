@@ -550,27 +550,38 @@ payment_df=fetch_payment_history(user_id)
 
 
 # function to serach through all tables and get information
+# ✅ Function to search through all tables
 def search_transactions(search_query, sales_df, expenses_df, restock_df, payment_df):
-    search_query_lower = search_query.strip().lower()
-    def safe_filter(df):
-        if df is not None:
-            return df[df.apply(lambda row: row.astype(str).str.contains(search_query_lower).any(), axis=1)]
-        return pd.DataFrame()  # 
+    search_query_lower = search_query.strip()
     
-    # Filter Sales Data
-    # Apply to all DataFrames
+    def safe_filter(df):
+        if df is not None and not df.empty:
+            return df[df.apply(lambda row: row.astype(str).str.contains(search_query_lower, case=False, na=False).any(), axis=1)]
+        return pd.DataFrame()
+    
+    # Filter all DataFrames
     filtered_sales = safe_filter(sales_df)
     filtered_expenses = safe_filter(expenses_df)
     filtered_restock = safe_filter(restock_df)
     filtered_payment = safe_filter(payment_df)
+
+    # ✅ Add 'source' column to know where data came from
+    if not filtered_sales.empty:
+        filtered_sales['source'] = 'Sales'
+    if not filtered_expenses.empty:
+        filtered_expenses['source'] = 'Expenses'
+    if not filtered_restock.empty:
+        filtered_restock['source'] = 'Restock'
+    if not filtered_payment.empty:
+        filtered_payment['source'] = 'Payments'
+
     # Combine filtered data
     combined_filtered_data = pd.concat(
         [filtered_sales, filtered_expenses, filtered_restock, filtered_payment],
         ignore_index=True
     )
-      
+    
     return combined_filtered_data
-
 
 
 
@@ -1044,19 +1055,28 @@ with tab1:
 
 
                             
+# ✅ UI for Search
 with tab1:
     st.subheader("🔍 Search Transactions")
 
-    search_query = st.text_input("Search by Customer/Supplier Name or Invoice Number")
+    search_query = st.text_input("Search by Customer/Supplier Name, Invoice Number, or Any Keyword")
 
     # Perform search if query is provided
     if search_query:
-        filtered_data = search_transactions(
-            search_query, sales_df, expenses_df, restock_df, payment_df
-        )
+        filtered_data = search_transactions(search_query, sales_df, expenses_df, restock_df, payment_df)
 
         if not filtered_data.empty:
-            st.write(filtered_data)
+            st.write(f"### Search Results ({len(filtered_data)} records found)")
+            st.dataframe(filtered_data)
+
+            # ✅ Add Download Button for search results
+            csv = filtered_data.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="⬇ Download Results as CSV",
+                data=csv,
+                file_name="search_results.csv",
+                mime="text/csv"
+            )
         else:
             st.warning("No transactions found matching your search.")
     else:
