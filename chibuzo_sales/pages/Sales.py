@@ -312,22 +312,43 @@ if "plan" not in st.session_state or "is_active" not in st.session_state:
 
 user_id = st.session_state.get("user_id")
 
-   
-
-def md_tab_content():
-    if st.session_state.get("role") != "md":
-        st.warning("🚫 You are not authorized to view this tab.")
-        return  # ❌ Stops this function
-    st.subheader("Restricted Content for MD")
-    st.write("Sensitive operations here") 
-
-
-
-
-
 # this will show if the person has paid or not
 
 # ---------- PLAN ENFORCEMENT ---------- #
+# ✅ Simulate user session role (in real app, this comes from login)
+# Simulate user role for testing (replace with your actual login logic)
+st.session_state["role"] = st.session_state.get("role", "employee")  # "employee" or "md"
+
+# ✅ Tabs everyone sees
+tabs = ["Add sale", "Add Expense"]
+
+# ✅ Add extra tabs for MD
+if st.session_state.get("role") == "md":
+    tabs.extend(["Payments", "Delete", "Report"])
+
+# ✅ Create tabs dynamically
+tab_objects = st.tabs(tabs)
+
+# ✅ Common Tabs (Visible to all users)
+with tab_objects[0]:
+    st.write("📊 Sales Data (Everyone can see this)")
+
+with tab_objects[1]:
+    st.write("📦 Expenses Data (Everyone can see this)")
+
+
+
+# ✅ Restricted Tabs (Only MD)
+if st.session_state.get("role") == "md":
+    with tab_objects[3]:
+        st.write("💰 Payments - Only MD can see this")
+
+    with tab_objects[4]:
+        st.write("🗑️ Delete Records - Only MD can see this")
+
+    with tab_objects[5]:
+        st.write("📑 Reports - Only MD can see this")
+
 
 
 
@@ -1649,7 +1670,7 @@ with tab3:
 
    
 with tab4:
-    md_tab_content()
+    
     st.markdown(
     "<h1 style='color: red;'>🗑️ Delete Sale or Expense Record by table ID</h1>", unsafe_allow_html=True)
     
