@@ -512,15 +512,16 @@ import streamlit as st
 import pandas as pd
 from io import BytesIO
 
-st.title("📊 Filter Records - Sales | Restock | Expenses")
+st.title("📊 Filter Records - Sales | Restock | Expenses | Payments")
 
 # ✅ Fetch Data (From your cached Supabase functions)
 restock_df = fetch_goods_bought_history(user_id)
 sales_df = fetch_sales_data(user_id)
 expenses_df = fetch_expenses_master_data(user_id)
+payment_df = fetch_payment_history(user_id)
 
 # ✅ Table Selection
-table_option = st.selectbox("Select Table", ["Sales", "Restock", "Expenses"])
+table_option = st.selectbox("Select Table", ["Sales", "Restock", "Expenses", "Payments"])
 
 # ✅ Helper: Download Button Function
 def download_button(df, filename):
@@ -657,51 +658,54 @@ elif table_option == "Expenses" and not expenses_df.empty:
     # ✅ Download Filtered Results
     download_button(filtered_df, "filtered_expenses.xlsx")
 
-    # ========================================
-    # ✅ PAYMENT FILTERS
-    # ========================================
-    elif table_option == "Payments" and not payment_df.empty:
-        st.subheader("🔍 Filter Payments Data")
+# ========================================
+# ✅ PAYMENT FILTERS
+# ========================================
+elif table_option == "Payments" and not payment_df.empty:
+    st.subheader("🔍 Filter Payments Data")
 
-        payment_filter_option = st.selectbox("Select a Filter for Payments",
-        ["None", "Payment Date Range", "Amount", "Payment Method", "Payment Status"])
+    payment_filter_option = st.selectbox(
+        "Select a Filter for Payments",
+        ["None", "Payment Date Range", "Amount", "Payment Method", "Payment Status"]
+    )
 
-        filtered_df = payment_df.copy()
+    filtered_df = payment_df.copy()
 
-        # ✅ Date Range Filter
-        if payment_filter_option == "Payment Date Range":
-            today = datetime.date.today()
-            start_date, end_date = st.date_input("Select Date Range", (today, today))
+    # ✅ Date Range Filter
+    if payment_filter_option == "Payment Date Range":
+        today = datetime.date.today()
+        start_date, end_date = st.date_input("Select Date Range", (today, today))
 
-            if start_date > end_date:
-                st.error("⚠ Start date cannot be after end date")
+        if start_date > end_date:
+            st.error("⚠ Start date cannot be after end date")
+        else:
+            filtered_df['payment_date'] = pd.to_datetime(filtered_df['payment_date'], errors='coerce')
+            filtered_df = filtered_df[
+                (filtered_df['payment_date'] >= pd.to_datetime(start_date)) &
+                (filtered_df['payment_date'] <= pd.to_datetime(end_date))
+            ]
+
+    # ✅ Amount Filter
+    elif payment_filter_option == "Amount":
+        amount = st.number_input("Enter Amount", min_value=0.0, step=0.01)
+        filter_type = st.radio("Filter Type", ["Equal To", "Greater Than or Equal To"])
+        if amount > 0:
+            if filter_type == "Equal To":
+                filtered_df = filtered_df[filtered_df['amount'] == amount]
             else:
-                filtered_df['payment_date'] = pd.to_datetime(filtered_df['payment_date'], errors='coerce')
-                filtered_df = filtered_df[
-                   (filtered_df['payment_date'] >= pd.to_datetime(start_date)) &
-                   (filtered_df['payment_date'] <= pd.to_datetime(end_date))]
+                filtered_df = filtered_df[filtered_df['amount'] >= amount]
 
-          # ✅ Amount Filter
-        elif payment_filter_option == "Amount":
-            amount = st.number_input("Enter Amount", min_value=0.0, step=0.01)
-            filter_type = st.radio("Filter Type", ["Equal To", "Greater Than or Equal To"])
-            if amount > 0:
-                if filter_type == "Equal To":
-                    filtered_df = filtered_df[filtered_df['amount'] == amount]
-                else:
-                    filtered_df = filtered_df[filtered_df['amount'] >= amount]
+    # ✅ Payment Method Filter
+    elif payment_filter_option == "Payment Method":
+        methods = payment_df['payment_method'].dropna().unique().tolist()
+        method = st.selectbox("Select Payment Method", methods)
+        filtered_df = filtered_df[filtered_df['payment_method'] == method]
 
-             # ✅ Payment Method Filter
-        elif payment_filter_option == "Payment Method":
-            methods = payment_df['payment_method'].dropna().unique().tolist()
-            method = st.selectbox("Select Payment Method", methods)
-            filtered_df = filtered_df[filtered_df['payment_method'] == method]
-
-          # ✅ Payment Status Filter
-        elif payment_filter_option == "Payment Status":
-            statuses = payment_df['payment_status'].dropna().unique().tolist()
-            status = st.selectbox("Select Payment Status", statuses)
-            filtered_df = filtered_df[filtered_df['payment_status'] == status]
+    # ✅ Payment Status Filter
+    elif payment_filter_option == "Payment Status":
+        statuses = payment_df['payment_status'].dropna().unique().tolist()
+        status = st.selectbox("Select Payment Status", statuses)
+        filtered_df = filtered_df[filtered_df['payment_status'] == status]
 
     # ✅ Show results
     st.write("### Filtered Payments Data")
@@ -709,7 +713,6 @@ elif table_option == "Expenses" and not expenses_df.empty:
 
     # ✅ Download Filtered Results
     download_button(filtered_df, "filtered_payments.xlsx")
-
 
 else:
     st.warning("No data available for the selected table.")
