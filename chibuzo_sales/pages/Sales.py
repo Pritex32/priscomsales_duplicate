@@ -1032,7 +1032,7 @@ with tab1:
 
 
                             
-    with col2:
+    
     search_query = st.text_input("🔍 Search by Customer/Supplier Name or Invoice Number")
 
         # Perform search if query is provided
