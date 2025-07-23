@@ -424,11 +424,7 @@ def get_employee_dict(user_id):
     
 
 
-# -------- Tabs --------
-st.title("**💼 Sales & Expenses Management**")
-tab1, tab2 ,tab3, tab4 ,tab5= st.tabs(["➕ Add Sale", "Payments","💸 Add Expense","Delete",'Report'])
 
-# ========== ADD SALE ==========
 
 @st.cache_data(ttl=7200)
 def fetch_inventory_items(user_id):
