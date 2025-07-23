@@ -440,7 +440,7 @@ def upload_invoice(file, folder, filename,user_id):
             else:
                 st.error(f"❌ Failed to upload invoice: {error_info.get('message', str(e))}")
         else:  # error_info is a string, just display it
-            st.error(f"❌ Failed to upload invoice.}")
+            st.error(f"❌ Failed to upload invoice.")
 
     return None
 
