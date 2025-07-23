@@ -462,7 +462,7 @@ def get_employee_dict(user_id):
 # ✅ Simulate user role (replace with actual session logic)
 
 st.title("**💼 Sales & Expenses Management**")
-tab1, tab2 ,tab3, tab4 ,tab5= st.tabs(["➕ Add Sale", "Payments","💸 Add Expense","Delete",'Report'])
+tab1, tab2 ,tab3, tab4 ,tab5= st.tabs(["➕ Add Sale", "💸 Add Expense","Payments","Delete",'Report'])
 
 # ========== ADD SALE ==========
 
@@ -1443,7 +1443,9 @@ with tab2:
 
 
 with tab3:
-   
+    if st.session_state.get("role") != "md":
+        st.warning("🚫 You are not authorized to view this page.")
+        st.stop()   
     st.markdown("""
     <h2 style='color: green; font-weight: 600;'>💰 View Customers with Pending Payments</h2>""", unsafe_allow_html=True)
     col11,col12=st.columns([3,1])
