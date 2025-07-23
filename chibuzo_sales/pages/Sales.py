@@ -1017,7 +1017,14 @@ with tab1:
                         "Payment Status": selected_sale["payment_status"],
                         "Notes": selected_sale.get("notes", "None")
                     }.items():
-                        pdf.cell(200, 10, txt=f"{key}: {value}", ln=True)
+                    pdf.cell(200, 10, txt=f"{key}: {value}", ln=True)
+                    pdf.ln(10)
+                    # Add thank you footer
+                    pdf.set_y(265)
+                    pdf.set_font("Arial", "I", 12)
+                    pdf.set_text_color(120, 120, 120)
+                    pdf.cell(0, 10, "Thank you for supporting our business — your trust means the world to us!", ln=True, align="C")
+
 
                     receipt_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
                     pdf.output(receipt_file)
