@@ -493,12 +493,11 @@ def fetch_goods_bought_history(user_id):
 
 
 @st.cache_data(ttl=7200)
-def fetch_sales_data(user_id, limit=10):
+def fetch_sales_data(user_id):
     
     response = supabase.table("sales_master_history").select("*") \
                 .eq("user_id", user_id) \
                 .order("sale_date", desc=True) \
-                .limit(limit) \
                 .execute()
     
     data = response.data or []
