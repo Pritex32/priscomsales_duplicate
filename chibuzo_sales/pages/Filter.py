@@ -99,7 +99,66 @@ def decode_jwt(token):
         return None
     except jwt.InvalidTokenError:
         return None
+
+
+from supabase import create_client
+# supabase configurations
+@st.cache_resource
+def get_supabase_client():
+    supabase_url = 'https://ecsrlqvifparesxakokl.supabase.co' # Your Supabase project URL
+    supabase_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjc3JscXZpZnBhcmVzeGFrb2tsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2NjczMDMsImV4cCI6MjA2MDI0MzMwM30.Zts7p1C3MNFqYYzp-wo3e0z-9MLfRDoY2YJ5cxSexHk'
+    try:
+        supabase = create_client(supabase_url, supabase_key)
+       
+        return supabase
+
+    except Exception as e:
+        st.error("❌ Failed to connect to database. Please check your internet or try again later.")
+        # Optional: Print or log error for debugging during development
+        # st.write(e)
+        st.stop()
     
+# Initialize Supabase client
+supabase = get_supabase_client() # use this to call the supabase database
+
+
+
+
+def sync_plan_from_db(user_id):
+    try:
+        response = supabase.table("subscription").select("*").eq("user_id", user_id).order("expires_at", desc=True).limit(1).execute()
+        data = response.data
+
+        if data:
+            sub = data[0]
+            plan = sub.get("plan", "free")
+            is_active = sub.get("is_active", False)
+
+            # Update session
+            st.session_state.plan = plan
+            st.session_state.is_active = is_active
+
+            # Update token with correct plan
+            username = st.session_state.get("username", "")
+            role = st.session_state.get("role", "user")
+            email = st.session_state.get("user_email", "")
+
+            token = generate_jwt(user_id, username, role, plan, is_active, email)
+            st.session_state.jwt_token = token
+
+            # Update localStorage with new token
+            st.markdown(f"""
+                <script>
+                    localStorage.setItem("login_token", "{token}");
+                </script>
+            """, unsafe_allow_html=True)
+        else:
+            st.session_state.plan = "free"
+            st.session_state.is_active = False
+
+    except Exception as e:
+        st.error(f"❌ Failed to sync subscription info: ")
+
 
 # Restore login from browser localStorage
 
@@ -201,30 +260,6 @@ st.markdown("""
 if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
     st.warning("Please log in first.")
     st.stop()
-
-
-
-
-from supabase import create_client
-# supabase configurations
-@st.cache_resource
-def get_supabase_client():
-    supabase_url = 'https://ecsrlqvifparesxakokl.supabase.co' # Your Supabase project URL
-    supabase_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjc3JscXZpZnBhcmVzeGFrb2tsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2NjczMDMsImV4cCI6MjA2MDI0MzMwM30.Zts7p1C3MNFqYYzp-wo3e0z-9MLfRDoY2YJ5cxSexHk'
-    try:
-        supabase = create_client(supabase_url, supabase_key)
-       
-        return supabase
-
-    except Exception as e:
-        st.error("❌ Failed to connect to database. Please check your internet or try again later.")
-        # Optional: Print or log error for debugging during development
-        # st.write(e)
-        st.stop()
-    
-# Initialize Supabase client
-supabase = get_supabase_client() # use this to call the supabase database
-
 
 
 
@@ -357,6 +392,7 @@ def handle_subscription_expiration(user_id):
         st.error(f"Subscription check failed")
 
 if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in"):
+    sync_plan_from_db(user_id)
     block_if_subscription_expired()
     # 🔍 Check if Pro subscription has expired
     handle_subscription_expiration(user_id)
@@ -404,7 +440,7 @@ def upload_invoice(file, folder, filename,user_id):
             else:
                 st.error(f"❌ Failed to upload invoice: {error_info.get('message', str(e))}")
         else:  # error_info is a string, just display it
-            st.error(f"❌ Failed to upload invoice: {error_info}")
+            st.error(f"❌ Failed to upload invoice.}")
 
     return None
 
@@ -509,11 +545,34 @@ def fetch_payment_history(user_id):
 
 
 
-import streamlit as st
-import pandas as pd
+i
+
+import datetime
 from io import BytesIO
 
-st.title("📊 Filter Records - Sales | Restock | Expenses | Payments")
+
+st.markdown(
+    """
+    <style>
+        .custom-title {
+            font-size: 32px;
+            color: #2c3e50;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #4CAF50, #81C784);
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+    <div class="custom-title">
+        📊 Filter Records - <span style="color:#f1f1f1;">Sales | Restock | Expenses | Payments</span>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 
 # ✅ Fetch Data (From your cached Supabase functions)
 restock_df = fetch_goods_bought_history(user_id)
@@ -578,8 +637,12 @@ if table_option == "Sales" and not sales_df.empty:
             filtered_df = filtered_df[filtered_df['item_name'].str.contains(item, case=False, na=False)]
 
     elif sales_filter_option == "Sale Date Range":
-        start_date, end_date = st.date_input("Select Date Range", [])
-        if len(start_date.__str__()) > 0 and len(end_date.__str__()) > 0:
+        today = datetime.date.today()
+        start_date, end_date = st.date_input("Select Date Range", (today, today))
+
+        if start_date > end_date:
+            st.error("⚠ Start date cannot be after end date")
+        else:
             # Ensure date column is in datetime format
             filtered_df['sale_date'] = pd.to_datetime(filtered_df['sale_date'], errors='coerce')
             filtered_df = filtered_df[
@@ -589,8 +652,6 @@ if table_option == "Sales" and not sales_df.empty:
 
     st.write("### Filtered Sales Data")
     st.dataframe(filtered_df)
-
-    # ✅ Download Filtered Results
     download_button(filtered_df, "filtered_sales.xlsx")
 
 # ========================================
@@ -612,8 +673,12 @@ elif table_option == "Restock" and not restock_df.empty:
             filtered_df = filtered_df[filtered_df['item_name'].str.contains(item, case=False, na=False)]
 
     elif restock_filter_option == "Restock Date Range":
-        start_date, end_date = st.date_input("Select Date Range", [])
-        if len(start_date.__str__()) > 0 and len(end_date.__str__()) > 0:
+        today = datetime.date.today()
+        start_date, end_date = st.date_input("Select Date Range", (today, today))
+
+        if start_date > end_date:
+            st.error("⚠ Start date cannot be after end date")
+        else:
             filtered_df['restock_date'] = pd.to_datetime(filtered_df['restock_date'], errors='coerce')
             filtered_df = filtered_df[
                 (filtered_df['restock_date'] >= pd.to_datetime(start_date)) &
@@ -622,8 +687,6 @@ elif table_option == "Restock" and not restock_df.empty:
 
     st.write("### Filtered Restock Data")
     st.dataframe(filtered_df)
-
-    # ✅ Download Filtered Results
     download_button(filtered_df, "filtered_restock.xlsx")
 
 # ========================================
@@ -645,8 +708,12 @@ elif table_option == "Expenses" and not expenses_df.empty:
             filtered_df = filtered_df[filtered_df['vendor_name'].str.contains(vendor, case=False, na=False)]
 
     elif expense_filter_option == "Expense Date Range":
-        start_date, end_date = st.date_input("Select Date Range", [])
-        if len(start_date.__str__()) > 0 and len(end_date.__str__()) > 0:
+        today = datetime.date.today()
+        start_date, end_date = st.date_input("Select Date Range", (today, today))
+
+        if start_date > end_date:
+            st.error("⚠ Start date cannot be after end date")
+        else:
             filtered_df['expense_date'] = pd.to_datetime(filtered_df['expense_date'], errors='coerce')
             filtered_df = filtered_df[
                 (filtered_df['expense_date'] >= pd.to_datetime(start_date)) &
@@ -655,8 +722,6 @@ elif table_option == "Expenses" and not expenses_df.empty:
 
     st.write("### Filtered Expenses Data")
     st.dataframe(filtered_df)
-
-    # ✅ Download Filtered Results
     download_button(filtered_df, "filtered_expenses.xlsx")
 
 # ========================================
@@ -672,7 +737,6 @@ elif table_option == "Payments" and not payment_df.empty:
 
     filtered_df = payment_df.copy()
 
-    # ✅ Date Range Filter
     if payment_filter_option == "Payment Date Range":
         today = datetime.date.today()
         start_date, end_date = st.date_input("Select Date Range", (today, today))
@@ -686,7 +750,6 @@ elif table_option == "Payments" and not payment_df.empty:
                 (filtered_df['payment_date'] <= pd.to_datetime(end_date))
             ]
 
-    # ✅ Amount Filter
     elif payment_filter_option == "Amount":
         amount = st.number_input("Enter Amount", min_value=0.0, step=0.01)
         filter_type = st.radio("Filter Type", ["Equal To", "Greater Than or Equal To"])
@@ -696,23 +759,18 @@ elif table_option == "Payments" and not payment_df.empty:
             else:
                 filtered_df = filtered_df[filtered_df['amount'] >= amount]
 
-    # ✅ Payment Method Filter
     elif payment_filter_option == "Payment Method":
         methods = payment_df['payment_method'].dropna().unique().tolist()
         method = st.selectbox("Select Payment Method", methods)
         filtered_df = filtered_df[filtered_df['payment_method'] == method]
 
-    # ✅ Payment Status Filter
     elif payment_filter_option == "Payment Status":
         statuses = payment_df['payment_status'].dropna().unique().tolist()
         status = st.selectbox("Select Payment Status", statuses)
         filtered_df = filtered_df[filtered_df['payment_status'] == status]
 
-    # ✅ Show results
     st.write("### Filtered Payments Data")
     st.dataframe(filtered_df)
-
-    # ✅ Download Filtered Results
     download_button(filtered_df, "filtered_payments.xlsx")
 
 else:
