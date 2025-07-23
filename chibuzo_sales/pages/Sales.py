@@ -902,9 +902,21 @@ max_size_mb = 10
 
 with tab1:
     st.markdown("___")
+    # Add custom CSS for expander
+    st.markdown("""
+    <style>
+        div.streamlit-expanderHeader {
+            background-color: orange !important;
+            color: white !important;
+            font-weight: bold;
+            font-size: 16px;
+            border-radius: 8px;
+            padding: 8px;
+        }
+    </style>""", unsafe_allow_html=True)
 
     # ✅ Expander for logo and account details
-    with st.expander("📄 Customize your Receipt"):
+    with st.expander("**📄 Customize your Receipt**"):
         col1, col2 = st.columns(2)
         with col1:
             # 👉 Fetch or create user settings
