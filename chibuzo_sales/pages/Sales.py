@@ -1273,12 +1273,176 @@ def update_payment_status(table_name, id_column, record_id,user_id):
 
 
 
-# for pagination
+
+
+
+
+
+
+
+
+    
+
+
+
+# ========== ADD EXPENSE ==========
+def get_paid_expenses(user_id):
+    # Fetch records where payment status is "paid"
+    paid_expenses = supabase.table("expenses_master").select("*").eq("payment_status", "paid").eq("user_id", user_id).execute()
+    return paid_expenses.data
+
+
+
+# Function to update payment and change payment status
+def update_payment(expense_id, payment_amount,user_id):
+    # Get the current expense record
+    expense = supabase.table("expenses_master").select("*").eq("id", expense_id).eq("user_id", user_id).execute().get("data", [])[0]
+    
+    if expense:
+        # Calculate the new amount paid
+        new_amount_paid = expense.get("amount_paid", 0) + payment_amount
+        
+        # Check if the full amount has been paid
+        if new_amount_paid >= expense["total_amount"]:
+            new_payment_status = "paid"
+            new_amount_paid = expense["total_amount"]  # Ensure amount paid doesn't exceed total
+        else:
+            new_payment_status = expense["payment_status"]  # Keep the same status if partial payment
+
+        # Update the database with new payment info
+        updated_data = {
+            "amount_paid": new_amount_paid,
+            "payment_status": new_payment_status
+        }
+        
+        # Update the expense record
+        supabase.table("expenses_master").update(updated_data).eq("id", expense_id).eq("user_id", user_id).execute()
+
+        return new_payment_status
+    return None
+
+
 
 
 
 
 with tab2:
+    col13,col14=st.columns([3,1])
+    with col13:
+        st.title("Record a New Expense")
+    with col14:
+        if st.button("🔄 Refresh", use_container_width=True,key='Expenses_refersh_333'):
+            st.cache_data.clear()
+            st.rerun()
+
+    col15,col16=st.columns(2)
+    with col15:
+        employee_name=st.text_input("user",value= user_name, disabled=True,key="expense_name_input")
+
+        employee_id=st.text_input("user",value= user_id, disabled=True)
+
+        expense_date = st.date_input("Expense Date", value=date.today(), key="exp_date")
+        vendor_name = st.text_input("Vendor Name")
+        total_exp_amount = st.number_input("Total Amount", min_value=0.0, key="amt2")
+    with col16:
+        exp_payment_method = st.selectbox("Payment Method", ["cash", "card", "transfer"], key="pm2")
+        exp_payment_status = st.selectbox("Payment Status", ["paid", "credit", "partial"], key="ps2")
+        exp_due_date = st.date_input("Due Date", value=date.today(), key="dd2") if exp_payment_status != "paid" else None
+        exp_invoice_number = st.text_input("Invoice Number (optional)", key="inv2")
+        exp_notes = st.text_area("Notes", key="note2")
+
+    # Show amount paid only for credit or partial payments
+    amount_paid = None
+    remaining_balance = 0.0  # default no balance
+
+    if exp_payment_status in ["credit", "partial"]:
+        amount_paid = st.number_input("Amount Paid", min_value=0.0, max_value=total_exp_amount, key="amt_paid")
+        remaining_balance = total_exp_amount - amount_paid
+        st.info(f"💰 Remaining Balance: {remaining_balance:.2f}")
+    else:
+        # For "paid", remaining balance is zero, amount_paid is full
+        amount_paid = total_exp_amount
+        remaining_balance = 0.0
+
+    # Upload invoice if not fully paid
+    # Upload Invoice File (Optional)
+    st.markdown("📎 **Upload Invoice (PDF/Image)**")
+    exp_invoice_file = st.file_uploader("Upload Invoice", type=["pdf", "jpg", "jpeg", "png"], key="exp_file")
+    exp_invoice_file_url = None
+    # to name the file
+    user_invoice_name = st.text_input("Enter desired invoice name (without extension)", value=f"invoice_{employee_id}_{date.today().isoformat()}")
+    
+    if st.button("💾 Save Expense"):
+        error_msgs = []
+        if exp_payment_status in ["paid", "credit", "partial"] and not (exp_invoice_number or exp_invoice_file):
+            error_msgs.append("📄 Please provide either an invoice number or upload the invoice file for paid, credit, or partial expenses.")
+        if not vendor_name:
+            error_msgs.append("🏪 Vendor name is required.")
+        if total_exp_amount == 0.0:
+            error_msgs.append("💰 Expense amount must be greater than zero.")
+        # --- Stop if any validation errors exist ---
+        if error_msgs:
+            for msg in error_msgs:
+                st.error(msg)
+            st.stop()
+            
+        if exp_invoice_file:
+                extension = os.path.splitext(exp_invoice_file.name)[1]
+                safe_name = user_invoice_name.strip().replace(" ", "_")
+                unique_suffix = uuid.uuid4().hex[:8]
+                filename = f"{safe_name}_{unique_suffix}{extension}"
+                st.write(f"Uploading file as: {filename}")
+                exp_invoice_file_url = upload_invoice(exp_invoice_file,"salesinvoices", filename,user_id)
+                if exp_invoice_file_url:
+                    st.success("✅ Invoice uploaded successfully!")
+                    st.write(f"[View Invoice]({exp_invoice_file_url})")
+                else:
+                    st.warning("⚠️ Invoice not uploaded. Please check for errors above.")
+         # upload inoive when i click save
+       
+        exp_data = {
+            "employee_id": employee_id,
+            "employee_name": employee_name,
+            "user_id":user_id,
+            "expense_date": str(expense_date),
+            "vendor_name": vendor_name,
+            "total_amount": total_exp_amount,
+            "payment_method": exp_payment_method,
+            "payment_status": exp_payment_status,
+            "due_date": str(exp_due_date) if exp_due_date else None,
+            "invoice_number": exp_invoice_number,
+            "invoice_file_url": exp_invoice_file_url,
+            "notes": exp_notes,
+            "amount_paid": amount_paid if amount_paid is not None else total_exp_amount,  # Full if "paid"
+            "amount_balance":remaining_balance 
+        }
+        supabase.table("expenses_master").insert(exp_data).execute()
+        st.success("✅ Expense recorded successfully!")
+        st.rerun()
+
+
+    
+# Streamlit form to make a payment
+
+    st.markdown("___")
+    df_expenses = fetch_expenses_master_data(user_id)
+    with st.expander('View Expenses table'):
+        if df_expenses is not None and not df_expenses.empty:
+            st.write('expenses table')
+            st.dataframe(df_expenses.tail(10))
+            st.download_button(
+                label="⬇️ Download Expenses Data as CSV",
+                data=df_expenses.to_csv(index=False),
+                file_name="expenses_data.csv",
+                mime="text/csv")  # Display the DataFrame in Streamlit
+        else:
+            st.info("No recorded expenses found.")
+
+
+
+
+
+with tab3:
    
     st.markdown("""
     <h2 style='color: green; font-weight: 600;'>💰 View Customers with Pending Payments</h2>""", unsafe_allow_html=True)
@@ -1477,161 +1641,6 @@ with tab2:
             st.error("❌ No data found!")# 
 
     
-
-
-
-# ========== ADD EXPENSE ==========
-def get_paid_expenses(user_id):
-    # Fetch records where payment status is "paid"
-    paid_expenses = supabase.table("expenses_master").select("*").eq("payment_status", "paid").eq("user_id", user_id).execute()
-    return paid_expenses.data
-
-
-
-# Function to update payment and change payment status
-def update_payment(expense_id, payment_amount,user_id):
-    # Get the current expense record
-    expense = supabase.table("expenses_master").select("*").eq("id", expense_id).eq("user_id", user_id).execute().get("data", [])[0]
-    
-    if expense:
-        # Calculate the new amount paid
-        new_amount_paid = expense.get("amount_paid", 0) + payment_amount
-        
-        # Check if the full amount has been paid
-        if new_amount_paid >= expense["total_amount"]:
-            new_payment_status = "paid"
-            new_amount_paid = expense["total_amount"]  # Ensure amount paid doesn't exceed total
-        else:
-            new_payment_status = expense["payment_status"]  # Keep the same status if partial payment
-
-        # Update the database with new payment info
-        updated_data = {
-            "amount_paid": new_amount_paid,
-            "payment_status": new_payment_status
-        }
-        
-        # Update the expense record
-        supabase.table("expenses_master").update(updated_data).eq("id", expense_id).eq("user_id", user_id).execute()
-
-        return new_payment_status
-    return None
-
-
-
-
-
-
-with tab3:
-    col13,col14=st.columns([3,1])
-    with col13:
-        st.title("Record a New Expense")
-    with col14:
-        if st.button("🔄 Refresh", use_container_width=True,key='Expenses_refersh_333'):
-            st.cache_data.clear()
-            st.rerun()
-
-    col15,col16=st.columns(2)
-    with col15:
-        employee_name=st.text_input("user",value= user_name, disabled=True,key="expense_name_input")
-
-        employee_id=st.text_input("user",value= user_id, disabled=True)
-
-        expense_date = st.date_input("Expense Date", value=date.today(), key="exp_date")
-        vendor_name = st.text_input("Vendor Name")
-        total_exp_amount = st.number_input("Total Amount", min_value=0.0, key="amt2")
-    with col16:
-        exp_payment_method = st.selectbox("Payment Method", ["cash", "card", "transfer"], key="pm2")
-        exp_payment_status = st.selectbox("Payment Status", ["paid", "credit", "partial"], key="ps2")
-        exp_due_date = st.date_input("Due Date", value=date.today(), key="dd2") if exp_payment_status != "paid" else None
-        exp_invoice_number = st.text_input("Invoice Number (optional)", key="inv2")
-        exp_notes = st.text_area("Notes", key="note2")
-
-    # Show amount paid only for credit or partial payments
-    amount_paid = None
-    remaining_balance = 0.0  # default no balance
-
-    if exp_payment_status in ["credit", "partial"]:
-        amount_paid = st.number_input("Amount Paid", min_value=0.0, max_value=total_exp_amount, key="amt_paid")
-        remaining_balance = total_exp_amount - amount_paid
-        st.info(f"💰 Remaining Balance: {remaining_balance:.2f}")
-    else:
-        # For "paid", remaining balance is zero, amount_paid is full
-        amount_paid = total_exp_amount
-        remaining_balance = 0.0
-
-    # Upload invoice if not fully paid
-    # Upload Invoice File (Optional)
-    st.markdown("📎 **Upload Invoice (PDF/Image)**")
-    exp_invoice_file = st.file_uploader("Upload Invoice", type=["pdf", "jpg", "jpeg", "png"], key="exp_file")
-    exp_invoice_file_url = None
-    # to name the file
-    user_invoice_name = st.text_input("Enter desired invoice name (without extension)", value=f"invoice_{employee_id}_{date.today().isoformat()}")
-    
-    if st.button("💾 Save Expense"):
-        error_msgs = []
-        if exp_payment_status in ["paid", "credit", "partial"] and not (exp_invoice_number or exp_invoice_file):
-            error_msgs.append("📄 Please provide either an invoice number or upload the invoice file for paid, credit, or partial expenses.")
-        if not vendor_name:
-            error_msgs.append("🏪 Vendor name is required.")
-        if total_exp_amount == 0.0:
-            error_msgs.append("💰 Expense amount must be greater than zero.")
-        # --- Stop if any validation errors exist ---
-        if error_msgs:
-            for msg in error_msgs:
-                st.error(msg)
-            st.stop()
-            
-        if exp_invoice_file:
-                extension = os.path.splitext(exp_invoice_file.name)[1]
-                safe_name = user_invoice_name.strip().replace(" ", "_")
-                unique_suffix = uuid.uuid4().hex[:8]
-                filename = f"{safe_name}_{unique_suffix}{extension}"
-                st.write(f"Uploading file as: {filename}")
-                exp_invoice_file_url = upload_invoice(exp_invoice_file,"salesinvoices", filename,user_id)
-                if exp_invoice_file_url:
-                    st.success("✅ Invoice uploaded successfully!")
-                    st.write(f"[View Invoice]({exp_invoice_file_url})")
-                else:
-                    st.warning("⚠️ Invoice not uploaded. Please check for errors above.")
-         # upload inoive when i click save
-       
-        exp_data = {
-            "employee_id": employee_id,
-            "employee_name": employee_name,
-            "user_id":user_id,
-            "expense_date": str(expense_date),
-            "vendor_name": vendor_name,
-            "total_amount": total_exp_amount,
-            "payment_method": exp_payment_method,
-            "payment_status": exp_payment_status,
-            "due_date": str(exp_due_date) if exp_due_date else None,
-            "invoice_number": exp_invoice_number,
-            "invoice_file_url": exp_invoice_file_url,
-            "notes": exp_notes,
-            "amount_paid": amount_paid if amount_paid is not None else total_exp_amount,  # Full if "paid"
-            "amount_balance":remaining_balance 
-        }
-        supabase.table("expenses_master").insert(exp_data).execute()
-        st.success("✅ Expense recorded successfully!")
-        st.rerun()
-
-
-    
-# Streamlit form to make a payment
-
-    st.markdown("___")
-    df_expenses = fetch_expenses_master_data(user_id)
-    with st.expander('View Expenses table'):
-        if df_expenses is not None and not df_expenses.empty:
-            st.write('expenses table')
-            st.dataframe(df_expenses.tail(10))
-            st.download_button(
-                label="⬇️ Download Expenses Data as CSV",
-                data=df_expenses.to_csv(index=False),
-                file_name="expenses_data.csv",
-                mime="text/csv")  # Display the DataFrame in Streamlit
-        else:
-            st.info("No recorded expenses found.")
 
 
 
