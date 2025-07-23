@@ -937,6 +937,7 @@ with tab1:
                     "bank_name": bank_name
                 }).eq("user_id", user_id).execute()
                 st.success("✅ Account details saved.")
+                st.rerun()
 
     # 📦 Sales and Receipt Logic (outside expander)
     try:
@@ -986,7 +987,7 @@ with tab1:
                         temp_logo_path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
                         urllib.request.urlretrieve(logo_url, temp_logo_path)
                         img = Image.open(temp_logo_path)
-                        max_width = 20  # mm
+                        max_width = 30 # mm
                         aspect_ratio = img.height / img.width
                         height = max_width * aspect_ratio
                         pdf.image(temp_logo_path, x=10, y=10, w=max_width, h=height)
