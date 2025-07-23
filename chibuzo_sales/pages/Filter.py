@@ -637,7 +637,8 @@ if table_option == "Sales" and not sales_df.empty:
 
     elif sales_filter_option == "Sale Date Range":
         today = datetime.date.today()
-        start_date, end_date = st.date_input("Select Date Range", (today, today))
+        start_date = st.date_input("Start Date", today)
+        end_date = st.date_input("End Date", today)
 
         if start_date > end_date:
             st.error("⚠ Start date cannot be after end date")
@@ -673,7 +674,8 @@ elif table_option == "Restock" and not restock_df.empty:
 
     elif restock_filter_option == "Restock Date Range":
         today = datetime.date.today()
-        start_date, end_date = st.date_input("Select Date Range", (today, today))
+        start_date = st.date_input("Start Date", today)
+        end_date = st.date_input("End Date", today)
 
         if start_date > end_date:
             st.error("⚠ Start date cannot be after end date")
@@ -708,7 +710,8 @@ elif table_option == "Expenses" and not expenses_df.empty:
 
     elif expense_filter_option == "Expense Date Range":
         today = datetime.date.today()
-        start_date, end_date = st.date_input("Select Date Range", (today, today))
+        start_date = st.date_input("Start Date", today)
+        end_date = st.date_input("End Date", today)
 
         if start_date > end_date:
             st.error("⚠ Start date cannot be after end date")
