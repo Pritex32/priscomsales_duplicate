@@ -1027,7 +1027,7 @@ with tab1:
                     pdf.set_y(265)
                     pdf.set_font("Arial", "I", 12)
                     pdf.set_text_color(120, 120, 120)
-                    pdf.cell(0, 10, "Thank you for supporting our business — your trust means the world to us!", ln=True, align="C")
+                    pdf.cell(0, 10, "Thank you for supporting our business - your trust means the world to us!", ln=True, align="C")
 
 
                     receipt_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
