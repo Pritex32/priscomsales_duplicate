@@ -1017,7 +1017,7 @@ with tab1:
                         "Payment Status": selected_sale["payment_status"],
                         "Notes": selected_sale.get("notes", "None")
                     }.items():
-                    pdf.cell(200, 10, txt=f"{key}: {value}", ln=True)
+                        pdf.cell(200, 10, txt=f"{key}: {value}", ln=True)
                     pdf.ln(10)
                     # Add thank you footer
                     pdf.set_y(265)
