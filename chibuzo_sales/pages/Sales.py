@@ -887,158 +887,149 @@ tenant_name = user_info.data["username"] if user_info.data else "Sales"
 
 
 #main code
-
 max_size_mb = 10
+
 with tab1:
     st.markdown("___")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.subheader("📄 Generate Sales Receipt")
-        # 👉 Fetch or create user settings
-        user_data = supabase.table("users").select("*").eq("user_id", user_id).single().execute().data
-        if not user_data:
-            supabase.table("users").insert({"user_id": user_id}).execute()
-            user_data = {"user_id": user_id, "account_number": "", "bank_name": "", "logo_url": ""}
 
-        # ➕ Upload logo
-        st.markdown("##### 🖼 Upload Company Logo max 10mb (optional)")
-        logo_file = st.file_uploader("Upload PNG or JPG logo", type=["png", "jpg", "jpeg"])
-        if logo_file:
-            file_size_mb = logo_file.size / (1024 * 1024)
+    # ✅ Expander for logo and account details
+    with st.expander("📄 Customize your Receipt"):
+        col1, col2 = st.columns(2)
+        with col1:
+            # 👉 Fetch or create user settings
+            user_data = supabase.table("users").select("*").eq("user_id", user_id).single().execute().data
+            if not user_data:
+                supabase.table("users").insert({"user_id": user_id}).execute()
+                user_data = {"user_id": user_id, "account_number": "", "bank_name": "", "logo_url": ""}
 
-            if file_size_mb > max_size_mb:
-                st.error(f"❌ File too large! Please upload a file under {max_size_mb}MB.")
-            else:
-                image = Image.open(logo_file)
-                temp_png = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
-                image.save(temp_png, format="PNG")
-                temp_png.close()
-                unique_id = str(uuid.uuid4())
-                file_path = f"{user_id}/logo_{unique_id}.png"
-                with open(temp_png.name, "rb") as f:
-                    supabase.storage.from_("logos").upload(file_path, f, {"content-type": "image/png"})
-                logo_url = f"https://ecsrlqvifparesxakokl.supabase.co/storage/v1/object/public/logos/{file_path}"
+            # ➕ Upload logo
+            st.markdown("##### 🖼 Upload Company Logo max 10mb (optional)")
+            logo_file = st.file_uploader("Upload PNG or JPG logo", type=["png", "jpg", "jpeg"])
+            if logo_file:
+                file_size_mb = logo_file.size / (1024 * 1024)
 
-                supabase.table("users").update({"logo_url": logo_url}).eq("user_id", user_id).execute()
-                st.success("✅ Logo uploaded successfully.")
-        else:
-            logo_url = user_data.get("logo_url", "")
-
-        # ➕ Account details
-        account_number = st.text_input("Company Account Number", value=user_data.get("account_number", ""))
-        bank_name = st.text_input("Bank Name", value=user_data.get("bank_name", ""))
-
-        # Save account info if changed
-        if st.button("💾 Save Account Details"):
-            supabase.table("users").update({
-                "account_number": account_number,
-                "bank_name": bank_name
-            }).eq("user_id", user_id).execute()
-            st.success("✅ Account details saved.")
-
-        # 🔁 Step 1: Fetch sales for the logged-in user
-        try:
-            sales_result = supabase.table("sales_master_history").select("*").eq("user_id", user_id).order("sale_date", desc=True).limit(50).execute()
-            sales = sales_result.data
-
-            if not sales:
-                st.warning("No sales found for this user.")
-            else:
-                available_dates = sorted({s["sale_date"] for s in sales}, reverse=True)
-
-                # Convert strings to date objects
-                date_options = [datetime.strptime(d, "%Y-%m-%d").date() for d in available_dates]
-                selected_date = st.date_input("Select Sale Date", value=date_options[0])
-
-                # 🔁 Step 3: Filter sales by selected date
-                sales_for_date = [s for s in sales if s["sale_date"] == selected_date.strftime("%Y-%m-%d")]
-
-                if not sales_for_date:
-                    st.warning(f"No sales on {selected_date.strftime('%Y-%m-%d')}.")
+                if file_size_mb > max_size_mb:
+                    st.error(f"❌ File too large! Please upload a file under {max_size_mb}MB.")
                 else:
-                    sale_options = {f"{s['item_name']} (₦{s['total_amount']:,.2f}) [#{s['sale_id']}]": s for s in sales_for_date}
-                    selected_sale_label = st.selectbox("Select a sale to generate receipt", list(sale_options.keys()))
-                    selected_sale = sale_options[selected_sale_label]
+                    image = Image.open(logo_file)
+                    temp_png = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+                    image.save(temp_png, format="PNG")
+                    temp_png.close()
+                    unique_id = str(uuid.uuid4())
+                    file_path = f"{user_id}/logo_{unique_id}.png"
+                    with open(temp_png.name, "rb") as f:
+                        supabase.storage.from_("logos").upload(file_path, f, {"content-type": "image/png"})
+                    logo_url = f"https://ecsrlqvifparesxakokl.supabase.co/storage/v1/object/public/logos/{file_path}"
 
-                    # Optional: edit the date if needed
+                    supabase.table("users").update({"logo_url": logo_url}).eq("user_id", user_id).execute()
+                    st.success("✅ Logo uploaded successfully.")
+            else:
+                logo_url = user_data.get("logo_url", "")
 
-                    # 🔁 Step 3: Show Receipt Details
-                    if st.button(" Show Receipt", key="show_receipt_btn"):
-                        if logo_url:
-                            st.image(logo_url, width=150)
-                        st.markdown(f"""   
-                        ###  Sales Receipt
-                        - **Sale ID:** {selected_sale['sale_id']}
-                        - **Employee Name:** {selected_sale.get('employee_name', 'N/A')}
-                        - **Sale Date:** {selected_sale['sale_date']}
-                        - **Customer:** {selected_sale['customer_name']}
-                        - **Item:** {selected_sale['item_name']}
-                        - **Quantity:** {selected_sale['quantity']}
-                        - **Unit Price:** ₦{selected_sale['unit_price']:,.2f}
-                        - **Total Amount:** ₦{selected_sale['total_amount']:,.2f}
-                        - **Amount Paid:** ₦{selected_sale.get('amount_paid', 0):,.2f}
-                        - **Balance:** ₦{selected_sale.get('amount_balance', 0):,.2f}
-                        - **Payment Method:** {selected_sale['payment_method']}
-                        - **Payment Status:** {selected_sale['payment_status']}
-                        - **Bank Account:** {account_number} - {bank_name}
-                        - **Notes:** {selected_sale.get('notes', 'None')}   """)
+            # ➕ Account details
+            account_number = st.text_input("Company Account Number", value=user_data.get("account_number", ""))
+            bank_name = st.text_input("Bank Name", value=user_data.get("bank_name", ""))
 
-                    # 🔁 Step 4: PDF generation
-                    if st.button("Download Receipt PDF", key="download_selected_receipt_btn"):
-                        pdf = FPDF()
-                        pdf.add_page()
-                        # Add logo from URL if exists
-                        if logo_url:
-                            temp_logo_path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
-                            urllib.request.urlretrieve(logo_url, temp_logo_path)
-                            # Resize logo dynamically
-                            img = Image.open(temp_logo_path)
-                            max_width = 20  # mm
-                            aspect_ratio = img.height / img.width
-                            height = max_width * aspect_ratio  # maintain aspect ratio
-                            pdf.image(temp_logo_path, x=10, y=10, w=max_width, h=height)
-                            pdf.set_y(10 + height + 5)  # move below the logo
+            # Save account info if changed
+            if st.button("💾 Save Account Details"):
+                supabase.table("users").update({
+                    "account_number": account_number,
+                    "bank_name": bank_name
+                }).eq("user_id", user_id).execute()
+                st.success("✅ Account details saved.")
 
-                            pdf.set_y(45)
-                        else:
-                            pdf.set_y(20)
+    # 📦 Sales and Receipt Logic (outside expander)
+    try:
+        sales_result = supabase.table("sales_master_history").select("*").eq("user_id", user_id).order("sale_date", desc=True).limit(50).execute()
+        sales = sales_result.data
+
+        if not sales:
+            st.warning("No sales found for this user.")
+        else:
+            available_dates = sorted({s["sale_date"] for s in sales}, reverse=True)
+            date_options = [datetime.strptime(d, "%Y-%m-%d").date() for d in available_dates]
+            selected_date = st.date_input("Select Sale Date", value=date_options[0])
+
+            sales_for_date = [s for s in sales if s["sale_date"] == selected_date.strftime("%Y-%m-%d")]
+
+            if not sales_for_date:
+                st.warning(f"No sales on {selected_date.strftime('%Y-%m-%d')}.")
+            else:
+                sale_options = {f"{s['item_name']} (₦{s['total_amount']:,.2f}) [#{s['sale_id']}]": s for s in sales_for_date}
+                selected_sale_label = st.selectbox("Select a sale to generate receipt", list(sale_options.keys()))
+                selected_sale = sale_options[selected_sale_label]
+
+                if st.button(" Show Receipt", key="show_receipt_btn"):
+                    if logo_url:
+                        st.image(logo_url, width=150)
+                    st.markdown(f"""   
+                    ###  Sales Receipt
+                    - **Sale ID:** {selected_sale['sale_id']}
+                    - **Employee Name:** {selected_sale.get('employee_name', 'N/A')}
+                    - **Sale Date:** {selected_sale['sale_date']}
+                    - **Customer:** {selected_sale['customer_name']}
+                    - **Item:** {selected_sale['item_name']}
+                    - **Quantity:** {selected_sale['quantity']}
+                    - **Unit Price:** ₦{selected_sale['unit_price']:,.2f}
+                    - **Total Amount:** ₦{selected_sale['total_amount']:,.2f}
+                    - **Amount Paid:** ₦{selected_sale.get('amount_paid', 0):,.2f}
+                    - **Balance:** ₦{selected_sale.get('amount_balance', 0):,.2f}
+                    - **Payment Method:** {selected_sale['payment_method']}
+                    - **Payment Status:** {selected_sale['payment_status']}
+                    - **Bank Account:** {account_number} - {bank_name}
+                    - **Notes:** {selected_sale.get('notes', 'None')}   """)
+
+                if st.button("Download Receipt PDF", key="download_selected_receipt_btn"):
+                    pdf = FPDF()
+                    pdf.add_page()
+                    if logo_url:
+                        temp_logo_path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
+                        urllib.request.urlretrieve(logo_url, temp_logo_path)
+                        img = Image.open(temp_logo_path)
+                        max_width = 20  # mm
+                        aspect_ratio = img.height / img.width
+                        height = max_width * aspect_ratio
+                        pdf.image(temp_logo_path, x=10, y=10, w=max_width, h=height)
+                        pdf.set_y(10 + height + 5)
+                        pdf.set_y(45)
+                    else:
+                        pdf.set_y(20)
+                    pdf.set_font("Arial", size=12)
+                    pdf.cell(200, 10, txt=safe_text(f"{tenant_name} SALES RECEIPT"), ln=True, align="C")
+                    pdf.ln(10)
+                    if account_number and bank_name:
                         pdf.set_font("Arial", size=12)
-                        pdf.cell(200, 10, txt=safe_text(f"{tenant_name} SALES RECEIPT"), ln=True, align="C")
-                        pdf.ln(10)
-                        # Add bank info
-                        if account_number and bank_name:
-                            pdf.set_font("Arial", size=12)
-                            pdf.cell(200, 10, txt=f"Bank Account: {account_number} - {bank_name}", ln=True, align="C")
-                            pdf.ln(5)
-                        pdf.set_font("Arial", size=12)
-                        for key, value in {
-                            "Sale ID": selected_sale["sale_id"],
-                            "Employee": selected_sale.get("employee_name", "N/A"),
-                            "Date": selected_sale["sale_date"],
-                            "Customer": selected_sale["customer_name"],
-                            "Item": selected_sale["item_name"],
-                            "Quantity": selected_sale["quantity"],
-                            "Unit Price": f"NGN{selected_sale['unit_price']:,.2f}",
-                            "Total": f"NGN{selected_sale['total_amount']:,.2f}",
-                            "Amount Paid": f"NGN{selected_sale.get('amount_paid', 0):,.2f}",
-                            "Balance": f"NGN{selected_sale.get('amount_balance', 0):,.2f}",
-                            "Payment Method": selected_sale["payment_method"],
-                            "Payment Status": selected_sale["payment_status"],
-                            "Notes": selected_sale.get("notes", "None")
-                        }.items():
-                            pdf.cell(200, 10, txt=f"{key}: {value}", ln=True)
+                        pdf.cell(200, 10, txt=f"Bank Account: {account_number} - {bank_name}", ln=True, align="C")
+                        pdf.ln(5)
+                    pdf.set_font("Arial", size=12)
+                    for key, value in {
+                        "Sale ID": selected_sale["sale_id"],
+                        "Employee": selected_sale.get("employee_name", "N/A"),
+                        "Date": selected_sale["sale_date"],
+                        "Customer": selected_sale["customer_name"],
+                        "Item": selected_sale["item_name"],
+                        "Quantity": selected_sale["quantity"],
+                        "Unit Price": f"NGN{selected_sale['unit_price']:,.2f}",
+                        "Total": f"NGN{selected_sale['total_amount']:,.2f}",
+                        "Amount Paid": f"NGN{selected_sale.get('amount_paid', 0):,.2f}",
+                        "Balance": f"NGN{selected_sale.get('amount_balance', 0):,.2f}",
+                        "Payment Method": selected_sale["payment_method"],
+                        "Payment Status": selected_sale["payment_status"],
+                        "Notes": selected_sale.get("notes", "None")
+                    }.items():
+                        pdf.cell(200, 10, txt=f"{key}: {value}", ln=True)
 
-                        receipt_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
-                        pdf.output(receipt_file)
+                    receipt_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
+                    pdf.output(receipt_file)
 
-                        with open(receipt_file, "rb") as f:
-                            base64_pdf = base64.b64encode(f.read()).decode("utf-8")
+                    with open(receipt_file, "rb") as f:
+                        base64_pdf = base64.b64encode(f.read()).decode("utf-8")
+                        download_link = f'<a href="data:application/pdf;base64,{base64_pdf}" download="receipt_{selected_sale["sale_id"]}.pdf">📥 Download Receipt PDF</a>'
+                        st.markdown(download_link, unsafe_allow_html=True)
 
-                            download_link = f'<a href="data:application/pdf;base64,{base64_pdf}" download="receipt_{selected_sale["sale_id"]}.pdf">📥 Download Receipt PDF</a>'
-                            st.markdown(download_link, unsafe_allow_html=True)
+    except Exception as e:
+        st.error(f"❌ Failed to fetch sales: {e}")
 
-        except Exception as e:
-            st.error(f"❌ Failed to fetch sales: {e}")
 
                             
     with col2:
