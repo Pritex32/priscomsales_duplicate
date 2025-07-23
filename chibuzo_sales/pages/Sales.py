@@ -312,42 +312,7 @@ if "plan" not in st.session_state or "is_active" not in st.session_state:
 
 user_id = st.session_state.get("user_id")
 
-# this will show if the person has paid or not
 
-# ---------- PLAN ENFORCEMENT ---------- #
-# ✅ Simulate user session role (in real app, this comes from login)
-# Simulate user role for testing (replace with your actual login logic)
-st.session_state["role"] = st.session_state.get("role", "employee")  # "employee" or "md"
-
-# ✅ Tabs everyone sees
-tabs = ["Add sale", "Add Expense"]
-
-# ✅ Add extra tabs for MD
-if st.session_state.get("role") == "md":
-    tabs.extend(["Payments", "Delete", "Report"])
-
-# ✅ Create tabs dynamically
-tab_objects = st.tabs(tabs)
-
-# ✅ Common Tabs (Visible to all users)
-with tab_objects[0]:
-    st.write("📊 Sales Data (Everyone can see this)")
-
-with tab_objects[1]:
-    st.write("📦 Expenses Data (Everyone can see this)")
-
-
-
-# ✅ Restricted Tabs (Only MD)
-if st.session_state.get("role") == "md":
-    with tab_objects[3]:
-        st.write("💰 Payments - Only MD can see this")
-
-    with tab_objects[4]:
-        st.write("🗑️ Delete Records - Only MD can see this")
-
-    with tab_objects[5]:
-        st.write("📑 Reports - Only MD can see this")
 
 
 
@@ -494,6 +459,8 @@ def get_employee_dict(user_id):
 
 
 # -------- Tabs --------
+# ✅ Simulate user role (replace with actual session logic)
+
 st.title("**💼 Sales & Expenses Management**")
 tab1, tab2 ,tab3, tab4 ,tab5= st.tabs(["➕ Add Sale", "Payments","💸 Add Expense","Delete",'Report'])
 
@@ -1670,7 +1637,9 @@ with tab3:
 
    
 with tab4:
-    
+    if st.session_state.get("role") != "md":
+        st.warning("🚫 You are not authorized to view this page.")
+        st.stop()
     st.markdown(
     "<h1 style='color: red;'>🗑️ Delete Sale or Expense Record by table ID</h1>", unsafe_allow_html=True)
     
