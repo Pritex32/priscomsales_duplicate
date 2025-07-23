@@ -314,7 +314,12 @@ user_id = st.session_state.get("user_id")
 
    
 
- 
+def md_tab_content():
+    if st.session_state.get("role") != "md":
+        st.warning("🚫 You are not authorized to view this tab.")
+        return  # ❌ Stops this function
+    st.subheader("Restricted Content for MD")
+    st.write("Sensitive operations here") 
 
 
 
@@ -1644,10 +1649,7 @@ with tab3:
 
    
 with tab4:
-    if st.session_state.get("role") != "md":
-        st.warning("🚫 You are not authorized to view this tab.")
-    else:
-        st.write("Restricted Content for MD")
+    md_tab_content()
     st.markdown(
     "<h1 style='color: red;'>🗑️ Delete Sale or Expense Record by table ID</h1>", unsafe_allow_html=True)
     
