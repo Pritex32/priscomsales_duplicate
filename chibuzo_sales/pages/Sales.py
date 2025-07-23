@@ -1644,15 +1644,14 @@ with tab3:
 
    
 with tab4:
-    
-    st.markdown(
-    "<h1 style='color: red;'>🗑️ Delete Sale or Expense Record by table ID</h1>", unsafe_allow_html=True)
-    
     if st.session_state.get("role") != "md":
         st.warning("🚫 You are not authorized to view this tab.")
     else:
         st.write("Restricted Content for MD")
-
+    st.markdown(
+    "<h1 style='color: red;'>🗑️ Delete Sale or Expense Record by table ID</h1>", unsafe_allow_html=True)
+    
+    
     sale_or_expense_id = st.text_input("Enter Sale ID or Expense ID to Delete", "")
     user_id = st.session_state.get("user_id")
 
