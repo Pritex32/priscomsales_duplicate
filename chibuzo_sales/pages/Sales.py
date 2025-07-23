@@ -1758,10 +1758,11 @@ from datetime import date, timedelta
 
 
 with tab5:
+   
+    st.subheader("📊 Sales Summary Report")
     if "role" not in st.session_state or st.session_state.role != "md":
         st.warning("🚫 You are not authorized to view this page.")
         st.stop()
-    st.subheader("📊 Sales Summary Report")
 
     # Fetch sales and expenses data
     df = fetch_sale_history(user_id)
