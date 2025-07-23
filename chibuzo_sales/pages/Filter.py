@@ -548,29 +548,34 @@ def fetch_payment_history(user_id):
 
 import datetime
 from io import BytesIO
-
-
+# heading
 st.markdown(
     """
     <style>
         .custom-title {
-            font-size: 32px;
-            color: #2c3e50;
+            font-size: 36px;
             font-weight: bold;
             text-align: center;
-            padding: 15px;
-            border-radius: 10px;
-            background: linear-gradient(90deg, #4CAF50, #81C784);
-            color: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #fff;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+            letter-spacing: 1px;
+        }
+        .custom-title span {
+            color: #ffeb3b;
         }
     </style>
     <div class="custom-title">
-        📊 Filter Records - <span style="color:#f1f1f1;">Sales | Restock | Expenses | Payments</span>
+        📊 Filter Records - <span>Sales | Restock | Expenses | Payments</span>
     </div>
     """,
     unsafe_allow_html=True
 )
+
 
 
 # ✅ Fetch Data (From your cached Supabase functions)
@@ -741,7 +746,8 @@ elif table_option == "Payments" and not payment_df.empty:
 
     if payment_filter_option == "Payment Date Range":
         today = datetime.date.today()
-        start_date, end_date = st.date_input("Select Date Range", (today, today))
+        start_date = st.date_input("Start Date", today)
+        end_date = st.date_input("End Date", today)
 
         if start_date > end_date:
             st.error("⚠ Start date cannot be after end date")
