@@ -543,8 +543,6 @@ with col33:
                 with col1:
                     st.write(f"**{row['Name']}** | 📞 {row['Phone']} | ✉️ {row['Email'] or 'N/A'} | 🏠 {row['Address'] or 'N/A'}")
                 with col2:
-                    if st.button("✏️ Edit", key=f"edit_{row['Customer ID']}"):
-                        st.session_state["edit_customer_id"] = row['Customer ID']
                 with col3:
                     if st.button("🗑️ Delete", key=f"delete_{row['Customer ID']}"):
                         supabase.table("customers").delete().eq("customer_id", row['Customer ID']).execute()
