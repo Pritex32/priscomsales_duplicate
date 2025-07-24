@@ -519,7 +519,9 @@ st.markdown("___")
 user_id = st.session_state.get("user_id")
 
 # ✅ Fetch all unverified sales for this user
-unverified_result = (
+col45,col65=st.columns([3,1])
+with col45:
+    unverified_result = (
     supabase
     .table("sales_master_history")
     .select("*")
@@ -528,6 +530,25 @@ unverified_result = (
     .order("sale_date", desc=True)
     .execute()
 )
+with col65:
+    st.title("🔐 Login History")
+
+    # Fetch logs from Supabase
+    logs = supabase.table("login_logs") \
+    .select("*") \
+    .eq("user_id", st.session_state["user_id"]) \
+    .order("login_time", desc=True) \
+    .limit(10) \
+    .execute()
+
+    if logs.data:
+        st.metric("Total Logins", len(logs.data))
+        st.write("### Recent Logins")
+        for log in logs.data:
+            st.write(f"📅 **{log['login_time']}** | 🌐 IP: {log['ip_address']} | 💻 Device: {log['device']}")
+    else:
+        st.info("No login history found.")
+
 
 unverified_sales = [sale for sale in (unverified_result.data or []) if not str(sale.get("verification_notes", "")).startswith("[FLAGGED]")]
 
@@ -901,7 +922,7 @@ else:
 
 st.markdown('___')
 # Pagination helper
-def paginate_dataframe(df, page_size=10):
+def paginate_dataframe(df, page_size=5):
     page = st.number_input("Page", min_value=1, max_value=max(1, (len(df) - 1) // page_size + 1), step=1)
     start_idx = (page - 1) * page_size
     end_idx = start_idx + page_size
