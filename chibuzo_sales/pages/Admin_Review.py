@@ -529,7 +529,7 @@ unverified_result = (
     .execute()
 )
 
-st.markdown("___")
+
 st.markdown("#### 🔐 Login History")
 
 # Fetch logs from Supabase
@@ -555,7 +555,7 @@ else:
 
 
 
-
+st.markdown("___")
 
 unverified_sales = [sale for sale in (unverified_result.data or []) if not str(sale.get("verification_notes", "")).startswith("[FLAGGED]")]
 
