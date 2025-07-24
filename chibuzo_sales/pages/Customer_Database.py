@@ -533,11 +533,18 @@ else:
 st.markdown("___")
 col33, col44 = st.columns([3, 1])
 
-# ✅ Search Bar
-search_query = st.text_input("🔍 Search Customer by Name or Phone", "")
+# ✅ Search Suggestions: Build list of Name + Phone
+suggestions = [f"{row['Name']} ({row['Phone']})" for _, row in df_customers.iterrows()]
+selected_customer = st.selectbox("🔍 Search Customer", [""] + suggestions)
 
-# ✅ Filter DataFrame
-if search_query:
+# ✅ Search Query Input (for manual typing)
+search_query = st.text_input("Or type to search by Name or Phone", "")
+
+# ✅ Filter Logic
+if selected_customer and selected_customer != "":
+    name_part = selected_customer.split(" (")[0]
+    df_filtered = df_customers[df_customers["Name"] == name_part]
+elif search_query:
     df_filtered = df_customers[df_customers.apply(
         lambda row: search_query.lower() in str(row['Name']).lower() or search_query in str(row['Phone']),
         axis=1
@@ -545,14 +552,24 @@ if search_query:
 else:
     df_filtered = df_customers
 
+st.markdown("___")
+# ✅ Pagination Setup
+items_per_page = 5
+total_items = len(df_filtered)
+total_pages = (total_items // items_per_page) + (1 if total_items % items_per_page > 0 else 0)
+page = st.number_input("Page", min_value=1, max_value=max(1, total_pages), value=1)
+start_idx = (page - 1) * items_per_page
+end_idx = start_idx + items_per_page
+df_page = df_filtered.iloc[start_idx:end_idx]
+
 # ✅ Customer List in Left Column
 with col33:
     st.subheader("📂 View & Manage Customer List")
-    with st.expander("Customer List", expanded=True):
+    with st.expander(f"Customer List (Page {page} of {total_pages})", expanded=True):
         if df_filtered.empty:
             st.warning("❌ No matching customers found.")
         else:
-            for idx, row in df_filtered.iterrows():
+            for idx, row in df_page.iterrows():
                 with st.container():
                     col1, col2, col3 = st.columns([4, 1, 1])
                     with col1:
@@ -562,11 +579,11 @@ with col33:
                             st.session_state["edit_customer_id"] = row['Customer ID']
                     with col3:
                         if st.button("🗑️ Delete", key=f"delete_{row['Customer ID']}"):
-                            # ✅ Confirmation before deleting
                             if st.confirm_dialog(f"Are you sure you want to delete {row['Name']}?"):
                                 supabase.table("customers").delete().eq("customer_id", row['Customer ID']).execute()
                                 st.success("✅ Customer deleted successfully!")
                                 st.rerun()
+        st.caption(f"Showing {start_idx+1}-{min(end_idx, total_items)} of {total_items} customers.")
 
 # ✅ Edit Customer Form in Right Column
 with col44:
@@ -601,6 +618,7 @@ with col44:
                     st.rerun()
     else:
         st.info("Select a customer to edit from the list.")
+
 
 
 
