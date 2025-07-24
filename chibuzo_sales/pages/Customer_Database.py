@@ -599,7 +599,7 @@ with col33:
                         if st.button("🗑️ Delete", key=f"delete_{row['Customer ID']}"):
                             confirm = st.checkbox(f"Confirm delete {row['Name']}")
                             if confirm:
-                                supabase.table("customers").delete().eq("customer_id", row['Customer ID']).execute()
+                                supabase.table("customers").delete().eq("customer_id", row['Customer ID']).eq(user_id,user_id).execute()
                                 st.success("✅ Customer deleted successfully!")
                                 st.rerun()
         st.caption(f"Showing {start_idx+1}-{min(end_idx, total_items)} of {total_items} customers.")
