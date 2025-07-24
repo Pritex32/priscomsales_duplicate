@@ -157,7 +157,7 @@ def sync_plan_from_db(user_id):
             st.session_state.is_active = False
 
     except Exception as e:
-        st.error(f"❌ Failed to sync subscription info: ")
+        st.error(f"❌ Failed to sync subscription info:{e} ")
 
 
 # Restore login from browser localStorage
@@ -685,10 +685,10 @@ elif table_option == "Restock" and not restock_df.empty:
         if start_date > end_date:
             st.error("⚠ Start date cannot be after end date")
         else:
-            filtered_df['restock_date'] = pd.to_datetime(filtered_df['restock_date'], errors='coerce')
+            filtered_df['purchase_date'] = pd.to_datetime(filtered_df['purchase_date'], errors='coerce')
             filtered_df = filtered_df[
-                (filtered_df['restock_date'] >= pd.to_datetime(start_date)) &
-                (filtered_df['restock_date'] <= pd.to_datetime(end_date))
+                (filtered_df['purchase_date'] >= pd.to_datetime(start_date)) &
+                (filtered_df['purchase_date'] <= pd.to_datetime(end_date))
             ]
 
     st.write("### Filtered Restock Data")
@@ -772,10 +772,7 @@ elif table_option == "Payments" and not payment_df.empty:
         method = st.selectbox("Select Payment Method", methods)
         filtered_df = filtered_df[filtered_df['payment_method'] == method]
 
-    elif payment_filter_option == "Payment Status":
-        statuses = payment_df['payment_status'].dropna().unique().tolist()
-        status = st.selectbox("Select Payment Status", statuses)
-        filtered_df = filtered_df[filtered_df['payment_status'] == status]
+    
 
     st.write("### Filtered Payments Data")
     st.dataframe(filtered_df)
