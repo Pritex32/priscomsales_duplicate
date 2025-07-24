@@ -519,9 +519,7 @@ st.markdown("___")
 user_id = st.session_state.get("user_id")
 
 # ✅ Fetch all unverified sales for this user
-col45,col65=st.columns([3,1])
-with col45:
-    unverified_result = (
+unverified_result = (
     supabase
     .table("sales_master_history")
     .select("*")
@@ -530,8 +528,8 @@ with col45:
     .order("sale_date", desc=True)
     .execute()
 )
-with col65:
-    st.markdown("#### 🔐 Login History")
+
+st.markdown("#### 🔐 Login History")
 
     # Fetch logs from Supabase
     logs = supabase.table("login_logs") \
@@ -548,7 +546,7 @@ with col65:
             st.write(f"📅 **{log['login_time']}** | 🌐 IP: {log['ip_address']} | 💻 Device: {log['device']}")
     else:
         st.info("No login history found.")
-
+    
 
 unverified_sales = [sale for sale in (unverified_result.data or []) if not str(sale.get("verification_notes", "")).startswith("[FLAGGED]")]
 
