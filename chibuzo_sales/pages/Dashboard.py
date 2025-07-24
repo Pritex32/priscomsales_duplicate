@@ -741,6 +741,30 @@ def init_session_state():
 init_session_state()
 
 
+# to track logins
+import socket
+import platform
+from datetime import datetime
+
+def track_login(user_id):
+    # Get basic IP and device info
+    try:
+        ip_address = socket.gethostbyname(socket.gethostname())
+    except:
+        ip_address = "Unknown"
+
+    device_info = f"{platform.system()} {platform.release()}"
+    
+    login_data = {
+        "user_id": user_id,
+        "login_time": str(datetime.now()),
+        "ip_address": ip_address,
+        "device": device_info
+    }
+
+    # Insert login log into Supabase
+    supabase.table("login_logs").insert(login_data).execute()
+
 
 
 # Sidebar Menu
@@ -984,6 +1008,11 @@ elif choice == 'Login':
                     if success:
                         display_name = st.session_state.get("username") or st.session_state.get("user", {}).get("email")
                         with st.spinner("🔄 Logging you in..."):
+                            # ✅ Track login in Supabase
+                            user_id = st.session_state.get("user_id")  # Ensure you store this when MD logs in
+                            ip_address = get_client_ip()  # You'll define this function
+                            device = get_device_info()    # Optional, can be from headers or user-agent
+                            log_login(user_id, ip_address, device)  # Ca
                             if login_type == "MD":
                                 st.success(f"✅ Welcome {display_name} (MD)! Redirecting to Sales...")
                             elif login_type == "Employee":
@@ -1235,6 +1264,15 @@ with st.sidebar.expander('Submit Feedback'):
                     st.rerun()
                 else:
                     st.sidebar.error("⚠️ Could not submit feedback. Please try again.")
+
+# show logins logs
+total_logins = supabase.table("login_logs").select("count", count="exact").eq("user_id", st.session_state["user_id"]).execute()
+last_login = supabase.table("login_logs").select("login_time").eq("user_id", st.session_state["user_id"]).order("login_time", desc=True).limit(1).execute()
+
+col1, col2 = st.columns(2)
+col1.metric("Total Logins", total_logins.count if hasattr(total_logins, 'count') else 0)
+col2.metric("Last Login", last_login.data[0]["login_time"] if last_login.data else "N/A")
+
 
 
 
