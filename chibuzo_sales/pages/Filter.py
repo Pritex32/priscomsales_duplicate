@@ -739,7 +739,7 @@ elif table_option == "Payments" and not payment_df.empty:
 
     payment_filter_option = st.selectbox(
         "Select a Filter for Payments",
-        ["None", "Payment Date Range", "Amount", "Payment Method", "Payment Status"]
+        ["None", "Payment Date Range", "Amount", "Payment Method"]
     )
 
     filtered_df = payment_df.copy()
