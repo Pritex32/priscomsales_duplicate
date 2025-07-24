@@ -431,7 +431,7 @@ with st.form("add_customer_form"):
                 st.success("✅ Customer added successfully!")
                 st.experimental_rerun()
             except Exception as e:
-                st.error("❌ Failed to save customer.")
+                st.error("❌ Failed to save customer: {e}")
 
 # ✅ Display customer list
 st.subheader("📋 Customer List")
