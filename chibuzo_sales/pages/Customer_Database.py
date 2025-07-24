@@ -471,7 +471,7 @@ if customers_list:
     })
 
     with st.expander('📂 View Customer List'):
-        st.dataframe(df_customers, use_container_width=True)
+        st.dataframe(df_customers.tail(10), use_container_width=True)
 
         # ✅ Convert DataFrame to CSV for download
         csv = df_customers.to_csv(index=False).encode('utf-8')
@@ -488,7 +488,7 @@ else:
 
 
 st.markdown("___")
-st.subheader("📋 Customer List")
+st.subheader("Search Bar")
 if customers_list:
     # ✅ Convert Supabase data to DataFrame
     df_customers = pd.DataFrame(customers_list)
@@ -513,18 +513,7 @@ if customers_list:
     else:
         df_filtered = df_customers
 
-    with st.expander('📂 View Customer List'):
-        st.dataframe(df_filtered, use_container_width=True)
-
-        # ✅ Download filtered list as CSV
-        csv = df_filtered.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="📥 Download Customer List (CSV)",
-            data=csv,
-            file_name="customer_list.csv",
-            mime="text/csv"
-        )
-
+    
 else:
     st.info("No customers found. Add your first customer above!")
 
