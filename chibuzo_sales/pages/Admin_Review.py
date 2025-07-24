@@ -529,7 +529,7 @@ unverified_result = (
     .execute()
 )
 
-unverified_sales = unverified_result.data or []
+unverified_sales = [sale for sale in (unverified_result.data or []) if not str(sale.get("verification_notes", "")).startswith("[FLAGGED]")]
 
 # ✅ Optional download as Excel
 if unverified_sales:
