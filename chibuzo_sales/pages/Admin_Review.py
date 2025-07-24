@@ -541,53 +541,69 @@ if unverified_sales:
         mime="text/csv"
     )
 
-# ✅ Loop and display each sale inside an expander
-for sale in unverified_sales:
-    with st.expander(f"🧾 Sale #{sale.get('invoice_number') or sale['sale_id']} — ₦{sale['total_amount']}"):
-        st.write(f"**Date:** {sale['sale_date']}")
-        st.write(f"**Customer Phone:** {sale.get('customer_phone', 'N/A')}")
-        st.write(f"**Customer:** {sale['customer_name']}")
-        st.write(f"**Amount:** ₦{sale['total_amount']}")
-        st.write(f"**Payment Method:** {sale['payment_method']}")
-        st.write(f"**Payment Status:** {sale['payment_status']}")
-        st.write(f"**Entered By:** {sale['employee_name']}")
+items_per_page = 5
+total_sales = len(unverified_sales)
 
-        # ✅ Show uploaded invoice
-        invoice_url = sale.get("invoice_file_url")
-        if invoice_url:
-            if invoice_url.endswith(".pdf"):
-                st.markdown(f"[📎 View PDF Invoice]({invoice_url})", unsafe_allow_html=True)
+if total_sales > 0:
+    total_pages = (total_sales + items_per_page - 1) // items_per_page
+    page = st.number_input("📄 Page", min_value=1, max_value=total_pages, step=1)
+
+    start_idx = (page - 1) * items_per_page
+    end_idx = start_idx + items_per_page
+    sales_to_display = unverified_sales[start_idx:end_idx]
+
+    st.markdown(f"Showing **{len(sales_to_display)}** of **{total_sales}** unverified sales")
+
+    # ✅ Display paginated sales
+    for sale in sales_to_display:
+        with st.expander(f"🧾 Sale #{sale.get('invoice_number') or sale['sale_id']} — ₦{sale['total_amount']}"):
+            st.write(f"**Date:** {sale['sale_date']}")
+            st.write(f"**Customer Phone:** {sale.get('customer_phone', 'N/A')}")
+            st.write(f"**Customer:** {sale['customer_name']}")
+            st.write(f"**Amount:** ₦{sale['total_amount']}")
+            st.write(f"**Payment Method:** {sale['payment_method']}")
+            st.write(f"**Payment Status:** {sale['payment_status']}")
+            st.write(f"**Entered By:** {sale['employee_name']}")
+
+            # ✅ Show uploaded invoice
+            invoice_url = sale.get("invoice_file_url")
+            if invoice_url:
+                if invoice_url.endswith(".pdf"):
+                    st.markdown(f"[📎 View PDF Invoice]({invoice_url})", unsafe_allow_html=True)
+                else:
+                    st.image(invoice_url, caption="Uploaded Invoice / POP")
             else:
-                st.image(invoice_url, caption="Uploaded Invoice / POP")
-        else:
-            st.info("No invoice uploaded.")
+                st.info("No invoice uploaded.")
 
-        # ✅ Admin action form
-        with st.form(key=f"verify_form_{sale['sale_id']}"):
-            notes = st.text_area("📝 Admin Review / Notes", key=f"note_{sale['sale_id']}")
-            verify_button = st.form_submit_button("✅ Mark as Verified")
-            flag_button = st.form_submit_button("🚩 Flag Sale")
+            # ✅ Admin action form
+            with st.form(key=f"verify_form_{sale['sale_id']}"):
+                notes = st.text_area("📝 Admin Review / Notes", key=f"note_{sale['sale_id']}")
+                verify_button = st.form_submit_button("✅ Mark as Verified")
+                flag_button = st.form_submit_button("🚩 Flag Sale")
 
-            if verify_button:
-                supabase.table("sales_master_history").update({
-                    "is_verified": True,
-                    "verified_by": st.session_state.get("user_email", "admin"),
-                    "verified_at": str(datetime.now()),
-                    "verification_notes": notes
-                }).eq("sale_id", sale["sale_id"]).eq("user_id", user_id).execute()
-                st.success("✅ Sale marked as verified.")
-                st.rerun()
+                if verify_button:
+                    supabase.table("sales_master_history").update({
+                        "is_verified": True,
+                        "verified_by": st.session_state.get("user_email", "admin"),
+                        "verified_at": str(datetime.now()),
+                        "verification_notes": notes
+                    }).eq("sale_id", sale["sale_id"]).eq("user_id", user_id).execute()
+                    st.success("✅ Sale marked as verified.")
+                    st.rerun()
 
-            if flag_button:
-                update = {
-                    "is_verified": False,
-                    "verified_by": st.session_state.get("user_email", "admin"),
-                    "verified_at": str(datetime.now()),
-                    "verification_notes": f"[FLAGGED] {notes or 'Flagged for follow-up'}"
-                }
-                supabase.table("sales_master_history").update(update).eq("sale_id", sale["sale_id"]).eq("user_id", user_id).execute()
-                st.warning("🚩 Sale has been flagged.")
-                st.rerun()
+                if flag_button:
+                    update = {
+                        "is_verified": False,
+                        "verified_by": st.session_state.get("user_email", "admin"),
+                        "verified_at": str(datetime.now()),
+                        "verification_notes": f"[FLAGGED] {notes or 'Flagged for follow-up'}"
+                    }
+                    supabase.table("sales_master_history").update(update).eq("sale_id", sale["sale_id"]).eq("user_id", user_id).execute()
+                    st.warning("🚩 Sale has been flagged.")
+                    st.rerun()
+else:
+    st.info("✅ No unverified sales found.")
+
 
 
 
