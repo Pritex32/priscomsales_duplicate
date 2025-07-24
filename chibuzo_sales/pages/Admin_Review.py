@@ -529,24 +529,33 @@ unverified_result = (
     .execute()
 )
 
+st.markdown("___")
 st.markdown("#### 🔐 Login History")
 
-    # Fetch logs from Supabase
-    logs = supabase.table("login_logs") \
+# Fetch logs from Supabase
+logs = supabase.table("login_logs") \
     .select("*") \
     .eq("user_id", st.session_state["user_id"]) \
     .order("login_time", desc=True) \
     .limit(10) \
     .execute()
 
-    if logs.data:
-        st.metric("Total Logins", len(logs.data))
-        st.write("### Recent Logins")
-        for log in logs.data:
-            st.write(f"📅 **{log['login_time']}** | 🌐 IP: {log['ip_address']} | 💻 Device: {log['device']}")
-    else:
-        st.info("No login history found.")
-    
+if logs.data:
+    st.metric("Total Logins", len(logs.data))
+    st.write("### Recent Logins")
+    for log in logs.data:
+        st.write(f"📅 **{log['login_time']}** | 🌐 IP: {log['ip_address']} | 💻 Device: {log['device']}")
+else:
+    st.info("No login history found.")
+
+
+
+
+
+
+
+
+
 
 unverified_sales = [sale for sale in (unverified_result.data or []) if not str(sale.get("verification_notes", "")).startswith("[FLAGGED]")]
 
