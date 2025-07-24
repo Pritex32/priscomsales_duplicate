@@ -358,7 +358,7 @@ def handle_subscription_expiration(user_id):
             st.warning("🔔 Your Pro subscription has expired. You've been downgraded to the Free Plan.")
 
     except Exception as e:
-        st.error(f"Subscription check failed: {e}")
+        st.error(f"Subscription check failed.")
 
 if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in"):
     block_if_subscription_expired()
@@ -493,6 +493,8 @@ else:
 
 st.markdown("___")
 # ✅ Calculate metrics
+st.markdown("<h1 style='color:blue;'>Metrics</h1>", unsafe_allow_html=True)
+st.title('Metrics')
 total_customers = len(df_customers)
 filtered_customers = len(df_filtered) if 'df_filtered' in locals() else total_customers
 
