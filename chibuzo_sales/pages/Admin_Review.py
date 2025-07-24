@@ -525,6 +525,7 @@ unverified_result = (
     .select("*")
     .eq("is_verified", False)
     .eq("user_id", user_id)
+    .not_.like("verification_notes", "[FLAGGED]%")
     .order("sale_date", desc=True)
     .execute()
 )
