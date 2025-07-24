@@ -591,7 +591,8 @@ with col33:
                             st.session_state["edit_customer_id"] = row['Customer ID']
                     with col3:
                         if st.button("🗑️ Delete", key=f"delete_{row['Customer ID']}"):
-                            if st.confirm_dialog(f"Are you sure you want to delete {row['Name']}?"):
+                            confirm = st.checkbox(f"Confirm delete {row['Name']}")
+                            if confirm:
                                 supabase.table("customers").delete().eq("customer_id", row['Customer ID']).execute()
                                 st.success("✅ Customer deleted successfully!")
                                 st.rerun()
