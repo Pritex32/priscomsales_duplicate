@@ -531,7 +531,7 @@ with col45:
     .execute()
 )
 with col65:
-    st.title("🔐 Login History")
+    st.markdown("#### 🔐 Login History")
 
     # Fetch logs from Supabase
     logs = supabase.table("login_logs") \
