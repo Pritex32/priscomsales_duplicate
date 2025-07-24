@@ -403,8 +403,10 @@ except:
 
 st.title("👥 Add Your Customers")
 
-# ✅ Fetch customers
-customer_lookup = supabase.table("customers").select("customer_id, name, phone, email, address, created_at").eq("user_id", user_id).execute()
+customer_lookup = supabase.table("customers").select(
+    "customer_id, name, phone, email, address, created_at"
+).eq("user_id", user_id).execute()
+
 customers_list = customer_lookup.data if customer_lookup.data else []
 
 with st.form("add_customer_form"):
@@ -418,20 +420,37 @@ with st.form("add_customer_form"):
     if submitted:
         if not name or not phone:
             st.error("❌ Name and Phone are required.")
+            st.stop()
         else:
             try:
-                customer_data = {
-                    "user_id": user_id,
-                    "name": name,
-                    "phone": phone,
-                    "email": email,
-                    "address": address
-                }
-                supabase.table("customers").insert(customer_data).execute()
-                st.success("✅ Customer added successfully!")
-                st.experimental_rerun()
+                # ✅ Check if customer already exists (same phone and user)
+                existing_customer = (
+                    supabase.table("customers")
+                    .select("customer_id, name")
+                    .eq("phone", phone)
+                    .eq("user_id", user_id)
+                    .execute()
+                )
+
+                if existing_customer.data:
+                    st.warning(
+                        f"⚠️ Customer '{existing_customer.data[0]['name']}' with this phone already exists."
+                    )
+                else:
+                    # ✅ Insert new customer
+                    customer_data = {
+                        "user_id": user_id,
+                        "name": name,
+                        "phone": phone,
+                        "email": email,
+                        "address": address,
+                    }
+                    supabase.table("customers").insert(customer_data).execute()
+                    st.success("✅ Customer added successfully!")
+                    st.rerun()
             except Exception as e:
                 st.error(f"❌ Failed to save customer: {e}")
+
 
 # ✅ Display customer list
 st.subheader("📋 Customer List")
