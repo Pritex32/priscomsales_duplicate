@@ -530,39 +530,50 @@ else:
     st.info("No customers found. Add your first customer above!")
 
 
-
+st.markdown("___")
 col33, col44 = st.columns([3, 1])
+
+# ✅ Search Bar
+search_query = st.text_input("🔍 Search Customer by Name or Phone", "")
+
+# ✅ Filter DataFrame
+if search_query:
+    df_filtered = df_customers[df_customers.apply(
+        lambda row: search_query.lower() in str(row['Name']).lower() or search_query in str(row['Phone']),
+        axis=1
+    )]
+else:
+    df_filtered = df_customers
 
 # ✅ Customer List in Left Column
 with col33:
     st.subheader("📂 View & Manage Customer List")
     with st.expander("Customer List", expanded=True):
-        for idx, row in df_filtered.iterrows():
-            with st.container():
-                col1, col2, col3 = st.columns([4, 1, 1])
-                with col1:
-                    st.write(f"**{row['Name']}** | 📞 {row['Phone']} | ✉️ {row['Email'] or 'N/A'} | 🏠 {row['Address'] or 'N/A'}")
-                with col2:
-                    if st.button("✏️ Edit", key=f"edit_{row['Customer ID']}"):
-                        st.session_state["edit_customer_id"] = row['Customer ID']
-                with col3:
-                    if st.button("🗑️ Delete", key=f"delete_{row['Customer ID']}"):
-                        supabase.table("customers").delete().eq("customer_id", row['Customer ID']).execute()
-                        st.success("✅ Customer deleted successfully!")
-                        st.rerun()
+        if df_filtered.empty:
+            st.warning("❌ No matching customers found.")
+        else:
+            for idx, row in df_filtered.iterrows():
+                with st.container():
+                    col1, col2, col3 = st.columns([4, 1, 1])
+                    with col1:
+                        st.write(f"**{row['Name']}** | 📞 {row['Phone']} | ✉️ {row['Email'] or 'N/A'} | 🏠 {row['Address'] or 'N/A'}")
+                    with col2:
+                        if st.button("✏️ Edit", key=f"edit_{row['Customer ID']}"):
+                            st.session_state["edit_customer_id"] = row['Customer ID']
+                    with col3:
+                        if st.button("🗑️ Delete", key=f"delete_{row['Customer ID']}"):
+                            # ✅ Confirmation before deleting
+                            if st.confirm_dialog(f"Are you sure you want to delete {row['Name']}?"):
+                                supabase.table("customers").delete().eq("customer_id", row['Customer ID']).execute()
+                                st.success("✅ Customer deleted successfully!")
+                                st.rerun()
 
 # ✅ Edit Customer Form in Right Column
 with col44:
     if "edit_customer_id" in st.session_state:
         edit_id = st.session_state["edit_customer_id"]
-        edit_customer = (
-            supabase.table("customers")
-            .select("*")
-            .eq("customer_id", edit_id)
-            .single()
-            .execute()
-            .data
-        )
+        response = supabase.table("customers").select("*").eq("customer_id", edit_id).single().execute()
+        edit_customer = response.data
 
         st.subheader(f"✏️ Edit Customer")
         with st.form("edit_customer_form"):
@@ -573,22 +584,23 @@ with col44:
             save_changes = st.form_submit_button("💾 Update Customer")
 
             if save_changes:
-                update_data = {
-                    "name": new_name,
-                    "phone": new_phone,
-                    "email": new_email,
-                    "address": new_address,
-                }
-                supabase.table("customers").update(update_data).eq("customer_id", edit_id).execute()
-                st.success("✅ Customer updated successfully!")
-                del st.session_state["edit_customer_id"]
-                st.rerun()
+                # ✅ Validate phone uniqueness
+                existing = supabase.table("customers").select("customer_id").eq("phone", new_phone).neq("customer_id", edit_id).execute()
+                if existing.data:
+                    st.error("❌ Phone number already exists for another customer.")
+                else:
+                    update_data = {
+                        "name": new_name,
+                        "phone": new_phone,
+                        "email": new_email,
+                        "address": new_address,
+                    }
+                    supabase.table("customers").update(update_data).eq("customer_id", edit_id).execute()
+                    st.success("✅ Customer updated successfully!")
+                    del st.session_state["edit_customer_id"]
+                    st.rerun()
     else:
         st.info("Select a customer to edit from the list.")
-
-
-
-
 
 
 
