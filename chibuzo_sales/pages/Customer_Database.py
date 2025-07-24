@@ -486,7 +486,7 @@ else:
     st.info("No customers found. Add your first customer above!")
 
 
-st.markdown
+st.markdown("___")
 # ✅ Calculate metrics
 total_customers = len(df_customers)
 filtered_customers = len(df_filtered) if 'df_filtered' in locals() else total_customers
