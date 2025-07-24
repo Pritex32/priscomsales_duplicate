@@ -400,8 +400,13 @@ except:
 
 
 
-
-st.title("👥 Add Your Customers")
+col76,col78=st.columns([3,1])
+with col76:
+    st.title("👥 Add Your Customers")
+with col78:
+    if st.button("🔄 Refresh Data"):
+         st.cache_data.clear()  # ✅ Clear cached data
+         st.rerun() 
 
 customer_lookup = supabase.table("customers").select(
     "customer_id, name, phone, email, address, created_at"
