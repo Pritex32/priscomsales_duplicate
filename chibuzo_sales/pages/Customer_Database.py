@@ -531,10 +531,12 @@ else:
 
 
 
-col33,col44=st.columns([3,1])
-df_filtered = df_customers
+col33, col44 = st.columns([3, 1])
+
+# ✅ Customer List in Left Column
 with col33:
-    with st.expander('📂 View & Manage Customer List'):
+    st.subheader("📂 View & Manage Customer List")
+    with st.expander("Customer List", expanded=True):
         for idx, row in df_filtered.iterrows():
             with st.container():
                 col1, col2, col3 = st.columns([4, 1, 1])
@@ -549,35 +551,40 @@ with col33:
                         st.success("✅ Customer deleted successfully!")
                         st.rerun()
 
- # edit customer                       
-if "edit_customer_id" in st.session_state:
-        edit_id = st.session_state["edit_customer_id"]
-        edit_customer = supabase.table("customers").select("*").eq("customer_id", edit_id).single().execute().data
-
+# ✅ Edit Customer Form in Right Column
 with col44:
-    # ✅ Edit customer modal (if triggered)
-    
-    st.subheader(f"✏️ Edit Customer: {edit_customer['name']}")
-    with st.form("edit_customer_form"):
-        new_name = st.text_input("Customer Name", value=edit_customer['name'])
-        new_phone = st.text_input("Phone Number", value=edit_customer['phone'])
-        new_email = st.text_input("Email", value=edit_customer.get('email', ''))
-        new_address = st.text_area("Address", value=edit_customer.get('address', ''))
-        save_changes = st.form_submit_button("💾 Update Customer")
+    if "edit_customer_id" in st.session_state:
+        edit_id = st.session_state["edit_customer_id"]
+        edit_customer = (
+            supabase.table("customers")
+            .select("*")
+            .eq("customer_id", edit_id)
+            .single()
+            .execute()
+            .data
+        )
 
-        if save_changes:
-            update_data = {
-                "name": new_name,
-                "phone": new_phone,
-                "email": new_email,
-                "address": new_address
-            }
-            supabase.table("customers").update(update_data).eq("customer_id", edit_id).execute()
-            st.success("✅ Customer updated successfully!")
-            del st.session_state["edit_customer_id"]
-            st.rerun()
+        st.subheader(f"✏️ Edit Customer")
+        with st.form("edit_customer_form"):
+            new_name = st.text_input("Customer Name", value=edit_customer["name"])
+            new_phone = st.text_input("Phone Number", value=edit_customer["phone"])
+            new_email = st.text_input("Email", value=edit_customer.get("email", ""))
+            new_address = st.text_area("Address", value=edit_customer.get("address", ""))
+            save_changes = st.form_submit_button("💾 Update Customer")
 
-
+            if save_changes:
+                update_data = {
+                    "name": new_name,
+                    "phone": new_phone,
+                    "email": new_email,
+                    "address": new_address,
+                }
+                supabase.table("customers").update(update_data).eq("customer_id", edit_id).execute()
+                st.success("✅ Customer updated successfully!")
+                del st.session_state["edit_customer_id"]
+                st.rerun()
+    else:
+        st.info("Select a customer to edit from the list.")
 
 
 
