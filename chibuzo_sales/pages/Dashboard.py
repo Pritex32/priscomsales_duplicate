@@ -1266,13 +1266,23 @@ with st.sidebar.expander('Submit Feedback'):
                     st.sidebar.error("⚠️ Could not submit feedback. Please try again.")
                     
 st.markdown("___")
-# show logins logs
-total_logins = supabase.table("login_logs").select("count", count="exact").eq("user_id", st.session_state["user_id"]).execute()
-last_login = supabase.table("login_logs").select("login_time").eq("user_id", st.session_state["user_id"]).order("login_time", desc=True).limit(1).execute()
+# ✅ Only show login logs if MD is logged in
+if st.session_state.get("role") == "md":
+    total_logins = supabase.table("login_logs").select("count", count="exact").eq("user_id", st.session_state["user_id"]).execute()
+    last_login = (
+        supabase.table("login_logs")
+        .select("login_time")
+        .eq("user_id", st.session_state["user_id"])
+        .order("login_time", desc=True)
+        .limit(1)
+        .execute()
+    )
 
-col1, col2 = st.columns(2)
-col1.metric("Total Logins", total_logins.count if hasattr(total_logins, 'count') else 0)
-col2.metric("Last Login", last_login.data[0]["login_time"] if last_login.data else "N/A")
+    st.markdown("### 📊 Login Activity")
+    col1, col2 = st.columns(2)
+    col1.metric("Total Logins", total_logins.count if hasattr(total_logins, 'count') else 0)
+    col2.metric("Last Login", last_login.data[0]["login_time"] if last_login.data else "N/A")
+
 
 
 
