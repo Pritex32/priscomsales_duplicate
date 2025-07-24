@@ -479,7 +479,8 @@ if customers_list:
             label="📥 Download Customer List (CSV)",
             data=csv,
             file_name="customer_list.csv",
-            mime="text/csv"
+            mime="text/csv",
+            key="download_customer_list"
         )
 else:
     st.info("No customers found. Add your first customer above!")
