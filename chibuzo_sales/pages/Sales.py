@@ -1061,7 +1061,9 @@ with tab1:
 
                             
 # ✅ UI for Search
+
 with tab1:
+    st.markdown("___")
     st.subheader("🔍 Search Transactions")
 
     search_query = st.text_input("Search by Customer/Supplier Name, Invoice Number, or Any Keyword")
