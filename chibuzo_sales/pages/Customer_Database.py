@@ -486,6 +486,18 @@ else:
     st.info("No customers found. Add your first customer above!")
 
 
+st.markdown
+# ✅ Calculate metrics
+total_customers = len(df_customers)
+filtered_customers = len(df_filtered) if 'df_filtered' in locals() else total_customers
+
+# ✅ Show metrics
+col_m1, col_m2 = st.columns(2)
+with col_m1:
+    st.metric(label="Total Customers", value=total_customers)
+with col_m2:
+    st.metric(label="Filtered Results", value=filtered_customers)
+
 
 st.markdown("___")
 st.subheader("Search Bar")
