@@ -512,6 +512,18 @@ if customers_list:
         ]
     else:
         df_filtered = df_customers
+    with st.expander('📂 View Customer List'):
+        st.dataframe(df_filtered, use_container_width=True)
+
+        # ✅ Download filtered list as CSV
+        csv = df_filtered.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Download Customer List (CSV)",
+            data=csv,
+            file_name="customer_list.csv",
+            mime="text/csv",
+            key="download_customer_list"  # ✅ Added unique key
+        )
 
     
 else:
