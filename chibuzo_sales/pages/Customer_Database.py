@@ -494,7 +494,6 @@ else:
 st.markdown("___")
 # ✅ Calculate metrics
 st.markdown("<h1 style='color:blue;'>Metrics</h1>", unsafe_allow_html=True)
-st.title('Metrics')
 total_customers = len(df_customers)
 filtered_customers = len(df_filtered) if 'df_filtered' in locals() else total_customers
 
