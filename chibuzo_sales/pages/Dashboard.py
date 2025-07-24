@@ -1264,7 +1264,8 @@ with st.sidebar.expander('Submit Feedback'):
                     st.rerun()
                 else:
                     st.sidebar.error("⚠️ Could not submit feedback. Please try again.")
-
+                    
+st.markdown("___")
 # show logins logs
 total_logins = supabase.table("login_logs").select("count", count="exact").eq("user_id", st.session_state["user_id"]).execute()
 last_login = supabase.table("login_logs").select("login_time").eq("user_id", st.session_state["user_id"]).order("login_time", desc=True).limit(1).execute()
