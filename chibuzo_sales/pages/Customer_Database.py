@@ -452,15 +452,80 @@ with st.form("add_customer_form"):
                 st.error(f"❌ Failed to save customer: {e}")
 
 
-# ✅ Display customer list
+
+st.markdown("___")
 st.subheader("📋 Customer List")
+
 if customers_list:
-    for customer in customers_list:
-        st.write(f"**{customer['name']}** | 📞 {customer['phone']} | ✉️ {customer.get('email', 'N/A')} | 🏠 {customer.get('address', 'N/A')}")
+    # ✅ Convert to DataFrame
+    df_customers = pd.DataFrame(customers_list)
+
+    # ✅ Rename columns for better display
+    df_customers = df_customers.rename(columns={
+        "customer_id": "Customer ID",
+        "name": "Name",
+        "phone": "Phone",
+        "email": "Email",
+        "address": "Address",
+        "created_at": "Created At"
+    })
+
+    with st.expander('📂 View Customer List'):
+        st.dataframe(df_customers, use_container_width=True)
+
+        # ✅ Convert DataFrame to CSV for download
+        csv = df_customers.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Download Customer List (CSV)",
+            data=csv,
+            file_name="customer_list.csv",
+            mime="text/csv"
+        )
 else:
     st.info("No customers found. Add your first customer above!")
 
 
+
+st.markdown("___")
+st.subheader("📋 Customer List")
+if customers_list:
+    # ✅ Convert Supabase data to DataFrame
+    df_customers = pd.DataFrame(customers_list)
+    df_customers = df_customers.rename(columns={
+        "customer_id": "Customer ID",
+        "name": "Name",
+        "phone": "Phone",
+        "email": "Email",
+        "address": "Address",
+        "created_at": "Created At"
+    })
+
+    # ✅ Search bar
+    search_query = st.text_input("🔍 Search by Name or Phone")
+
+    # ✅ Filter DataFrame based on search input
+    if search_query:
+        df_filtered = df_customers[
+            df_customers["Name"].str.contains(search_query, case=False, na=False) |
+            df_customers["Phone"].str.contains(search_query, case=False, na=False)
+        ]
+    else:
+        df_filtered = df_customers
+
+    with st.expander('📂 View Customer List'):
+        st.dataframe(df_filtered, use_container_width=True)
+
+        # ✅ Download filtered list as CSV
+        csv = df_filtered.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Download Customer List (CSV)",
+            data=csv,
+            file_name="customer_list.csv",
+            mime="text/csv"
+        )
+
+else:
+    st.info("No customers found. Add your first customer above!")
 
 
 
