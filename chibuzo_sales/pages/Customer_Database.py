@@ -512,7 +512,7 @@ if customers_list:
         ]
     else:
         df_filtered = df_customers
-    with st.expander('📂 View Customer List'):
+    with st.expander('📂 View Search Result'):
         st.dataframe(df_filtered, use_container_width=True)
 
         # ✅ Download filtered list as CSV
