@@ -1266,23 +1266,41 @@ with st.sidebar.expander('Submit Feedback'):
                     st.sidebar.error("⚠️ Could not submit feedback. Please try again.")
                     
 st.markdown("___")
-# ✅ Only show login logs if MD is logged in
+
 if st.session_state.get("role") == "md":
+    # Get the last login entry globally
     total_logins = supabase.table("login_logs").select("count", count="exact").eq("user_id", st.session_state["user_id"]).execute()
-    last_login = (
+    last_login_record = (
         supabase.table("login_logs")
-        .select("login_time")
-        .eq("user_id", st.session_state["user_id"])
+        .select("user_id, login_time, role")  # include role
         .order("login_time", desc=True)
-        .limit(1)
+        .limit(5)
         .execute()
     )
 
-    st.markdown("### 📊 Login Activity")
-    col1, col2 = st.columns(2)
-    col1.metric("Total Logins", total_logins.count if hasattr(total_logins, 'count') else 0)
-    col2.metric("Last Login", last_login.data[0]["login_time"] if last_login.data else "N/A")
+    if last_login_record.data:
+        last_user_id = last_login_record.data[0]["user_id"]
+        last_login_time = last_login_record.data[0]["login_time"]
+        last_role = last_login_record.data[0].get("role", "md")  # default to md if not set
 
+        # Fetch name based on role
+        if last_role == "md":
+            user_info = supabase.table("users").select("username").eq("user_id", last_user_id).single().execute()
+            last_user_name = user_info.data["username"] if user_info.data else "Unknown MD"
+        else:
+            emp_info = supabase.table("employees").select("name").eq("employee_id", last_user_id).single().execute()
+            last_user_name = emp_info.data["name"] if emp_info.data else "Unknown Employee"
+
+        st.markdown("### 📊 Login Activity")
+        col1, col2,col3 = st.columns(2)
+        col1.metric("Last Login", last_login.data[0]["login_time"] if last_login.data else "N/A")
+        col2.metric("Last Login User", f"{last_user_name} ({last_role})")
+        col3.metric("Last Login Time", last_login_time)
+    else:
+        st.info("No login records found yet.")
+
+
+    
 
 
 
