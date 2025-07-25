@@ -1289,38 +1289,49 @@ with st.sidebar.expander('Submit Feedback'):
                     st.sidebar.error("⚠️ Could not submit feedback. Please try again.")
                     
 st.markdown("___")
-
 if st.session_state.get("role") == "md":
-    # Get the last login entry globally
-    total_logins = supabase.table("login_logs").select("count", count="exact").eq("user_id", st.session_state["user_id"]).execute()
+    # ✅ Get total logins for this MD
+    total_logins = supabase.table("login_logs") \
+        .select("count", count="exact") \
+        .eq("user_id", st.session_state["user_id"]) \
+        .execute()
+
+    # ✅ Get the last 5 logins globally
     last_login_record = (
         supabase.table("login_logs")
-        .select("user_id, login_time, role")  # include role
+        .select("user_id, login_time, role")
         .order("login_time", desc=True)
-        .limit(1)
+        .limit(5)
         .execute()
     )
 
+    st.markdown("### 📊 Login Activity")
     if last_login_record.data:
         last_user_id = last_login_record.data[0]["user_id"]
         last_login_time = last_login_record.data[0]["login_time"]
-        last_role = last_login_record.data[0].get("role", "md")  # default to md if not set
+        last_role = last_login_record.data[0].get("role", "md")  # default to md
 
-        # Fetch name based on role
+        # ✅ Fetch name based on role
         if last_role == "md":
             user_info = supabase.table("users").select("username").eq("user_id", last_user_id).single().execute()
-            last_user_name = user_info.data["username"] if user_info.data else "Unknown MD"
+            last_user_name = user_info.data.get("username", "Unknown MD") if user_info.data else "Unknown MD"
         else:
             emp_info = supabase.table("employees").select("name").eq("employee_id", last_user_id).single().execute()
-            last_user_name = emp_info.data["name"] if emp_info.data else "Unknown Employee"
+            last_user_name = emp_info.data.get("name", "Unknown Employee") if emp_info.data else "Unknown Employee"
 
-        st.markdown("### 📊 Login Activity")
-        col1, col2,col3 = st.columns(3)
-        col1.metric("Last Login", last_login.data[0]["login_time"] if last_login.data else "N/A")
+        # ✅ Display metrics
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Total Logins", total_logins.count if hasattr(total_logins, 'count') else 0)
         col2.metric("Last Login User", f"{last_user_name} ({last_role})")
         col3.metric("Last Login Time", last_login_time)
+
+        # ✅ Show recent logins (optional)
+        st.write("#### Recent Logins")
+        for record in last_login_record.data:
+            st.write(f"- {record['login_time']} | Role: {record['role']}")
     else:
         st.info("No login records found yet.")
+
 
 
     
