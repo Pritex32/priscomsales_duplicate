@@ -757,36 +757,31 @@ def get_client_ip():
 import socket
 import platform
 from datetime import datetime
-def track_login(user_id):
-    # ✅ Get client IP using JavaScript in Streamlit
-    client_ip = st_javascript("""
-        await fetch('https://api.ipify.org?format=json')
-        .then(res => res.json())
-        .then(data => data.ip)
-    """)
+def track_login(user_id, role):
+    # ✅ Get client IP (from Streamlit headers if running on Streamlit Cloud)
+    try:
+        ip_address = st.context.headers.get("X-Forwarded-For", "Unknown")  # Handles proxy IP
+    except:
+        ip_address = "Unknown"
 
-    if not client_ip:
-        client_ip = "Unknown"
-
-    # ✅ Get device info from the server environment
+    # ✅ Get device info
     device_info = f"{platform.system()} {platform.release()}"
 
-    # ✅ Prepare login data
+    # ✅ Prepare data for Supabase
     login_data = {
         "user_id": user_id,
+        "role": role,
         "login_time": str(datetime.now()),
-        "ip_address": client_ip,
+        "ip_address": ip_address,
         "device": device_info
     }
 
-    # ✅ Insert login record into Supabase
+    # ✅ Insert into Supabase
     try:
-        response=supabase.table("login_logs").insert(login_data).execute()
-        st.write(response)
-        st.success("✅ Login tracked successfully!")
+        supabase.table("login_logs").insert(login_data).execute()
+        print(f"✅ Login tracked: {login_data}")
     except Exception as e:
-        st.error(f"❌ Failed to log login: {e}")
-
+        print(f"❌ Failed to track login: {e}")
 
 
 # Sidebar Menu
@@ -1035,7 +1030,7 @@ elif choice == 'Login':
                             user_id = st.session_state.get("user_id")  # Ensure you store this when MD logs in
                             ip_address = get_client_ip()  # You'll define this function
                             device = device    # Optional, can be from headers or user-agent
-                            track_login(user_id)  # Ca
+                            track_login(user_id, role)  # Ca
                             if login_type == "MD":
                                 st.success(f"✅ Welcome {display_name} (MD)! Redirecting to Sales...")
                             elif login_type == "Employee":
@@ -1316,7 +1311,7 @@ if st.session_state.get("role") == "md":
             user_info = supabase.table("users").select("username").eq("user_id", last_user_id).single().execute()
             last_user_name = user_info.data.get("username", "Unknown MD") if user_info.data else "Unknown MD"
         else:
-            emp_info = supabase.table("employees").select("name").eq("employee_id", last_user_id).single().execute()
+            emp_info = supabase.table("employees").select("name").eq("employee_id", last_user_id).eq('user_id',user_id).single().execute()
             last_user_name = emp_info.data.get("name", "Unknown Employee") if emp_info.data else "Unknown Employee"
 
         # ✅ Display metrics
