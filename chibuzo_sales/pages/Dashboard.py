@@ -741,6 +741,18 @@ def init_session_state():
 init_session_state()
 
 
+
+import requests
+# to get client ip
+def get_client_ip():
+    try:
+        response = requests.get('https://api.ipify.org?format=json')
+        return response.json().get('ip', 'Unknown')
+    except:
+        return "Unknown"
+
+
+
 # to track logins
 import socket
 import platform
