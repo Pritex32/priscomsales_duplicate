@@ -1004,6 +1004,7 @@ elif choice == 'Login':
 
     else:
         # 🔐 Login form
+        device = f"{platform.system()} {platform.release()}"
         login_type = st.radio("Login as:", ["MD", "Employee"], horizontal=True)
 
         with st.form("login_form"):
@@ -1033,7 +1034,7 @@ elif choice == 'Login':
                             # ✅ Track login in Supabase
                             user_id = st.session_state.get("user_id")  # Ensure you store this when MD logs in
                             ip_address = get_client_ip()  # You'll define this function
-                            device = get_device_info()    # Optional, can be from headers or user-agent
+                            device = device    # Optional, can be from headers or user-agent
                             log_login(user_id, ip_address, device)  # Ca
                             if login_type == "MD":
                                 st.success(f"✅ Welcome {display_name} (MD)! Redirecting to Sales...")
