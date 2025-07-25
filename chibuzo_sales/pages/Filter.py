@@ -1,5 +1,6 @@
 import streamlit as st
 # to hide streamlit features
+st.set_page_config(page_title="Filters", layout="wide")
 hide_streamlit_style = """
     <style>
     #MainMenu {visibility: hidden;}
@@ -37,7 +38,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 import streamlit as st
 
-st.set_page_config(page_title="Filters", layout="wide")
+
 
 
 
