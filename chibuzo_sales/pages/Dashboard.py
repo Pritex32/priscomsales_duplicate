@@ -886,6 +886,21 @@ elif choice == "Register":
                                 # ✅ Save to session
                                 st.session_state.registration_success = True
                                 st.session_state.access_code = access_code
+                                st.markdown(f"""
+                                 <div style="
+                                  background-color: #f0f8ff; 
+                                  border-left: 6px solid #1e90ff; 
+                                   padding: 16px; 
+                                    border-radius: 8px;
+                                    font-family: Arial, sans-serif;
+                                     color: #333;
+                                     ">
+                                    <h3 style="margin: 0; color: #1e90ff;">🔐 Your Secret Access Code</h3>
+                                    <p style="font-size: 20px; font-weight: bold; color: #000;">{access_code}</p>
+                                   <p style="font-size: 14px; color: #555;">Please save this code securely. You will need it for password changes!</p>
+                                    </div> """,    unsafe_allow_html=True
+)
+
                                 
                                 st.rerun()
                             else:
