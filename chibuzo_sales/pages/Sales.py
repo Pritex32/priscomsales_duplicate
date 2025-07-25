@@ -818,6 +818,7 @@ with tab1:
                 new_sale_id = result.data[0]["sale_id"]
                 sale_ids.append((new_sale_id, item["total_amount"]))
                 st.success(f"✅ Sale of '{item['item_name']}' recorded successfully!")
+                st.rerun()
             except Exception as e:
                 st.error(f"❌ Failed to insert sale for item '{item['item_name']}': ")
 
