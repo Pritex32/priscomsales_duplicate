@@ -373,7 +373,6 @@ if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in
 
 
 
-selected_option = st.radio("Label", ["Option 1", "Option 2"])
 choice = st.radio("Select an Option", ["Change Password", "API Integration"])
 
 
@@ -383,7 +382,8 @@ choice = st.radio("Select an Option", ["Change Password", "API Integration"])
 
 
 
-elif choice == "Change Password":
+
+if choice == "Change Password":
     st.subheader("🔐 Change Your Password")
 
     with st.form("change_password_form"):
