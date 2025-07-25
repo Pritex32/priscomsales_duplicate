@@ -1,4 +1,5 @@
 import streamlit as st
+st.set_page_config(page_title="sales", layout="wide")
 # to hide streamlit features
 hide_streamlit_style = """
     <style>
