@@ -571,7 +571,7 @@ st.markdown(
         }
     </style>
     <div class="custom-title">
-        📊 Filter Records - <span>Sales | Restock | Expenses | Payments</span>
+        📊 Filter Records  <div class="sub-title">Sales | Restock | Expenses | Payments</div>
     </div>
     """,
     unsafe_allow_html=True
