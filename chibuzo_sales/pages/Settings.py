@@ -445,6 +445,9 @@ if choice == "Settings":
 
 
 elif choice == "Change Password":
+    if "role" not in st.session_state or st.session_state.role != "md":
+        st.warning("🚫 You are not authorized to view this page.")
+        st.stop()
     st.subheader("🔐 Change Your Password")
 
     with st.form("change_password_form"):
