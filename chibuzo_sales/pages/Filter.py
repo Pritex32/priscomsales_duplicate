@@ -77,7 +77,7 @@ if "loaded" not in st.session_state:
 
 jwt_SECRET_KEY = "4606"  # Use env vars in production
 ALGORITHM = "HS256"
-
+API_URL = "http://127.0.0.1:8000/api/sales/fetch"
 #Decode function
 def generate_jwt(user_id, username, role,plan="free", is_active=False, email=None):
     payload = {
