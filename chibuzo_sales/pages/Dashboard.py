@@ -137,6 +137,7 @@ def restore_login_from_jwt():
                 st.session_state.clear()
                 st_javascript("""localStorage.removeItem("login_token");""", key=f"get_login_token_888")
                 st.session_state.login_failed = True
+                st.rerun()
 
 
 # Only call restore function if not already logged in
