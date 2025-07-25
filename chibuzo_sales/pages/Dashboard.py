@@ -825,7 +825,7 @@ elif choice == "Register":
              <p style="font-size: 20px; font-weight: bold; color: #000;">{access_code}</p>
              <p style="font-size: 14px; color: #555;">Please save this code securely. You will need it for password changes!</p>
              </div> """,    unsafe_allow_html=True)
-        st.markdown("# ** Kindly select Login by selecting Login Above**
+        
                                 
        
         st.markdown("""
