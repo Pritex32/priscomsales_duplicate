@@ -35,6 +35,9 @@ from streamlit_javascript import st_javascript
 import logging
 
 from datetime import datetime, timedelta, timezone
+import streamlit as st
+
+st.set_page_config(page_title="Filters", layout="wide")
 
 
 
