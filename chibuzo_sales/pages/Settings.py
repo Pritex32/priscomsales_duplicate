@@ -440,8 +440,6 @@ elif choice == "Change Password":
                         if update_result.data:
                             st.success("✅ Password updated successfully!")
                             # ✅ Button to redirect to Login
-                            if st.button("👉 Go to Login"):
-                                st.session_state.page = "Login"
-                                st.rerun()
+                            switch_page('Dashboard')
                         else:
                             st.error("❌ Failed to update password. Please try again.")
