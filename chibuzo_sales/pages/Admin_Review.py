@@ -596,7 +596,63 @@ if st.session_state.get("role") == "md":
                   # ✅ Show recent logins in a table
             st.write("#### Recent Logins")
             df_logins = pd.DataFrame(last_login_record.data)
-            st.dataframe(df_logins[['login_time', 'role', 'ip_address', 'device']], use_container_width=True)
+            if not df_logins.empty:
+                st.dataframe(df_logins[['login_time', 'role', 'ip_address', 'device']], use_container_width=True)
+                csv_data = df_logins.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                   label="⬇️ Download Login History as CSV",
+                   data=csv_data,
+                   file_name="login_history.csv",
+                   mime="text/csv")
+            else:
+                st.warning("No login records available.")
+        # header for filtering
+        st.markdown("""
+         <h4 style='
+         color: white;
+         background: linear-gradient(90deg, #4CAF50, #2E8B57);
+         padding: 10px;
+         border-radius: 8px;
+         font-size: 20px;
+         text-align: center;
+         font-weight: bold;
+         '>
+         🔍 Filter Login History
+         </h4>""", unsafe_allow_html=True)
+
+        df_logins = pd.DataFrame(last_login_record.data)
+
+        if not df_logins.empty:
+            # ✅ Date filter with separate Start & End
+            min_date = pd.to_datetime(df_logins['login_time']).min()
+            max_date = pd.to_datetime(df_logins['login_time']).max()
+
+            col1, col2 = st.columns(2)
+            with col1:
+                start_date = st.date_input("📅 Start Date:", min_value=min_date.date(), value=min_date.date())
+            with col2:
+                end_date = st.date_input("📅 End Date:", min_value=min_date.date(), value=max_date.date())
+
+            # ✅ Apply filter
+            df_logins['login_time'] = pd.to_datetime(df_logins['login_time'])
+            filtered_df = df_logins[
+                (df_logins['login_time'].dt.date >= start_date) &
+                (df_logins['login_time'].dt.date <= end_date)
+            ]
+
+            st.write("#### Filtered Logins")
+            st.dataframe(filtered_df[['login_time', 'role', 'ip_address', 'device']], use_container_width=True)
+
+            # ✅ Add download button for filtered data
+            csv_data = filtered_df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="⬇️ Download Filtered Login History as CSV",
+                data=csv_data,
+                file_name="login_history_filtered.csv",
+                mime="text/csv"
+            )
+        else:
+            st.warning("No login records available.")
 
     else:
         st.info("No login records found yet.")
