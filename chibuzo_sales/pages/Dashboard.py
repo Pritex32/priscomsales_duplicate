@@ -1285,8 +1285,10 @@ with st.sidebar.expander('Submit Feedback'):
                     
 
 
-elif choice == 'Login':
-    st.markdown("___")
+
+
+
+st.markdown("___")
     if st.session_state.get("role") == "md":
         user_id = st.session_state["user_id"]
 
@@ -1340,6 +1342,7 @@ elif choice == 'Login':
 
 
 
+    
 
     
 
