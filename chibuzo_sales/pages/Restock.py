@@ -1,4 +1,5 @@
 import streamlit as st
+st.set_page_config(page_title="restock", layout="wide")
 # to hide streamlit feautres and icons
 hide_streamlit_style = """
     <style>
