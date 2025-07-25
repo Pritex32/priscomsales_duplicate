@@ -1116,8 +1116,8 @@ if selected =='Delete':
 
                 except Exception as e:
                     st.error(f"❌ Failed to delete item and related data.")
-            else:
-                st.warning("❗ No inventory item found with that name.")
+        else:
+            st.warning("❗ No inventory item found with that name.")
 
 
 
