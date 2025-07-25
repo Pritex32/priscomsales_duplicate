@@ -781,7 +781,8 @@ def track_login(user_id):
 
     # ✅ Insert login record into Supabase
     try:
-        supabase.table("login_logs").insert(login_data).execute()
+        response=supabase.table("login_logs").insert(login_data).execute()
+        st.write(response)
         st.success("✅ Login tracked successfully!")
     except Exception as e:
         st.error(f"❌ Failed to log login: {e}")
