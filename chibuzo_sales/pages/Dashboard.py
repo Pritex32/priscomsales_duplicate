@@ -887,8 +887,7 @@ elif choice == "Register":
                                 st.session_state.registration_success = True
                                 st.session_state.access_code = access_code
                                 st.session_state.do_rerun = True
-                                st.markdown(f"""
-                                 <div style="
+                                st.markdown(f"""<div style="
                                   background-color: #f0f8ff; 
                                   border-left: 6px solid #1e90ff; 
                                    padding: 16px; 
