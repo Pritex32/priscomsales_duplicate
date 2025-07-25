@@ -442,10 +442,9 @@ elif choice == "Change Password":
                         if update_result.data:
                             st.success("✅ Password updated successfully!")
                             time.sleep(1)
-                            # ✅ Log out by clearing session state
-                            for key in list(st.session_state.keys()):
-                                del st.session_state[key]
-                            # ✅ Button to redirect to Login
+                            st.session_state.clear()
+                            st_javascript("localStorage.removeItem('login_token');",key="remove_login_token_6")
+                            time.sleep(1)
                             switch_page('Dashboard')
                         else:
                             st.error("❌ Failed to update password. Please try again.")
