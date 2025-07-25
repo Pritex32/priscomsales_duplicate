@@ -261,7 +261,9 @@ user_id = st.session_state.get("user_id")
  
 
 
-
+def hash_password(password: str) -> str:
+    # Hash the password using SHA-256 (or a stronger hashing function like bcrypt)
+    return hashlib.sha256(password.encode()).hexdigest()
 
 
 # this will show if the person has paid or not
