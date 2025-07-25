@@ -1028,7 +1028,8 @@ elif choice == 'Login':
                         display_name = st.session_state.get("username") or st.session_state.get("user", {}).get("email")
                         with st.spinner("🔄 Logging you in..."):
                             # ✅ Track login in Supabase
-                            user_id = st.session_state.get("user_id")  # Ensure you store this when MD logs in
+                            user_id = st.session_state.get("user_id") 
+                             role = st.session_state.get("role", "md")# Ensure you store this when MD logs in
                             ip_address = get_client_ip()  # You'll define this function
                             device = device    # Optional, can be from headers or user-agent
                             track_login(user_id, role)  # Ca
