@@ -427,11 +427,13 @@ elif choice == "Change Password":
 
                 if not user_check.data:
                     st.error("❌ No account found with this email.")
+                    st.stop()
                 else:
                     stored_access_code = user_check.data[0]["access_code"]
 
                     if stored_access_code != access_code:
                         st.error("❌ Invalid Access Code.")
+                        st.stop()
                     else:
                         # ✅ Hash new password and update
                         hashed_new_password = hash_password(new_password)
