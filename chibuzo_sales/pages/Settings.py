@@ -439,6 +439,9 @@ elif choice == "Change Password":
 
                         if update_result.data:
                             st.success("✅ Password updated successfully!")
+                            # ✅ Log out by clearing session state
+                            for key in list(st.session_state.keys()):
+                                del st.session_state[key]
                             # ✅ Button to redirect to Login
                             switch_page('Dashboard')
                         else:
