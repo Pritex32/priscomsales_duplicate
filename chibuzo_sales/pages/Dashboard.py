@@ -1,4 +1,5 @@
 import streamlit as st
+st.set_page_config(page_title="Dashboard", layout="wide")
 # to hide streamlit icons
 hide_streamlit_style = """
     <style>
