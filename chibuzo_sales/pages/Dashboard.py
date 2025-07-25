@@ -469,7 +469,10 @@ def login_user(email, password):
         st.error("❌ Login failed. Please check your credentials or try again later.")
         return None
 
-
+# to generate access code
+def generate_access_code(length=8):
+    chars = string.ascii_uppercase + string.digits
+    return ''.join(random.choices(chars, k=length))
 
 
 
@@ -804,67 +807,88 @@ if st.session_state.redirect_to_login:
 # Registration Page
 elif choice == "Register":
     st.subheader("📋 Register")
-    # 🧠 Only initialize once
-    if "email_entered" not in st.session_state:
-        st.session_state.email_entered = False
 
-    if "temp_email" not in st.session_state:
-        st.session_state.temp_email = ""
-    with st.form("registration_form"):
-        username = st.text_input("Full name or Business name")
-        password = st.text_input("Password", type="password")
-        plan = st.selectbox("Choose Plan", ["free"])
-        role = st.selectbox("Select Role", ["MD"])
+    # ✅ If access code exists in session, show it and Login button
+    if "registration_success" in st.session_state and st.session_state.registration_success:
+        access_code = st.session_state.get("access_code", "")
+        st.success("✅ Registration completed successfully!")
+        st.info(f"🔐 **Your Secret Access Code:** {access_code}\n\nPlease save it securely for password changes!")
 
-        if not st.session_state.email_entered:
-            email = st.text_input("Enter your email")
+        # ✅ Add Login button
+        if st.button("👉 Go to Login"):
+            st.session_state.page = "Login"
+            st.session_state.registration_success = False  # Clear success state
+            st.rerun()
 
-            if st.form_submit_button("Next"):
-                if email and "@" in email:
-                    st.session_state.temp_email = email
-                    st.session_state.email_entered = True
-                    st.rerun()
-                else:
-                    st.warning("Please enter a valid email.")
-        else:
-            # Email was previously submitted
-            def mask_email(email):
-                try:
-                    name, domain = email.split("@")
-                    name_masked = name[:2] + "***" if len(name) >= 3 else name[0] + "***"
-                    return f"{name_masked}@{domain}"
-                except:
-                    return "*****@unknown.com"
+    else:
+        # 🧠 Only initialize once
+        if "email_entered" not in st.session_state:
+            st.session_state.email_entered = False
+        if "temp_email" not in st.session_state:
+            st.session_state.temp_email = ""
 
-            masked = mask_email(st.session_state.temp_email)
-            st.info(f"To confirm, please complete this email: `{masked}`")
-            email_confirmation = st.text_input("Confirm your email")
+        with st.form("registration_form"):
+            username = st.text_input("Full name or Business name")
+            password = st.text_input("Password", type="password")
+            plan = st.selectbox("Choose Plan", ["free"])
+            role = st.selectbox("Select Role", ["MD"])
 
-            submitted = st.form_submit_button("Register")
+            if not st.session_state.email_entered:
+                email = st.text_input("Enter your email")
 
-            if submitted:
-                if username and password and email_confirmation:
-                    if email_confirmation != st.session_state.temp_email:
-                        st.error("❌ Email confirmation doesn't match.")
+                if st.form_submit_button("Next"):
+                    if email and "@" in email:
+                        st.session_state.temp_email = email
+                        st.session_state.email_entered = True
+                        st.rerun()
                     else:
-                        hashed_password = hash_password(password)
-                        result = register_user(
-                            username,
-                            st.session_state.temp_email,
-                            email_confirmation,
-                            hashed_password,
-                            role,
-                            plan
-                        )
-                        if "successfully" in result:
-                            st.success(result)
-                            st.session_state.page='Login'
-                            st.rerun()          
-                            
+                        st.warning("Please enter a valid email.")
+            else:
+                # Email was previously submitted
+                def mask_email(email):
+                    try:
+                        name, domain = email.split("@")
+                        name_masked = name[:2] + "***" if len(name) >= 3 else name[0] + "***"
+                        return f"{name_masked}@{domain}"
+                    except:
+                        return "*****@unknown.com"
+
+                masked = mask_email(st.session_state.temp_email)
+                st.info(f"To confirm, please complete this email: `{masked}`")
+                email_confirmation = st.text_input("Confirm your email")
+
+                submitted = st.form_submit_button("Register")
+
+                if submitted:
+                    if username and password and email_confirmation:
+                        if email_confirmation != st.session_state.temp_email:
+                            st.error("❌ Email confirmation doesn't match.")
                         else:
-                            st.error(result)
-                else:
-                    st.warning("⚠️ Please fill in all fields.")
+                            hashed_password = hash_password(password)
+
+                            # ✅ Generate Access Code
+                            access_code = generate_access_code()
+
+                            result = register_user(
+                                username,
+                                st.session_state.temp_email,
+                                email_confirmation,
+                                hashed_password,
+                                role,
+                                plan,
+                                access_code
+                            )
+
+                            if "successfully" in result:
+                                # ✅ Save to session
+                                st.session_state.registration_success = True
+                                st.session_state.access_code = access_code
+                                st.success(result)
+                                st.rerun()
+                            else:
+                                st.error(result)
+                    else:
+                        st.warning("⚠️ Please fill in all fields.")
 
 ## to redirect you to dashboard after login
  # force rerun to redirect to dashboard
