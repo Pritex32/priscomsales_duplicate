@@ -493,16 +493,26 @@ else:
 
 st.markdown("___")
 # ✅ Calculate metrics
-st.markdown("<h1 style='color:blue;'>Metrics</h1>", unsafe_allow_html=True)
-total_customers = len(df_customers)
-filtered_customers = len(df_filtered) if 'df_filtered' in locals() else total_customers
 
-# ✅ Show metrics
-col_m1, col_m2 = st.columns(2)
-with col_m1:
-    st.metric(label="Total Customers", value=total_customers)
-with col_m2:
-    st.metric(label="Filtered Results", value=filtered_customers)
+
+st.markdown("<h1 style='color:blue;'>Metrics</h1>", unsafe_allow_html=True)
+# ✅ Ensure df_customers always exists
+df_customers = pd.DataFrame(customers_list) if customers_list else pd.DataFrame()
+
+if not df_customers.empty:
+    # ✅ Calculate metrics
+    total_customers = len(df_customers)
+    filtered_customers = len(df_filtered) if 'df_filtered' in locals() else total_customers
+
+    # ✅ Show metrics
+    col_m1, col_m2 = st.columns(2)
+    with col_m1:
+        st.metric(label="Total Customers", value=total_customers)
+    with col_m2:
+        st.metric(label="Filtered Results", value=filtered_customers)
+else:
+    st.info("No customer metrics available. Add customers to see stats.")
+
 
 
 st.markdown("___")
