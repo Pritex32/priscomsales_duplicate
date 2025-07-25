@@ -380,7 +380,7 @@ choice = st.radio("Select an Option", ["Settings","Change Password", "API Integr
 if choice == "Settings":
     st.subheader("⚙️ Settings")
     st.markdown("""
-   <div style="
+    <div style="
     background-color:#fff8e1; 
     border-left:6px solid #ff9800; 
     padding:16px; 
@@ -393,7 +393,9 @@ if choice == "Settings":
         You are now on the <strong>Settings</strong> page.<br>
         Manage your preferences below.
     </p>
-    </div>""", unsafe_allow_html=True)")
+</div>
+""", unsafe_allow_html=True)
+
 
 
 
