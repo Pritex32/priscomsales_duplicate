@@ -657,7 +657,7 @@ if table_option == "Sales" and not sales_df.empty:
             ]
 
     st.write("### Filtered Sales Data")
-    st.dataframe(filtered_df)
+    st.dataframe(filtered_df.tail(10))
     download_button(filtered_df, "filtered_sales.xlsx")
 
 # ========================================
