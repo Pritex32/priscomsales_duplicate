@@ -2,6 +2,9 @@
 
 
 
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from services.supabase_service import supabase_client
 
 
 
@@ -10,8 +13,7 @@
 
 
 
-
-
+from supabase import create_client
 
 
 @st.cache_resource
