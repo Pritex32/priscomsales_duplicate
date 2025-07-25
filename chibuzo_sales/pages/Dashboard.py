@@ -886,7 +886,7 @@ elif choice == "Register":
                                 # ✅ Save to session
                                 st.session_state.registration_success = True
                                 st.session_state.access_code = access_code
-                                st.success(result)
+                                
                                 st.rerun()
                             else:
                                 st.error(result)
