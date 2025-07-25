@@ -745,25 +745,34 @@ init_session_state()
 import socket
 import platform
 from datetime import datetime
-
 def track_login(user_id):
-    # Get basic IP and device info
-    try:
-        ip_address = socket.gethostbyname(socket.gethostname())
-    except:
-        ip_address = "Unknown"
+    # ✅ Get client IP using JavaScript in Streamlit
+    client_ip = st_javascript("""
+        await fetch('https://api.ipify.org?format=json')
+        .then(res => res.json())
+        .then(data => data.ip)
+    """)
 
+    if not client_ip:
+        client_ip = "Unknown"
+
+    # ✅ Get device info from the server environment
     device_info = f"{platform.system()} {platform.release()}"
-    
+
+    # ✅ Prepare login data
     login_data = {
         "user_id": user_id,
         "login_time": str(datetime.now()),
-        "ip_address": ip_address,
+        "ip_address": client_ip,
         "device": device_info
     }
 
-    # Insert login log into Supabase
-    supabase.table("login_logs").insert(login_data).execute()
+    # ✅ Insert login record into Supabase
+    try:
+        supabase.table("login_logs").insert(login_data).execute()
+        st.success("✅ Login tracked successfully!")
+    except Exception as e:
+        st.error(f"❌ Failed to log login: {e}")
 
 
 
