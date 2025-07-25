@@ -1315,7 +1315,7 @@ if st.session_state.get("role") == "md":
             last_user_name = emp_info.data["name"] if emp_info.data else "Unknown Employee"
 
         st.markdown("### 📊 Login Activity")
-        col1, col2,col3 = st.columns(2)
+        col1, col2,col3 = st.columns(3)
         col1.metric("Last Login", last_login.data[0]["login_time"] if last_login.data else "N/A")
         col2.metric("Last Login User", f"{last_user_name} ({last_role})")
         col3.metric("Last Login Time", last_login_time)
