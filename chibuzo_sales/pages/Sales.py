@@ -598,6 +598,11 @@ except:
 
 # getting the employee id
 employee_lookup = supabase.table("employees").select("employee_id").eq("user_id", user_id).eq("name", user_name).limit(1).execute()
+# ✅ Fetch customers
+customer_lookup = supabase.table("customers").select("customer_id, name, phone, email, address").eq("user_id", user_id).execute()
+customers_list = customer_lookup.data if customer_lookup.data else []
+customer_options = ["➕ Add New Customer"] + [f"{c['name']} ({c['phone']})" for c in customers_list]
+
 
 if not employee_lookup.data:
     st.error("❌ This employee is not registered.")
@@ -660,8 +665,26 @@ with tab1:
 
         st.success(f"🧾 Grand Total: ₦{grand_total:,.2f}")
         sale_date = st.date_input("Sale Date", value=date.today(), key="sale_date")
-        customer_name = st.text_input("Customer Name", key="customer_name")
-        customer_phone = st.text_input("Customer Phone Number", key="customer_phone")
+        customer_choice = st.radio("Select Customer Input Method", ["Select Existing Customer", "Enter New Customer"])
+        if customer_choice == "Select Existing Customer":
+            selected_customer = st.selectbox("Choose Customer", customer_options, key="customer_select")
+
+            if selected_customer != "➕ Add New Customer":
+                    # Extract customer details
+                customer_index = customer_options.index(selected_customer) - 1
+                selected_data = customers_list[customer_index]
+
+                 # Auto-fill fields (but make them editable if needed)
+                customer_name = st.text_input("Customer Name", value=selected_data["name"], key="customer_name")
+                customer_phone = st.text_input("Customer Phone Number", value=selected_data["phone"], key="customer_phone")
+            else:        # If "Add New Customer" is selected → Show blank fields
+                customer_name = st.text_input("Customer Name", key="customer_name")
+                customer_phone = st.text_input("Customer Phone Number", key="customer_phone")
+        else:  # ✅ Enter New Customer manually
+            customer_name = st.text_input("Customer Name", key="customer_name")
+            customer_phone = st.text_input("Customer Phone Number", key="customer_phone")
+
+       
     with col19:
         payment_method = st.selectbox("Payment Method", ["cash", "card", "transfer"], key="payment_method")
         payment_status = st.selectbox("Payment Status", ["paid", "credit", "partial"], key="payment_status")
