@@ -693,7 +693,7 @@ elif table_option == "Restock" and not restock_df.empty:
             ]
 
     st.write("### Filtered Restock Data")
-    st.dataframe(filtered_df)
+    st.dataframe(filtered_df.tail(10))
     download_button(filtered_df, "filtered_restock.xlsx")
 
 # ========================================
@@ -729,7 +729,7 @@ elif table_option == "Expenses" and not expenses_df.empty:
             ]
 
     st.write("### Filtered Expenses Data")
-    st.dataframe(filtered_df)
+    st.dataframe(filtered_df.tail(10))
     download_button(filtered_df, "filtered_expenses.xlsx")
 
 # ========================================
@@ -776,7 +776,7 @@ elif table_option == "Payments" and not payment_df.empty:
     
 
     st.write("### Filtered Payments Data")
-    st.dataframe(filtered_df)
+    st.dataframe(filtered_df.tail(10))
     download_button(filtered_df, "filtered_payments.xlsx")
 
 else:
