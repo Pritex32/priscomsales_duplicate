@@ -503,7 +503,7 @@ def fetch_sales_data(user_id):
 
 
 
-st.header("🔍 Admin - Review Sales & Invoices")
+st.header("🔍 Admin - Review Login History, Sales & Invoices")
 # refresh button
 col9,col10=st.columns([3,1])
 with col9:
@@ -549,6 +549,54 @@ else:
     st.info("No login history found.")
 
 
+if st.session_state.get("role") == "md":
+    # ✅ Get total logins for this MD
+    total_logins = supabase.table("login_logs") \
+        .select("count", count="exact") \
+        .eq("user_id", st.session_state["user_id"]) \
+        .execute()
+
+    # ✅ Get the last 5 logins globally
+    last_login_record = (
+        supabase.table("login_logs")
+        .select("user_id, login_time, role")
+        .order("login_time", desc=True)
+        .limit(5)
+        .execute()
+    )
+
+    st.markdown("### 📊 Login Activity")
+    if last_login_record.data:
+        last_user_id = last_login_record.data[0]["user_id"]
+        last_login_time = last_login_record.data[0]["login_time"]
+        last_role = last_login_record.data[0].get("role", "md")  # default to md
+
+        # ✅ Fetch name based on role
+        if last_role == "md":
+            user_info = supabase.table("users").select("username").eq("user_id", last_user_id).single().execute()
+            last_user_name = user_info.data.get("username", "Unknown MD") if user_info.data else "Unknown MD"
+        else:
+            emp_info = supabase.table("employees").select("name").eq("employee_id", last_user_id).single().execute()
+            last_user_name = emp_info.data.get("name", "Unknown Employee") if emp_info.data else "Unknown Employee"
+
+        # ✅ Display metrics
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Total Logins", total_logins.count if hasattr(total_logins, 'count') else 0)
+        col2.metric("Last Login User", f"{last_user_name} ({last_role})")
+        col3.metric("Last Login Time", last_login_time)
+
+        # ✅ Show recent logins (optional)
+        st.write("#### Recent Logins")
+        for record in last_login_record.data:
+            st.write(f"- {record['login_time']} | Role: {record['role']}")
+        with st.expander('📜 View Login History Data'):
+                  # ✅ Show recent logins in a table
+            st.write("#### Recent Logins")
+            df_logins = pd.DataFrame(last_login_record.data)
+            st.dataframe(df_logins[['login_time', 'role', 'ip_address', 'device']], use_container_width=True)
+
+    else:
+        st.info("No login records found yet.")
 
 
 
