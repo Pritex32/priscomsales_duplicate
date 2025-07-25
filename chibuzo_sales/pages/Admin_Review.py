@@ -537,11 +537,10 @@ logs = supabase.table("login_logs") \
     .select("*") \
     .eq("user_id", st.session_state["user_id"]) \
     .order("login_time", desc=True) \
-    .limit(10) \
+    .limit(5) \
     .execute()
 
 if logs.data:
-    st.metric("Total Logins", len(logs.data))
     st.write("### Recent Logins")
     for log in logs.data:
         st.write(f"📅 **{log['login_time']}** | 🌐 IP: {log['ip_address']} | 💻 Device: {log['device']}")
@@ -559,7 +558,7 @@ if st.session_state.get("role") == "md":
     # ✅ Get the last 5 logins globally
     last_login_record = (
         supabase.table("login_logs")
-        .select("user_id, login_time, role")
+        .select("user_id, login_time, role, ip_address, device")
         .order("login_time", desc=True)
         .limit(5)
         .execute()
@@ -570,6 +569,8 @@ if st.session_state.get("role") == "md":
         last_user_id = last_login_record.data[0]["user_id"]
         last_login_time = last_login_record.data[0]["login_time"]
         last_role = last_login_record.data[0].get("role", "md")  # default to md
+        last_ip = last_login_record.data[0].get("ip_address", "Unknown IP")
+        last_device = last_login_record.data[0].get("device", "Unknown Device")
 
         # ✅ Fetch name based on role
         if last_role == "md":
@@ -584,6 +585,8 @@ if st.session_state.get("role") == "md":
         col1.metric("Total Logins", total_logins.count if hasattr(total_logins, 'count') else 0)
         col2.metric("Last Login User", f"{last_user_name} ({last_role})")
         col3.metric("Last Login Time", last_login_time)
+        st.write(f"**Last IP:** {last_ip} | **Device:** {last_device}")
+
 
         # ✅ Show recent logins (optional)
         st.write("#### Recent Logins")
