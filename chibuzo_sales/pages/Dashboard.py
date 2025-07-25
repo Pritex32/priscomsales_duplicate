@@ -286,7 +286,7 @@ def is_valid_email(email):
 
 
 
-def register_user(username, email, email_confirmation,password_hash, role,plan):
+def register_user(username, email, email_confirmation,password_hash, role,plan,access_code):
     try:
         # Step 1: Validate email format
         if not is_valid_email(email):
@@ -316,6 +316,7 @@ def register_user(username, email, email_confirmation,password_hash, role,plan):
             "password_hash": password_hash,
             "role": role,
             "is_verified":  True ,
+             "access_code": access_code
             
         }).execute()
         # ✅ Extract user_id from the insert result
