@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from routers import sales, restock
 
-app = FastAPI(title="ChibuSales API")
+app = FastAPI(title="PriscomSales API")
 
 # Include Routers
 app.include_router(sales.router, prefix="/api/sales", tags=["sales"])
