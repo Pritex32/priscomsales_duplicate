@@ -558,8 +558,8 @@ st.markdown(
             font-weight: bold;
             text-align: center;
             padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 12px;
+            margin-bottom: 15px;
+            border-radius: 10px;
             background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
             color: #fff;
             text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
