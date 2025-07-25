@@ -825,17 +825,23 @@ elif choice == "Register":
              <p style="font-size: 20px; font-weight: bold; color: #000;">{access_code}</p>
              <p style="font-size: 14px; color: #555;">Please save this code securely. You will need it for password changes!</p>
              </div> """,    unsafe_allow_html=True)
-
+        st.markdown("# ** Kindly select Login by selecting Login Above**
                                 
+       
+        st.markdown("""
+         <div style="
+        background-color: #fff3e0; 
+        border-left: 6px solid #ff9800; 
+        padding: 12px; 
+        border-radius: 6px;
+        font-family: Arial, sans-serif;
+        color: #333;
+       ">
+        🔐 <strong style="color:#ff9800;">Please switch to the Login page</strong><br>
+        using the menu above.
+       </div>""",unsafe_allow_html=True)
         st.success("✅ Registration completed successfully!")
-        st.info(f"🔐 **Your Secret Access Code:** {access_code}\n\nPlease save it securely for password changes!")
-
-        # ✅ Add Login button
-        if st.button("👉 Go to Login"):
-            choice = "Login"
-            st.session_state.registration_success = False  # Clear success state
-            st.rerun()
-
+       
     else:
         # 🧠 Only initialize once
         if "email_entered" not in st.session_state:
