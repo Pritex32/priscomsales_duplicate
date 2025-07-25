@@ -66,3 +66,12 @@ def get_sales(user_id: int):
         return {"status": "success", "data": response.data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ✅ Get all sales for a user
+@router.get("/sales/{user_id}")
+def get_sales(user_id: int):
+    try:
+        response = supabase_client.table("sales_master_log").select("*").eq("user_id", user_id).execute()
+        return {"status": "success", "data": response.data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
