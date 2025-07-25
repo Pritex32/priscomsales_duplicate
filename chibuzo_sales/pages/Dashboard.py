@@ -882,7 +882,7 @@ elif choice == "Register":
                                 access_code
                             )
 
-                            if "successfully" in result:
+                            if "successful" in result:
                                 # ✅ Save to session
                                 st.session_state.registration_success = True
                                 st.session_state.access_code = access_code
