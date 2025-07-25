@@ -566,8 +566,11 @@ st.markdown(
             box-shadow: 0 6px 15px rgba(0,0,0,0.2);
             letter-spacing: 1px;
         }
-        .custom-title span {
-            color: #ffeb3b;
+        .custom-title .sub-title {
+            color: #ffeb3b; /* ✅ Yellow subtitle */
+            font-size: 20px; /* Optional: smaller than main title */
+            margin-top: 10px;
+            font-weight: normal;
         }
     </style>
     <div class="custom-title">
