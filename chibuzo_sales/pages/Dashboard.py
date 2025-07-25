@@ -832,7 +832,7 @@ elif choice == "Register":
 
         # ✅ Add Login button
         if st.button("👉 Go to Login"):
-            st.session_state.page = "Login"
+            choice = "Login"
             st.session_state.registration_success = False  # Clear success state
             st.rerun()
 
