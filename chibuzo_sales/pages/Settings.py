@@ -391,7 +391,7 @@ if choice == "Settings":
     <h3 style="margin:0; color:#ff9800;">⚙️ Settings</h3>
     <p style="font-size:16px; margin:8px 0;">
         You are now on the <strong>Settings</strong> page.<br>
-        Manage your preferences below.
+        Manage your preferences above.
     </p>
 </div>
 """, unsafe_allow_html=True)
