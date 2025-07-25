@@ -441,6 +441,7 @@ elif choice == "Change Password":
 
                         if update_result.data:
                             st.success("✅ Password updated successfully!")
+                            time.sleep(1)
                             # ✅ Log out by clearing session state
                             for key in list(st.session_state.keys()):
                                 del st.session_state[key]
