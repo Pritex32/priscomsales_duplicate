@@ -1035,7 +1035,7 @@ elif choice == 'Login':
                             user_id = st.session_state.get("user_id")  # Ensure you store this when MD logs in
                             ip_address = get_client_ip()  # You'll define this function
                             device = device    # Optional, can be from headers or user-agent
-                            log_login(user_id, ip_address, device)  # Ca
+                            track_login(user_id)  # Ca
                             if login_type == "MD":
                                 st.success(f"✅ Welcome {display_name} (MD)! Redirecting to Sales...")
                             elif login_type == "Employee":
@@ -1297,7 +1297,7 @@ if st.session_state.get("role") == "md":
         supabase.table("login_logs")
         .select("user_id, login_time, role")  # include role
         .order("login_time", desc=True)
-        .limit(5)
+        .limit(1)
         .execute()
     )
 
