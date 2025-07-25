@@ -373,17 +373,33 @@ if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in
 
 
 
-choice = st.radio("Select an Option", ["Change Password", "API Integration"])
+choice = st.radio("Select an Option", ["Settings","Change Password", "API Integration"])
+
+
+
+if choice == "Settings":
+    st.subheader("⚙️ Settings")
+   st.markdown("""
+   <div style="
+    background-color:#fff8e1; 
+    border-left:6px solid #ff9800; 
+    padding:16px; 
+    border-radius:8px; 
+    font-family:Arial, sans-serif; 
+    color:#333;
+    ">
+    <h3 style="margin:0; color:#ff9800;">⚙️ Settings</h3>
+    <p style="font-size:16px; margin:8px 0;">
+        You are now on the <strong>Settings</strong> page.<br>
+        Manage your preferences below.
+    </p>
+    </div>""", unsafe_allow_html=True)")
 
 
 
 
 
-
-
-
-
-if choice == "Change Password":
+elif choice == "Change Password":
     st.subheader("🔐 Change Your Password")
 
     with st.form("change_password_form"):
