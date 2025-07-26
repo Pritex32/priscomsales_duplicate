@@ -1085,10 +1085,42 @@ with tab1:
     except Exception as e:
         st.error(f"❌ Failed to fetch sales.")
 
+
+# ✅ UI for Search
+col40,col55=st.columns(2)
+with tab1:
+    with col40:
+        st.markdown("___")
+        st.subheader("🔍 Search Transactions")
+
+        search_query = st.text_input("Search by Customer/Supplier Name, Invoice Number, or Any Keyword")
+
+        # Perform search if query is provided
+        if search_query:
+            filtered_data = search_transactions(search_query, sales_df, expenses_df, restock_df, payment_df)
+
+            if not filtered_data.empty:
+                st.write(f"### Search Results ({len(filtered_data)} records found)")
+                st.dataframe(filtered_data)
+
+                # ✅ Add Download Button for search results
+                csv = filtered_data.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="⬇ Download Results as CSV",
+                    data=csv,
+                    file_name="search_results.csv",
+                    mime="text/csv"
+                )
+            else:
+                st.warning("No transactions found matching your search.")
+        else:
+            st.info("Please enter a search term to begin.")
+
+
 with tab1:
 
 
-    with col2:
+    with col55:
         # ✅ Place the email sending code here
         if st.button("📧 Send Receipt via Email", key="send_email_btn"):
             try:
@@ -1136,37 +1168,6 @@ with tab1:
                 st.error(f"❌ Error sending email: {str(e)}")
 
                             
-# ✅ UI for Search
-
-with tab1:
-    st.markdown("___")
-    st.subheader("🔍 Search Transactions")
-
-    search_query = st.text_input("Search by Customer/Supplier Name, Invoice Number, or Any Keyword")
-
-    # Perform search if query is provided
-    if search_query:
-        filtered_data = search_transactions(search_query, sales_df, expenses_df, restock_df, payment_df)
-
-        if not filtered_data.empty:
-            st.write(f"### Search Results ({len(filtered_data)} records found)")
-            st.dataframe(filtered_data)
-
-            # ✅ Add Download Button for search results
-            csv = filtered_data.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="⬇ Download Results as CSV",
-                data=csv,
-                file_name="search_results.csv",
-                mime="text/csv"
-            )
-        else:
-            st.warning("No transactions found matching your search.")
-    else:
-        st.info("Please enter a search term to begin.")
-
-
-
 
 
 
