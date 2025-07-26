@@ -1087,8 +1087,9 @@ with tab1:
 
 
 # ✅ UI for Search
-col40,col55=st.columns(2)
+
 with tab1:
+    col40,col55=st.columns(2)
     with col40:
         st.markdown("___")
         st.subheader("🔍 Search Transactions")
