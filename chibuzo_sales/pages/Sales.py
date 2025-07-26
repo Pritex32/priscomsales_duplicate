@@ -1117,25 +1117,21 @@ with tab1:
         else:
             st.info("Please enter a search term to begin.")
 
-
 with tab1:
-
-
     with col55:
-        # ✅ Place the email sending code here
-        if st.button("📧 Send Receipt via Email", key="send_email_btn"):
-            try:
-                # Customer email input
-                customer_email = st.text_input("Enter Customer Email", key="customer_email_input")
+        st.markdown("### 📧 Send Receipt via Email")
 
+        # ✅ Email input OUTSIDE button
+        customer_email = st.text_input("Enter Customer Email", key="customer_email_input")
+
+        if st.button("Send Email", key="send_email_btn"):
+            try:
                 if customer_email:
-                    # Convert PDF to base64 for attachment
                     with open(receipt_file, "rb") as f:
                         encoded_pdf = base64.b64encode(f.read()).decode()
 
-                    # Create email message
                     message = Mail(
-                        from_email="priscomac@gmail.com",  # Your verified sender
+                        from_email="priscomac@gmail.com",  # Verified sender
                         to_emails=customer_email,
                         subject=f"Receipt for Sale #{selected_sale['sale_id']}",
                         html_content=f"""
@@ -1146,7 +1142,7 @@ with tab1:
                         """
                     )
 
-                    # Add PDF as attachment
+                    # Add PDF attachment
                     attachment = Attachment()
                     attachment.file_content = encoded_pdf
                     attachment.file_type = "application/pdf"
@@ -1154,7 +1150,6 @@ with tab1:
                     attachment.disposition = "attachment"
                     message.attachment = attachment
 
-                    # Send email
                     sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
                     response = sg.send(message)
 
@@ -1164,9 +1159,9 @@ with tab1:
                         st.error(f"❌ Failed to send email. Status Code: {response.status_code}")
                 else:
                     st.warning("Please enter a valid email address.")
-
             except Exception as e:
                 st.error(f"❌ Error sending email: {str(e)}")
+
 
                             
 
