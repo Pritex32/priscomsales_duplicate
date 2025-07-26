@@ -23,7 +23,8 @@ import io
 from datetime import timedelta
 import urllib.parse
 
-
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Attachment
 import os
 import numpy as np
 from storage3.exceptions import StorageApiError
@@ -934,8 +935,9 @@ with tab1:
     </style>""", unsafe_allow_html=True)
 
     # ✅ Expander for logo and account details
+    col1, col2 = st.columns(2)
     with st.expander("**📄 Customize your Receipt**"):
-        col1, col2 = st.columns(2)
+        
         with col1:
             # 👉 Fetch or create user settings
             user_data = supabase.table("users").select("*").eq("user_id", user_id).single().execute().data
@@ -1081,8 +1083,57 @@ with tab1:
                         st.markdown(download_link, unsafe_allow_html=True)
 
     except Exception as e:
-        st.error(f"❌ Failed to fetch sales: {e}")
+        st.error(f"❌ Failed to fetch sales.")
 
+with tab1:
+
+
+    with col2:
+        # ✅ Place the email sending code here
+        if st.button("📧 Send Receipt via Email", key="send_email_btn"):
+            try:
+                # Customer email input
+                customer_email = st.text_input("Enter Customer Email", key="customer_email_input")
+
+                if customer_email:
+                    # Convert PDF to base64 for attachment
+                    with open(receipt_file, "rb") as f:
+                        encoded_pdf = base64.b64encode(f.read()).decode()
+
+                    # Create email message
+                    message = Mail(
+                        from_email="priscomac@gmail.com",  # Your verified sender
+                        to_emails=customer_email,
+                        subject=f"Receipt for Sale #{selected_sale['sale_id']}",
+                        html_content=f"""
+                        <p>Dear {selected_sale.get('customer_name', 'Customer')},</p>
+                        <p>Thank you for your purchase! Please find your receipt attached below.</p>
+                        <p><b>Total:</b> ₦{selected_sale['total_amount']:,.2f}</p>
+                        <p>Best regards,<br>{tenant_name} Team</p>
+                        """
+                    )
+
+                    # Add PDF as attachment
+                    attachment = Attachment()
+                    attachment.file_content = encoded_pdf
+                    attachment.file_type = "application/pdf"
+                    attachment.file_name = f"receipt_{selected_sale['sale_id']}.pdf"
+                    attachment.disposition = "attachment"
+                    message.attachment = attachment
+
+                    # Send email
+                    sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+                    response = sg.send(message)
+
+                    if response.status_code in [200, 202]:
+                        st.success(f"✅ Receipt sent successfully to {customer_email}.")
+                    else:
+                        st.error(f"❌ Failed to send email. Status Code: {response.status_code}")
+                else:
+                    st.warning("Please enter a valid email address.")
+
+            except Exception as e:
+                st.error(f"❌ Error sending email: {str(e)}")
 
                             
 # ✅ UI for Search
