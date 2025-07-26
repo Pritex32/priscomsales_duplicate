@@ -937,7 +937,7 @@ with tab1:
     # ✅ Expander for logo and account details
     col1, col2 = st.columns(2)
     with st.expander("**📄 Customize your Receipt**"):
-        
+        col1, col2 = st.columns(2)
         with col1:
             # 👉 Fetch or create user settings
             user_data = supabase.table("users").select("*").eq("user_id", user_id).single().execute().data
