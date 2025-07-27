@@ -698,7 +698,13 @@ with tab1:
         invoice_file_url = None
         invoice_file = st.file_uploader("Upload Invoice (PDF/Image)", type=["pdf", "jpg", "jpeg", "png"], key="invoice_upload")
         invoice_name = st.text_input("Enter desired invoice name (without extension)", value=f"invoice_{employee_id}_{date.today().isoformat()}", key='sale_key_invoice')
-
+        # ✅ Check max file size (10 MB)
+        max_size_mb = 10
+        if invoice_file:
+            file_size_mb = len(invoice_file.getvalue()) / (1024 * 1024)
+            if file_size_mb > max_size_mb:
+                st.error(f"❌ File too large! Maximum allowed size is {max_size_mb} MB.")
+                st.stop()
     # Partial payment
     partial_payment_amount = None
     partial_payment_date = None
@@ -904,6 +910,7 @@ with tab1:
 
             except Exception as e:
                 st.error(f"❌ Failed to update sales record with payment: ")
+                
 # ...existing code...
 def safe_text(text):
     return str(text).replace("₦", "NGN").encode('latin-1', 'replace').decode('latin-1')
