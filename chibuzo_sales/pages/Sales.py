@@ -1137,21 +1137,18 @@ with tab1:
             st.info("Please enter a search term to begin.")
             
 # ✅ Use session state to persist selection across reruns
+# ✅ Persist selected sale in session state
+if 'selected_sale' not in st.session_state:
+    st.session_state['selected_sale'] = None
+
+# ✅ Safely retrieve session values
 selected_sale = st.session_state.get('selected_sale')
 sales_for_date = st.session_state.get('sales_for_date', [])
-
-if not sales_for_date:
-    st.warning(f"No sales on {selected_date.strftime('%Y-%m-%d')}.")
-else:
-    sale_options = {f"{s['item_name']} (₦{s['total_amount']:,.2f}) [#{s['sale_id']}]": s for s in sales_for_date}
-    selected_sale_label = st.selectbox("Select a sale to generate receipt", list(sale_options.keys()))
-    selected_sale = sale_options[selected_sale_label]
+selected_date = st.session_state.get('selected_date', None)
 
 with tab1:
     with col55:
-        selected_sale = st.session_state.get('selected_sale')
-        sales_for_date = st.session_state.get('sales_for_date', [])
-
+        
         if selected_date and not sales_for_date:
             st.warning(f"No sales on {selected_date.strftime('%Y-%m-%d')}.")
         else:
