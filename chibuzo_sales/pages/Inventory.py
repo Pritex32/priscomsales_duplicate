@@ -817,7 +817,7 @@ if selected == 'Home':
             for item in low_stock_items[:max_display]:
                 st.write(f"**🔻 {item['item_name']}: {item['closing_balance']} units left (reorder level: {item['reorder_level']})**")
             if len(low_stock_items) > max_display:
-                with st.expander(f"View all {len(low_stock_items)} low-stock items"):
+                with st.expander(f"**View all {len(low_stock_items)} low-stock items**"):
                     for item in low_stock_items[max_display:]:
                         st.write(f"**🔻 {item['item_name']}: {item['closing_balance']} units left (reorder level: {item['reorder_level']})**")
         else:
