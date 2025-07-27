@@ -1138,13 +1138,13 @@ with tab1:
                     st.info("Please enter a search term to begin.")
 
              # ✅ Display results & download button outside form
-             if filtered_data is not None and not filtered_data.empty:
-                 st.write(f"### Search Results ({len(filtered_data)} records found)")
-                 st.dataframe(filtered_data)
+            if filtered_data is not None and not filtered_data.empty:
+                st.write(f"### Search Results ({len(filtered_data)} records found)")
+                st.dataframe(filtered_data)
 
                  # ✅ Add download button
-                 csv = filtered_data.to_csv(index=False).encode('utf-8')
-                 st.download_button(
+                csv = filtered_data.to_csv(index=False).encode('utf-8')
+                st.download_button(
                      label="⬇ Download Results as CSV",
                      data=csv,
                      file_name="search_results.csv",
