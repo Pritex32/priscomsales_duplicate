@@ -703,10 +703,6 @@ def login_md(email, password):
     st.session_state.username = user.get("username") or user.get("name") or user.get("email")
     st.session_state.user_email = user.get("email")
 
-    st.session_state.avatar_url = user.get("avatar_url", "https://ui-avatars.com/api/?name=MD&background=random")  # ✅ NEW
-
-
-
     # ✅ Generate and store JWT in localStorage using JS
     jwt_token = generate_jwt(
     user_id=user_id,
@@ -795,42 +791,6 @@ def track_login(user_id, role):
     except Exception as e:
         print(f"❌ Failed to track login: {e}")
 
-DEFAULT_AVATAR = "https://ui-avatars.com/api/?name=User&background=random"
-if st.session_state.get("logged_in") and st.session_state.get("role") == "md":
-    avatar = st.session_state.get("avatar_url", DEFAULT_AVATAR)
-    st.sidebar.image(avatar, width=80)
-    st.sidebar.markdown(f"**{st.session_state.get('username', 'MD')}**")
-    st.sidebar.write(st.session_state.get("user_email", ""))
-st.sidebar.subheader("👤 MD Profile Settings")
-
-# Show current avatar
- #Show current avatar safely
-avatar = st.session_state.get("avatar_url", DEFAULT_AVATAR)
-st.sidebar.image(avatar, width=150, caption="Current Avatar")
-
-# Upload new avatar
-uploaded_file = st.sidebar.file_uploader("Upload new avatar", type=["jpg", "jpeg", "png"])
-
-if uploaded_file:
-    file_bytes = uploaded_file.read()
-    file_name = f"avatars/{uuid.uuid4()}.png"
-
-    # Upload to Supabase Storage
-    upload_response = supabase.storage.from_("avatars").upload(file_name, file_bytes)
-
-    if upload_response:
-        new_avatar_url = f"{SUPABASE_URL}/storage/v1/object/public/logos/{file_name}"
-        
-        # Update in users table
-        supabase.table("users").update({"avatar_url": new_avatar_url}).eq("user_id", st.session_state.user_id).execute()
-
-        # Update session state
-        st.session_state.avatar_url = new_avatar_url
-
-        st.success("✅ Avatar updated successfully!")
-        st.sidebar.image(new_avatar_url, width=150)
-    else:
-        st.error("❌ Failed to upload avatar.")
 
 
 
