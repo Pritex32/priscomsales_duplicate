@@ -1156,6 +1156,7 @@ selected_date = st.session_state.get('selected_date', None)
 
 with tab1:
     with col55:
+        st.subheader('Send Receipt via email')
         
         if selected_date and not sales_for_date:
             st.warning(f"No sales on {selected_date.strftime('%Y-%m-%d')}.")
