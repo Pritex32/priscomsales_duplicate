@@ -1006,8 +1006,10 @@ with tab1:
             available_dates = sorted({s["sale_date"] for s in sales}, reverse=True)
             date_options = [datetime.strptime(d, "%Y-%m-%d").date() for d in available_dates]
             selected_date = st.date_input("Select Sale Date", value=date_options[0])
-
+            
             sales_for_date = [s for s in sales if s["sale_date"] == selected_date.strftime("%Y-%m-%d")]
+            st.session_state['selected_date'] = selected_date
+
 
             if not sales_for_date:
                 st.warning(f"No sales on {selected_date.strftime('%Y-%m-%d')}.")
@@ -1150,7 +1152,7 @@ with tab1:
         selected_sale = st.session_state.get('selected_sale')
         sales_for_date = st.session_state.get('sales_for_date', [])
 
-        if not sales_for_date:
+        if selected_date and not sales_for_date:
             st.warning(f"No sales on {selected_date.strftime('%Y-%m-%d')}.")
         else:
             sale_options = {f"{s['item_name']} (₦{s['total_amount']:,.2f}) [#{s['sale_id']}]": s for s in sales_for_date}
