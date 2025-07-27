@@ -905,6 +905,8 @@ with tab1:
             except Exception as e:
                 st.error(f"❌ Failed to update sales record with payment: ")
 # ...existing code...
+def safe_text(text):
+    return str(text).replace("₦", "NGN").encode('latin-1', 'replace').decode('latin-1')
 
 
 # to get the user name of the owner and then use it to customize the receipt
@@ -1135,7 +1137,8 @@ with tab1:
                    "Item": selected_sale["item_name"],
                    "Total": f"₦{selected_sale['total_amount']:,.2f}",
                     }.items():
-                   pdf.cell(200, 10, txt=f"{key}: {value}", ln=True)
+                   pdf.cell(200, 10, txt=f"{safe_text(key)}: {safe_text(value)}", ln=True)
+
 
                 receipt_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
                 pdf.output(receipt_file)
