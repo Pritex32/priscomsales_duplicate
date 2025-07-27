@@ -256,7 +256,23 @@ with col30:
      menu = ["Login", "Register","Delete Account"]
      choice = st.selectbox("Navigate 👇", menu, index=0)
 with col32:
-    st.link_button("📖 Guide on How to Use PriscomSales", "https://youtu.be/acAiqMU-gks")
+    st.markdown("""
+        <a href="https://youtu.be/acAiqMU-gks" target="_blank">
+            <div style="
+                display:inline-block;
+                padding:12px 24px;
+                background-color:#FF0000;
+                color:white;
+                border-radius:8px;
+                text-decoration:none;
+                font-weight:bold;
+                font-size:16px;
+                text-align:center;
+                ">
+                ▶ Watch Guide on YouTube
+            </div>
+        </a>
+    """, unsafe_allow_html=True)
 
 
 if choice != st.session_state.page:
