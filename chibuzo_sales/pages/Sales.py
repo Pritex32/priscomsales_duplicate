@@ -1083,7 +1083,7 @@ with tab1:
                         "Payment Status": selected_sale["payment_status"],
                         "Notes": selected_sale.get("notes", "None")
                     }.items():
-                    for key, value in details.items():   
+                     
                         # Replace unsupported characters for FPDF (latin-1)
                         safe_value = str(value).replace("—", "-").encode('latin-1', 'replace').decode('latin-1')
                         safe_key = str(key).replace("—", "-").encode('latin-1', 'replace').decode('latin-1')
