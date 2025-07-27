@@ -256,8 +256,7 @@ with col30:
      menu = ["Login", "Register","Delete Account"]
      choice = st.selectbox("Navigate 👇", menu, index=0)
 with col32:
-    if st.button('📖 Guide on How to Use PriscomSales'):
-        webbrowser.open_new_tab("https://youtu.be/acAiqMU-gks")
+    st.link_button("📖 Guide on How to Use PriscomSales", "https://youtu.be/acAiqMU-gks")
 
 
 if choice != st.session_state.page:
