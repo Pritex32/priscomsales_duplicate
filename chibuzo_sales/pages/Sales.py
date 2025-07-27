@@ -1062,7 +1062,12 @@ with tab1:
                         pdf.set_font("Arial", size=12)
                         pdf.cell(200, 10, txt=f"Bank Account: {account_number} - {bank_name}", ln=True, align="C")
                         pdf.ln(5)
-                    pdf.set_font("Arial", size=12)
+                    # ✅ SECTION: Sale Info Title
+                    pdf.set_font("Arial", 'B', 12)
+                    pdf.cell(0, 8, "Transaction Details", ln=True)
+                    pdf.ln(4)
+
+                    pdf.set_font("Arial","", size=12)
                     for key, value in {
                         "Sale ID": selected_sale["sale_id"],
                         "Employee": selected_sale.get("employee_name", "N/A"),
