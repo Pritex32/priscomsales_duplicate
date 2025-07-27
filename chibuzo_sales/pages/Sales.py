@@ -1089,7 +1089,7 @@ with tab1:
                         safe_key = str(key).replace("—", "-").encode('latin-1', 'replace').decode('latin-1')
                         pdf.cell(200, 10, txt=f"{safe_key}: {safe_value}", ln=True)
                         pdf.cell(60, 8, f"{safe_key}:", border=0)  # Fixed width for label
-                        pdf.cell(100, 8, f"{safe_value}", ln=True)  # Fixed width for val
+                        
                     pdf.ln(10)
                     # Add thank you footer
                     pdf.set_y(265)
