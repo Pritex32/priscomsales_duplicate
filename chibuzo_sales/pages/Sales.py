@@ -1143,7 +1143,7 @@ with tab1:
                   # Save in session state for reuse
                 st.session_state['receipt_file'] = receipt_file
                 st.markdown("### 📧 Send Receipt via Email")
-         Download button
+               # Download button
          with open(st.session_state['receipt_file'], "rb") as f:
              base64_pdf = base64.b64encode(f.read()).decode("utf-8")
              download_link = f'<a href="data:application/pdf;base64,{base64_pdf}" download="receipt_{selected_sale["sale_id"]}.pdf">📥 Download Receipt PDF</a>'
