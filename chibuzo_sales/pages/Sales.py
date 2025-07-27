@@ -1163,6 +1163,7 @@ selected_date = st.session_state.get('selected_date', None)
 
 with tab1:
     with col55:
+        st.markdown("___")
         st.subheader('Send Receipt via email')
         
         if selected_date and not sales_for_date:
