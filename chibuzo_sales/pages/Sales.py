@@ -1162,68 +1162,73 @@ with tab1:
             st.warning(f"No sales on {selected_date.strftime('%Y-%m-%d')}.")
         else:
             sale_options = {f"{s['item_name']} (₦{s['total_amount']:,.2f}) [#{s['sale_id']}]": s for s in sales_for_date}
-            selected_sale_label = st.selectbox("Select a sale to generate receipt", list(sale_options.keys()),key="sale_select_receipt")
+            selected_sale_label = st.selectbox("Select a sale to generate receipt", list(sale_options.keys()), key="sale_select_receipt")
             if selected_sale_label:
                 st.session_state['selected_sale'] = sale_options[selected_sale_label]
                 selected_sale = st.session_state['selected_sale']
-        # ✅ Check if PDF is available and a sale is selected
-        if 'receipt_file' in st.session_state and selected_sale:
-            
-            # ✅ Email input field
-            customer_email = st.text_input("Enter Customer Email", key="customer_email_input")
-            
-            # ✅ Send Email Button
-            if st.button("📧 Send Email", key="send_email_btn"):
-                try:
-                    if customer_email:
-                        # ✅ Read the existing PDF file from session_state
-                        with open(st.session_state['receipt_file'], "rb") as f:
-                            encoded_pdf = base64.b64encode(f.read()).decode()
 
-                        # ✅ Extract details for email
-                        customer_name = selected_sale.get('customer_name', 'Customer')
-                        sale_id = selected_sale.get('sale_id', 'N/A')
-                        total_amount = selected_sale.get('total_amount', 0)
+        # ✅ Wrap in st.form
+        with st.form("send_receipt_form"):
+            # ✅ Check if PDF is available and a sale is selected
+            if 'receipt_file' in st.session_state and selected_sale:
+                
+                # ✅ Email input field
+                customer_email = st.text_input("Enter Customer Email", key="customer_email_input")
+                
+                # ✅ Send Email Button inside form
+                submitted = st.form_submit_button("📧 Send Email")
 
-                        # ✅ Compose email content
-                        message = Mail(
-                            from_email="priscomac@gmail.com",  # ✅ Verified sender
-                            to_emails=customer_email,
-                            subject=f"Receipt for Sale #{sale_id}",
-                            html_content=f"""
-                                <p>Dear {customer_name},</p>
-                                <p>Thank you for your purchase! Please find your receipt attached below.</p>
-                                <p><b>Total:</b> ₦{total_amount:,.2f}</p>
-                                <p>Best regards,<br>{tenant_name} Team</p>
-                            """
-                        )
+                if submitted:
+                    try:
+                        if customer_email:
+                            # ✅ Read the existing PDF file from session_state
+                            with open(st.session_state['receipt_file'], "rb") as f:
+                                encoded_pdf = base64.b64encode(f.read()).decode()
 
-                        # ✅ Attach PDF to email
-                        attachment = Attachment()
-                        attachment.file_content = encoded_pdf
-                        attachment.file_type = "application/pdf"
-                        attachment.file_name = f"receipt_{sale_id}.pdf"
-                        attachment.disposition = "attachment"
-                        message.attachment = attachment
+                            # ✅ Extract details for email
+                            customer_name = selected_sale.get('customer_name', 'Customer')
+                            sale_id = selected_sale.get('sale_id', 'N/A')
+                            total_amount = selected_sale.get('total_amount', 0)
 
-                        # ✅ Send email using SendGrid
-                        sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-                        response = sg.send(message)
+                            # ✅ Compose email content
+                            message = Mail(
+                                from_email="priscomac@gmail.com",  # ✅ Verified sender
+                                to_emails=customer_email,
+                                subject=f"Receipt for Sale #{sale_id}",
+                                html_content=f"""
+                                    <p>Dear {customer_name},</p>
+                                    <p>Thank you for your purchase! Please find your receipt attached below.</p>
+                                    <p><b>Total:</b> ₦{total_amount:,.2f}</p>
+                                    <p>Best regards,<br>{tenant_name} Team</p>
+                                """
+                            )
 
-                        # ✅ Check response
-                        if response.status_code in [200, 202]:
-                            st.success(f"✅ Receipt sent successfully to {customer_email}.")
+                            # ✅ Attach PDF to email
+                            attachment = Attachment()
+                            attachment.file_content = encoded_pdf
+                            attachment.file_type = "application/pdf"
+                            attachment.file_name = f"receipt_{sale_id}.pdf"
+                            attachment.disposition = "attachment"
+                            message.attachment = attachment
+
+                            # ✅ Send email using SendGrid
+                            sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+                            response = sg.send(message)
+
+                            # ✅ Check response
+                            if response.status_code in [200, 202]:
+                                st.success(f"✅ Receipt sent successfully to {customer_email}.")
+                            else:
+                                st.error(f"❌ Failed to send email. Status Code: {response.status_code}")
+
                         else:
-                            st.error(f"❌ Failed to send email. Status Code: {response.status_code}")
+                            st.warning("⚠ Please enter a valid email address.")
 
-                    else:
-                        st.warning("⚠ Please enter a valid email address.")
+                    except Exception as e:
+                        st.error(f"❌ Error sending email: {str(e)}")
 
-                except Exception as e:
-                    st.error(f"❌ Error sending email: {str(e)}")
-
-        else:
-            st.info("ℹ Generate a receipt first before sending an email.")
+            else:
+                st.info("ℹ Generate a receipt first before sending an email.")
 
 
                             
