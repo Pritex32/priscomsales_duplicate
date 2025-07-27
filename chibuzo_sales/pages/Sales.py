@@ -1168,6 +1168,7 @@ with tab1:
         
         if selected_date and not sales_for_date:
             st.info("ℹ No sales available. Please add sales first.")
+            
         else:
             sale_options = {f"{s['item_name']} (₦{s['total_amount']:,.2f}) [#{s['sale_id']}]": s for s in sales_for_date}
             selected_sale_label = st.selectbox("Select a sale to generate receipt", list(sale_options.keys()), key="sale_select_receipt")
@@ -1237,6 +1238,7 @@ with tab1:
 
             else:
                 st.info("ℹ Generate a receipt first before sending an email.")
+                st.form_submit_button("📧 Send Email", disabled=True)
 
 
                             
