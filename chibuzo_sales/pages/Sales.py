@@ -1089,6 +1089,8 @@ with tab1:
 
                     receipt_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
                     pdf.output(receipt_file)
+                    # ✅ Save file path in session state for reuse (email)
+                    st.session_state['receipt_file'] = receipt_file
 
                     with open(receipt_file, "rb") as f:
                         base64_pdf = base64.b64encode(f.read()).decode("utf-8")
@@ -1129,82 +1131,73 @@ with tab1:
                 st.warning("No transactions found matching your search.")
         else:
             st.info("Please enter a search term to begin.")
+if not sales_for_date:
+    st.warning(f"No sales on {selected_date.strftime('%Y-%m-%d')}.")
+else:
+    sale_options = {f"{s['item_name']} (₦{s['total_amount']:,.2f}) [#{s['sale_id']}]": s for s in sales_for_date}
+    selected_sale_label = st.selectbox("Select a sale to generate receipt", list(sale_options.keys()))
+    selected_sale = sale_options[selected_sale_label]
 
 with tab1:
     with col55:
-        # When a sale is selected
-        if selected_sale:
-            # Generate the PDF once and store in session state
-            if "receipt_file" not in st.session_state:
-                pdf = FPDF()
-                pdf.add_page()
-                pdf.set_font("Arial", size=12)
-                pdf.cell(200, 10, txt=f"{tenant_name} SALES RECEIPT", ln=True, align="C")
-                pdf.ln(10)
+        # ✅ Check if PDF is available and a sale is selected
+        if 'receipt_file' in st.session_state and selected_sale:
+            
+            # ✅ Email input field
+            customer_email = st.text_input("Enter Customer Email", key="customer_email_input")
+            
+            # ✅ Send Email Button
+            if st.button("📧 Send Email", key="send_email_btn"):
+                try:
+                    if customer_email:
+                        # ✅ Read the existing PDF file from session_state
+                        with open(st.session_state['receipt_file'], "rb") as f:
+                            encoded_pdf = base64.b64encode(f.read()).decode()
 
-                for key, value in {
-                    "Sale ID": selected_sale["sale_id"],
-                    "Customer": selected_sale["customer_name"],
-                   "Item": selected_sale["item_name"],
-                   "Total": f"₦{selected_sale['total_amount']:,.2f}",
-                    }.items():
-                   pdf.cell(200, 10, txt=f"{safe_text(key)}: {safe_text(value)}", ln=True)
+                        # ✅ Extract details for email
+                        customer_name = selected_sale.get('customer_name', 'Customer')
+                        sale_id = selected_sale.get('sale_id', 'N/A')
+                        total_amount = selected_sale.get('total_amount', 0)
 
+                        # ✅ Compose email content
+                        message = Mail(
+                            from_email="priscomac@gmail.com",  # ✅ Verified sender
+                            to_emails=customer_email,
+                            subject=f"Receipt for Sale #{sale_id}",
+                            html_content=f"""
+                                <p>Dear {customer_name},</p>
+                                <p>Thank you for your purchase! Please find your receipt attached below.</p>
+                                <p><b>Total:</b> ₦{total_amount:,.2f}</p>
+                                <p>Best regards,<br>{tenant_name} Team</p>
+                            """
+                        )
 
-                receipt_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
-                pdf.output(receipt_file)
+                        # ✅ Attach PDF to email
+                        attachment = Attachment()
+                        attachment.file_content = encoded_pdf
+                        attachment.file_type = "application/pdf"
+                        attachment.file_name = f"receipt_{sale_id}.pdf"
+                        attachment.disposition = "attachment"
+                        message.attachment = attachment
 
-                  # Save in session state for reuse
-                st.session_state['receipt_file'] = receipt_file
-                st.markdown("### 📧 Send Receipt via Email")
-               # Download button
-        with open(st.session_state['receipt_file'], "rb") as f:
-            base64_pdf = base64.b64encode(f.read()).decode("utf-8")
-            download_link = f'<a href="data:application/pdf;base64,{base64_pdf}" download="receipt_{selected_sale["sale_id"]}.pdf">📥 Download Receipt PDF</a>'
-            st.markdown(download_link, unsafe_allow_html=True)
+                        # ✅ Send email using SendGrid
+                        sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+                        response = sg.send(message)
 
+                        # ✅ Check response
+                        if response.status_code in [200, 202]:
+                            st.success(f"✅ Receipt sent successfully to {customer_email}.")
+                        else:
+                            st.error(f"❌ Failed to send email. Status Code: {response.status_code}")
 
-        # ✅ Email input OUTSIDE button
-        customer_email = st.text_input("Enter Customer Email", key="customer_email_input")
-
-        if st.button("Send Email", key="send_email_btn"):
-            try:
-                if customer_email:
-                    with open(st.session_state['receipt_file'], "rb") as f:
-
-                        encoded_pdf = base64.b64encode(f.read()).decode()
-
-                    message = Mail(
-                        from_email="priscomac@gmail.com",  # Verified sender
-                        to_emails=customer_email,
-                        subject=f"Receipt for Sale #{selected_sale['sale_id']}",
-                        html_content=f"""
-                        <p>Dear {selected_sale.get('customer_name', 'Customer')},</p>
-                        <p>Thank you for your purchase! Please find your receipt attached below.</p>
-                        <p><b>Total:</b> ₦{selected_sale['total_amount']:,.2f}</p>
-                        <p>Best regards,<br>{tenant_name} Team</p>
-                        """
-                    )
-
-                    # Add PDF attachment
-                    attachment = Attachment()
-                    attachment.file_content = encoded_pdf
-                    attachment.file_type = "application/pdf"
-                    attachment.file_name = f"receipt_{selected_sale['sale_id']}.pdf"
-                    attachment.disposition = "attachment"
-                    message.attachment = attachment
-
-                    sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-                    response = sg.send(message)
-
-                    if response.status_code in [200, 202]:
-                        st.success(f"✅ Receipt sent successfully to {customer_email}.")
                     else:
-                        st.error(f"❌ Failed to send email. Status Code: {response.status_code}")
-                else:
-                    st.warning("Please enter a valid email address.")
-            except Exception as e:
-                st.error(f"❌ Error sending email: {str(e)}")
+                        st.warning("⚠ Please enter a valid email address.")
+
+                except Exception as e:
+                    st.error(f"❌ Error sending email: {str(e)}")
+
+        else:
+            st.info("ℹ Generate a receipt first before sending an email.")
 
 
                             
