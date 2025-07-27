@@ -1167,7 +1167,7 @@ with tab1:
         st.subheader('Send Receipt via email')
         
         if selected_date and not sales_for_date:
-            st.warning(f"No sales on {selected_date.strftime('%Y-%m-%d')}.")
+            st.info("ℹ No sales available. Please add sales first.")
         else:
             sale_options = {f"{s['item_name']} (₦{s['total_amount']:,.2f}) [#{s['sale_id']}]": s for s in sales_for_date}
             selected_sale_label = st.selectbox("Select a sale to generate receipt", list(sale_options.keys()), key="sale_select_receipt")
