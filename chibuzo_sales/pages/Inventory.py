@@ -813,9 +813,13 @@ if selected == 'Home':
             st.markdown("""
                <div style="padding: 15px; background-color: #fff4e5; border-left: 6px solid #ffa726; border-radius: 5px; color: black;">
                ⚠️<strong>Warning:</strong> The following items are low in stock:  </div>""", unsafe_allow_html=True)
-            
-            for item in low_stock_items:
+            max_display = 3  # Show first 5
+            for item in low_stock_items[:max_display]:
                 st.write(f"**🔻 {item['item_name']}: {item['closing_balance']} units left (reorder level: {item['reorder_level']})**")
+            if len(low_stock_items) > max_display:
+                with st.expander(f"View all {len(low_stock_items)} low-stock items"):
+                    for item in low_stock_items[max_display:]:
+                        st.write(f"**🔻 {item['item_name']}: {item['closing_balance']} units left (reorder level: {item['reorder_level']})**")
         else:
             st.success("✅ All items are sufficiently stocked.")
     
