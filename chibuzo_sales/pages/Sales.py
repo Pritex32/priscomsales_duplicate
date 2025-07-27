@@ -1015,6 +1015,8 @@ with tab1:
                 sale_options = {f"{s['item_name']} (₦{s['total_amount']:,.2f}) [#{s['sale_id']}]": s for s in sales_for_date}
                 selected_sale_label = st.selectbox("Select a sale to generate receipt", list(sale_options.keys()))
                 selected_sale = sale_options[selected_sale_label]
+      
+                st.session_state['sales_for_date'] = sales_for_date
 
                 if st.button(" Show Receipt", key="show_receipt_btn"):
                     if logo_url:
