@@ -250,10 +250,14 @@ st.markdown("""
         <div class="header-subtext">Smart Sales, Smarter Decisions</div>
     </div>
 """, unsafe_allow_html=True)
+col30,col32=st.columns([3,1])
+with col30:
+     menu = ["Login", "Register","Delete Account"]
+     choice = st.selectbox("Navigate 👇", menu, index=0)
+with col32:
+    if st.button('📖 Guide on How to Use PriscomSales'):
+        webbrowser.open_new_tab("https://youtu.be/acAiqMU-gks")
 
-menu = ["Login", "Register","Delete Account"]
-
-choice = st.selectbox("Navigate 👇", menu, index=0)
 
 if choice != st.session_state.page:
     st.session_state.page = choice
