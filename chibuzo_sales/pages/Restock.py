@@ -586,74 +586,72 @@ with tab1:
                 submitted = st.form_submit_button("Add Item")
             
                 if submitted:
-                    if not item_name or quantity <= 0:
+                    if not item_name or quantity < 0:
                         st.error("❌ Please fill in all required fields.")
+                        st.stop()
                           # Check if item already exists
                     else:
                         check_item = supabase.table("inventory_master_log").select("item_name").eq("item_name", item_name).eq("user_id", user_id).execute()
 
                    
-                    if check_item.data:
-                        st.warning("⚠️ Item already exists in inventory.")
-                    else:
-                        if invoice_file:
-                            extension = os.path.splitext(invoice_file.name)[1]
-                            safe_name = invoice_name.strip().replace(" ", "_")
-                            unique_suffix = uuid.uuid4().hex[:8]
-                            filename = f"{safe_name}_{unique_suffix}{extension}"
-                            st.write(f"Uploading file as: {filename}")
-                            invoice_file_url = upload_invoice(invoice_file,"salesinvoices", filename,user_id)
-                            if invoice_file_url:
-                                st.success("✅ Invoice uploaded successfully!")
-                                st.write(f"[View Invoice]({invoice_file_url})")
-                            else:
-                                st.warning("⚠️ Invoice not uploaded. Please check for errors above.")
-                    # Insert into inventory_master_log
-                    new_item = {
-                        "item_name": item_name,
-                        "supplied_quantity": quantity,
-                        "open_balance": 0,
-                        "log_date": purchase_date.isoformat(),
-                        "user_id": user_id,
-                        "reorder_level": reorder_level
-                       
-                        # closing_balance will be calculated in the DB as a generated column
-                    }
-
-                    item_response = supabase.table("inventory_master_log").insert(new_item).execute()
-
-                    if item_response.data:
-                        new_item_id = item_response.data[0]["item_id"]
-
-                        # Insert into goods_bought
-                        restock_entry = {
-                            "item_id": new_item_id,
-                            "user_id": user_id,
-                            "employee_id":employee_id,
-                            "employee_name":employee_name,
-                            "item_name": item_name,
-                            "supplied_quantity": quantity,
-                            "unit_price": unit_price,
-                            "supplier_name": supplier,
-                            "purchase_date": purchase_date.isoformat(),
-                            "payment_status": payment_status,
-                            "payment_method": payment_method,
-                            "due_date": due_date.isoformat() if due_date else None,
-                            "total_price_paid": total_price_paid,
-                            "invoice_file_url": invoice_file_url,
-                            "notes": notes
-                        }
-
-                        restock_response = supabase.table("goods_bought_history").upsert(restock_entry).execute()
-
-                        if restock_response.data:
-                            st.success("✅ New item added and restocked successfully.")
-                            time.sleep(1)
-                            st.rerun()
+                        if check_item.data:
+                            st.warning("⚠️ Item already exists in inventory.")
                         else:
-                            st.warning("⚠️ Item added, but restock not recorded.")
-                    else:
-                        st.error("❌ Failed to add item to inventory.")
+                            invoice_file_url = None
+                            if invoice_file:
+                                extension = os.path.splitext(invoice_file.name)[1]
+                                safe_name = invoice_name.strip().replace(" ", "_")
+                                unique_suffix = uuid.uuid4().hex[:8]
+                                filename = f"{safe_name}_{unique_suffix}{extension}"
+                                st.write(f"Uploading file as: {filename}")
+                                invoice_file_url = upload_invoice(invoice_file,"salesinvoices", filename,user_id)
+                                if invoice_file_url:
+                                    st.success("✅ Invoice uploaded successfully!")
+                                    st.write(f"[View Invoice]({invoice_file_url})")
+                                else:
+                                    st.warning("⚠️ Invoice not uploaded. Please check for errors above.")
+                             # Insert into inventory_master_log
+                            new_item = {
+                                "item_name": item_name,
+                                "supplied_quantity": quantity,
+                                 "open_balance": 0,
+                                "log_date": purchase_date.isoformat(),
+                                 "user_id": user_id,
+                                "reorder_level": reorder_level}
+
+                            item_response = supabase.table("inventory_master_log").insert(new_item).execute()
+
+                            if item_response.data:
+                                new_item_id = item_response.data[0]["item_id"]
+
+                                # Insert into goods_bought
+                                restock_entry = {
+                                    "item_id": new_item_id,
+                                    "user_id": user_id,
+                                    "employee_id":employee_id,
+                                    "employee_name":employee_name,
+                                    "item_name": item_name,
+                                    "supplied_quantity": quantity,
+                                    "unit_price": unit_price,
+                                   "supplier_name": supplier,
+                                   "purchase_date": purchase_date.isoformat(),
+                                   "payment_status": payment_status,
+                                   "payment_method": payment_method,
+                                   "due_date": due_date.isoformat() if due_date else None,
+                                   "total_price_paid": total_price_paid,
+                                   "invoice_file_url": invoice_file_url,
+                                    "notes": notes}
+
+                                restock_response = supabase.table("goods_bought_history").upsert(restock_entry).execute()
+
+                                if restock_response.data:
+                                    st.success("✅ New item added and restocked successfully.")
+                                    time.sleep(1)
+                                    st.rerun()
+                                else:
+                                    st.warning("⚠️ Item added, but restock not recorded.")
+                            else:
+                                st.error("❌ Failed to add item to inventory.")
 
 
 ## this  is the add restock section   
