@@ -1159,7 +1159,8 @@ with tab1:
         if st.button("Send Email", key="send_email_btn"):
             try:
                 if customer_email:
-                    with open(receipt_file, "rb") as f:
+                    with open(st.session_state['receipt_file'], "rb") as f:
+
                         encoded_pdf = base64.b64encode(f.read()).decode()
 
                     message = Mail(
