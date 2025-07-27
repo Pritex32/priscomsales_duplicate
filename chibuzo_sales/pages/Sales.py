@@ -1131,6 +1131,7 @@ with tab1:
                 st.warning("No transactions found matching your search.")
         else:
             st.info("Please enter a search term to begin.")
+sales_for_date = []  
 if not sales_for_date:
     st.warning(f"No sales on {selected_date.strftime('%Y-%m-%d')}.")
 else:
