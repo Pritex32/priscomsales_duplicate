@@ -795,17 +795,19 @@ def track_login(user_id, role):
     except Exception as e:
         print(f"❌ Failed to track login: {e}")
 
+DEFAULT_AVATAR = "https://ui-avatars.com/api/?name=User&background=random"
 if st.session_state.get("logged_in") and st.session_state.get("role") == "md":
-    st.sidebar.image(st.session_state.avatar_url, width=80)
-    st.sidebar.markdown(f"**{st.session_state.username}**")
-    st.sidebar.write(st.session_state.user_email)
-st.title("👤 MD Profile Settings")
+    avatar = st.session_state.get("avatar_url", DEFAULT_AVATAR)
+    st.sidebar.image(avatar, width=80)
+    st.sidebar.markdown(f"**{st.session_state.get('username', 'MD')}**")
+    st.sidebar.write(st.session_state.get("user_email", ""))
+st.sidebar.subheader("👤 MD Profile Settings")
 
 # Show current avatar
 st.sidebar.image(st.session_state.avatar_url, width=150, caption="Current Avatar")
 
 # Upload new avatar
-uploaded_file = st.file_uploader("Upload new avatar", type=["jpg", "jpeg", "png"])
+uploaded_file = st.sidebar.file_uploader("Upload new avatar", type=["jpg", "jpeg", "png"])
 
 if uploaded_file:
     file_bytes = uploaded_file.read()
