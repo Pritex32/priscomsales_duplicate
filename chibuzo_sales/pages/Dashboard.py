@@ -1107,6 +1107,7 @@ elif choice == 'Login':
                             # ✅ Track login in Supabase
                             user_id = st.session_state.get("user_id") 
                             role = st.session_state.get("role", "md")# Ensure you store this when MD logs in
+                            user_name = st.session_state.get("user_name", "Unknown") 
                             ip_address = get_client_ip()  # You'll define this function
                             device = device    # Optional, can be from headers or user-agent
                             track_login(user_id, role,user_name)  # Ca
