@@ -914,7 +914,19 @@ if selected == 'Home':
         st.dataframe(pd.DataFrame(restocks_today))
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 # Display Daily Inventory Log by Date
-    st.subheader("📆 Daily Inventory Log History")
+    col17,col18=st.columns([3,1])
+    with col17: 
+        st.subheader("📆 Daily Inventory Log History")
+    with col18:
+        # Fetch inventory items using cached function
+        inventory_dict = fetch_inventory_items(user_id)
+
+         # Calculate unique inventory count
+        unique_inventory_count = len(inventory_dict)
+
+         # Display as a metric
+        st.metric(label="📦 Total Inventory Items", value=unique_inventory_count)
+
     selected_log_date = st.date_input("Select a date", value=date.today())
     daily_history = supabase.table("inventory_master_log").select("*").eq("user_id", user_id).eq("log_date", str(selected_log_date)).execute().data
 
