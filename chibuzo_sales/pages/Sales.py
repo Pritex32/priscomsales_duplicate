@@ -1116,33 +1116,39 @@ with tab1:
 # ✅ UI for Search
 
 with tab1:
-    col40,col55=st.columns(2)
+    col40, col55 = st.columns(2)
     with col40:
         st.markdown("___")
         st.subheader("🔍 Search Transactions")
 
-        search_query = st.text_input("Search by Customer/Supplier Name, Invoice Number, or Any Keyword")
+        # ✅ Wrap the search inputs and button in a form
+        with st.form("search_form"):
+            search_query = st.text_input("Search by Customer/Supplier Name, Invoice Number, or Any Keyword")
 
-        # Perform search if query is provided
-        if search_query:
-            filtered_data = search_transactions(search_query, sales_df, expenses_df, restock_df, payment_df)
+            # ✅ Add a submit button for the form
+            submitted = st.form_submit_button("🔍 Search")
 
-            if not filtered_data.empty:
-                st.write(f"### Search Results ({len(filtered_data)} records found)")
-                st.dataframe(filtered_data)
+            if submitted:
+                if search_query:
+                    filtered_data = search_transactions(search_query, sales_df, expenses_df, restock_df, payment_df)
 
-                # ✅ Add Download Button for search results
-                csv = filtered_data.to_csv(index=False).encode('utf-8')
-                st.download_button(
-                    label="⬇ Download Results as CSV",
-                    data=csv,
-                    file_name="search_results.csv",
-                    mime="text/csv"
-                )
-            else:
-                st.warning("No transactions found matching your search.")
-        else:
-            st.info("Please enter a search term to begin.")
+                    if not filtered_data.empty:
+                        st.write(f"### Search Results ({len(filtered_data)} records found)")
+                        st.dataframe(filtered_data)
+
+                        # ✅ Add Download Button for search results
+                        csv = filtered_data.to_csv(index=False).encode('utf-8')
+                        st.download_button(
+                            label="⬇ Download Results as CSV",
+                            data=csv,
+                            file_name="search_results.csv",
+                            mime="text/csv"
+                        )
+                    else:
+                        st.warning("No transactions found matching your search.")
+                else:
+                    st.info("Please enter a search term to begin.")
+
             
 # ✅ Use session state to persist selection across reruns
 # ✅ Persist selected sale in session state
