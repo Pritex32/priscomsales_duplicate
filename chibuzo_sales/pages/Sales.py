@@ -1119,7 +1119,36 @@ with tab1:
 
 with tab1:
     with col55:
-        st.markdown("### 📧 Send Receipt via Email")
+        # When a sale is selected
+        if selected_sale:
+            # Generate the PDF once and store in session state
+            if "receipt_file" not in st.session_state:
+                pdf = FPDF()
+                pdf.add_page()
+                pdf.set_font("Arial", size=12)
+                pdf.cell(200, 10, txt=f"{tenant_name} SALES RECEIPT", ln=True, align="C")
+                pdf.ln(10)
+
+                for key, value in {
+                    "Sale ID": selected_sale["sale_id"],
+                    "Customer": selected_sale["customer_name"],
+                   "Item": selected_sale["item_name"],
+                   "Total": f"₦{selected_sale['total_amount']:,.2f}",
+                    }.items():
+                   pdf.cell(200, 10, txt=f"{key}: {value}", ln=True)
+
+                receipt_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
+                pdf.output(receipt_file)
+
+                  # Save in session state for reuse
+                st.session_state['receipt_file'] = receipt_file
+                st.markdown("### 📧 Send Receipt via Email")
+         Download button
+         with open(st.session_state['receipt_file'], "rb") as f:
+             base64_pdf = base64.b64encode(f.read()).decode("utf-8")
+             download_link = f'<a href="data:application/pdf;base64,{base64_pdf}" download="receipt_{selected_sale["sale_id"]}.pdf">📥 Download Receipt PDF</a>'
+             st.markdown(download_link, unsafe_allow_html=True)
+
 
         # ✅ Email input OUTSIDE button
         customer_email = st.text_input("Enter Customer Email", key="customer_email_input")
