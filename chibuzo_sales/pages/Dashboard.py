@@ -785,7 +785,7 @@ import socket
 import platform
 from datetime import datetime
 
-def track_login(user_id, role):
+def track_login(user_id, role,user_name):
     # ✅ Get client IP (from Streamlit headers if running on Streamlit Cloud)
     try:
         ip_address = st.context.headers.get("X-Forwarded-For", "Unknown")  # Handles proxy IP
@@ -1109,7 +1109,7 @@ elif choice == 'Login':
                             role = st.session_state.get("role", "md")# Ensure you store this when MD logs in
                             ip_address = get_client_ip()  # You'll define this function
                             device = device    # Optional, can be from headers or user-agent
-                            track_login(user_id, role)  # Ca
+                            track_login(user_id, role,user_name)  # Ca
                             if login_type == "MD":
                                 st.success(f"✅ Welcome {display_name} (MD)! Redirecting to Sales...")
                             elif login_type == "Employee":
