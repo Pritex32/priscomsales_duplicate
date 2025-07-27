@@ -1120,7 +1120,7 @@ with tab1:
     with col40:
         st.markdown("___")
         st.subheader("🔍 Search Transactions")
-
+        filtered_data = None
         # ✅ Wrap the search inputs and button in a form
         with st.form("search_form"):
             search_query = st.text_input("Search by Customer/Supplier Name, Invoice Number, or Any Keyword")
