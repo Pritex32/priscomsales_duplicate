@@ -1147,6 +1147,15 @@ else:
 
 with tab1:
     with col55:
+        selected_sale = st.session_state.get('selected_sale')
+        sales_for_date = st.session_state.get('sales_for_date', [])
+
+        if not sales_for_date:
+            st.warning(f"No sales on {selected_date.strftime('%Y-%m-%d')}.")
+        else:
+            sale_options = {f"{s['item_name']} (₦{s['total_amount']:,.2f}) [#{s['sale_id']}]": s for s in sales_for_date}
+            selected_sale_label = st.selectbox("Select a sale to generate receipt", list(sale_options.keys()))
+            selected_sale = sale_options[selected_sale_label]
         # ✅ Check if PDF is available and a sale is selected
         if 'receipt_file' in st.session_state and selected_sale:
             
