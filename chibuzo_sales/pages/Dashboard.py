@@ -804,7 +804,9 @@ if st.session_state.get("logged_in") and st.session_state.get("role") == "md":
 st.sidebar.subheader("👤 MD Profile Settings")
 
 # Show current avatar
-st.sidebar.image(st.session_state.avatar_url, width=150, caption="Current Avatar")
+ Show current avatar safely
+avatar = st.session_state.get("avatar_url", DEFAULT_AVATAR)
+st.sidebar.image(avatar, width=150, caption="Current Avatar")
 
 # Upload new avatar
 uploaded_file = st.sidebar.file_uploader("Upload new avatar", type=["jpg", "jpeg", "png"])
