@@ -779,6 +779,7 @@ def track_login(user_id, role):
     login_data = {
         "user_id": user_id,
         "role": role,
+        "user_name": user_name, 
         "login_time": str(datetime.now()),
         "ip_address": ip_address,
         "device": device_info
