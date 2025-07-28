@@ -948,10 +948,7 @@ with tab1:
     # ✅ Expander for logo and account details
     col1, col2 = st.columns(2)
     with st.expander("**📄 Customize your Receipt**"):
-        if "role" not in st.session_state or st.session_state.role != "md":
-            st.warning("🚫 You are not authorized to view this page.")
-            st.stop()
-
+        
         col1, col2 = st.columns(2)
         with col1:
             # 👉 Fetch or create user settings
