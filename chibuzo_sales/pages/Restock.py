@@ -80,6 +80,7 @@ def generate_jwt(user_id, username, role,plan="free", is_active=False, email=Non
          "plan": plan,
         "is_active": is_active,
         "email": email,
+        "access_code": access_code,
         "exp": datetime.utcnow() + timedelta(hours=4)
     }
     
