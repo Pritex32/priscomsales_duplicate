@@ -409,10 +409,7 @@ import mimetypes
 
 
 
-# to restrict acess
-if st.session_state.get("role") != "md":
-    st.error("🚫 Access denied: Only the Managing Director can access this page.")
-    st.stop()
+
 
 
 
