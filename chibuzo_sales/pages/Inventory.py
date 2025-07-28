@@ -898,7 +898,7 @@ if selected == 'Home':
                                         log_data["return_quantity"] = previous_return + return_quantity
                                         log_data["stock_out"] = existing_entry.get("stock_out", 0)
                                         log_data["supplied_quantity"] = existing_entry.get("supplied_quantity", 0)
-                                        log_data["opening_balance"] = prev_closing  # ✅ Ensure opening balance updates too
+                                        log_data["open_balance"] = prev_closing  # ✅ Ensure opening balance updates too
                                         
                                         response = supabase.table("inventory_master_log") \
                                             .update(log_data) \
