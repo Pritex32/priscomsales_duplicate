@@ -907,6 +907,7 @@ if selected == 'Home':
                                             .execute()
                                     else:
                                         # ✅ If new, insert fresh log
+                                        log_data["opening_balance"] = prev_closing  # <-- Add here
                                         log_data["return_quantity"] = return_quantity
                                         log_data["stock_out"] = 0
                                         log_data["supplied_quantity"] = 0
