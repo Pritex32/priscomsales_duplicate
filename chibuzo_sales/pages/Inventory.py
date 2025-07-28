@@ -930,7 +930,7 @@ if selected == 'Home':
                                         st.info("ℹ️ No inventory log found for this item today.")
                                 
                                 except Exception as e:
-                                    st.error("❌ Failed to process the return. Please try again later: {e}")
+                                    st.error(f"❌ Failed to process the return. Please try again later: {e}")
                 else:
                     st.error("❌ Incorrect access code. Please try again.")
 
