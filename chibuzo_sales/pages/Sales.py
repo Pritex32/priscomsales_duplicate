@@ -1122,7 +1122,7 @@ with tab1:
                         st.markdown(download_link, unsafe_allow_html=True)
 
     except Exception as e:
-        st.error(f"❌ Failed to fetch sales {e}")
+        st.error(f"❌ Failed to fetch sales")
 
 
 # ✅ UI for Search
