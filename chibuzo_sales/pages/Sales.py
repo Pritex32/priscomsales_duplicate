@@ -1011,7 +1011,7 @@ with tab1:
     try:
         sales_result = supabase.table("sales_master_history").select("*").eq("user_id", user_id).order("sale_date", desc=True).limit(50).execute()
         sales = sales_result.data
-        st.write("DEBUG user_id:", user_id)
+        
         if not sales:
             st.warning("No sales found for this user.")
         else:
@@ -1112,7 +1112,7 @@ with tab1:
 
 
                     receipt_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
-                    pdf.output(receipt_file, dest='F')
+                    pdf.output(receipt_file)
                     # ✅ Save file path in session state for reuse (email)
                     st.session_state['receipt_file'] = receipt_file
 
@@ -1250,7 +1250,7 @@ with tab1:
 
             else:
                 st.info("ℹ Generate a receipt first before sending an email.")
-                st.form_submit_button("📧 Send Email", disabled=True)
+                
 
 
                             
