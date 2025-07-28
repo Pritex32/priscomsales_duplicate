@@ -110,12 +110,25 @@ def decode_jwt(token):
     
 
 
+# Validate session using JWT
+token = st.session_state.get("token")
+
+if not token:
+    session_expired_ui()
+    st.stop()
+
+decoded = decode_jwt(token)
+
+if not decoded:  # Expired or invalid
+    st.session_state.clear()  # Clear all session data
+    session_expired_ui()
+    st.stop()
 
 
 
 # === Session Validation ===
 # === Session Validation === # this stops you when you are logged out
-if not st.session_state.get("logged_in"):
+def session_expired_ui():
     st.markdown("""
         <div style="
             background-color: #ffe6e6;
@@ -132,9 +145,9 @@ if not st.session_state.get("logged_in"):
             </p>
         </div>
     """, unsafe_allow_html=True)
-    time.sleep(2)    
-    switch_page("Dashboard")
-   
+    time.sleep(2)
+    switch_page("Dashboard")  # ✅ Redirect to Login, not Dashboard
+ session_expired_ui()
    
 
 
