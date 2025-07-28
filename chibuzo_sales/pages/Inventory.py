@@ -825,9 +825,7 @@ if selected == 'Home':
     
     with col6:
         with st.expander('**➕ Return Item to Inventory**'):
-            if "role" not in st.session_state or st.session_state.role != "md":
-                st.warning("🚫 You are not authorized to view this page.")
-                st.stop()
+          
             with st.form("return_inventory_form"):
                 item_dict = fetch_inventory_items(user_id)
                 item_options = ["Select an item"] + list(item_dict.keys())
