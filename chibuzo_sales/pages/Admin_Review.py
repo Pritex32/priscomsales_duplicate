@@ -545,8 +545,8 @@ if logs.data:
     st.write("### Recent Logins")
     for log in logs.data:
         st.write(f"📅 **{log['login_time']}** | 🌐 IP: {log['ip_address']} | 💻 Device: {log['device']} | 👤 Username: {log.get('username', 'Unknown')}")
-    else:
-        st.info("No login history found.")
+else:
+    st.info("No login history found.")
 
 
 if st.session_state.get("role") == "md":
