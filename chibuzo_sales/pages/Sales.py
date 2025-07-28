@@ -279,9 +279,9 @@ def restore_login_from_jwt():
             user_data = decode_jwt(token)
             if user_data:
                 st.session_state.logged_in = True
+                st.session_state["token"] = token
                 st.session_state.user_id = int(user_data["user_id"])
                 st.session_state.username = user_data["username"]
-                st.session_state.role = user_data["role"]
                 st.session_state.role = user_data["role"]
                 st.session_state.plan = user_data.get("plan", "free")
                 st.session_state.is_active = user_data.get("is_active", False)
