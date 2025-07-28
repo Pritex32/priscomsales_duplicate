@@ -846,11 +846,32 @@ if selected == 'Home':
                         item_id = item_dict.get(item_name, None)
                         
                         return_quantity = st.number_input('Return Quantity', min_value=1, step=1)
+                        # ✅ Fetch previous closing balance for preview
+                        prev_closing = 0
+                        if item_id and item_name != "Select an item":
+                            prev_day_log = supabase.table("inventory_master_log") \
+                                .select("*") \
+                                .eq("user_id", user_id) \
+                                .eq("item_id", item_id) \
+                                .lt("log_date", selected_date.isoformat()) \
+                                .order("log_date", desc=True) \
+                                .limit(1) \
+                                .execute().data
+                            if prev_day_log:
+                                prev_closing = int(prev_day_log[0].get("closing_balance", 0) or 0)
+                                # ✅ Display previous and expected new balance
+                                expected_new_balance = prev_closing + return_quantity
+                                st.info(f"📦 Previous Closing Balance: {prev_closing} units")
+                                st.info(f"🔄 After returning {return_quantity}, expected stock: {expected_new_balance} units")
+                            else:
+                                st.warning("⚠️ No previous record found for this item.")
+
                         submit = st.form_submit_button("Submit")
                         
                         if submit:
                             if item_name == "Select an item" or item_id is None:
                                 st.warning("Please select a valid item.")
+                                st.stop()
                             else:
                                 try:
                                     log_data = {
