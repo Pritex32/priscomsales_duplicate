@@ -933,20 +933,7 @@ max_size_mb = 10
 with tab1:
     st.markdown("___")
 
-    # Add custom CSS for expander
-    st.markdown("""
-    <style>
-        div.streamlit-expanderHeader {
-            background-color: orange !important;
-            color: white !important;
-            font-weight: bold;
-            font-size: 16px;
-            border-radius: 8px;
-            padding: 8px;
-        }
-    </style>""", unsafe_allow_html=True)
-
-    # ✅ Expander for logo and account details
+       # ✅ Expander for logo and account details
     col1, col2 = st.columns(2)
 
     with st.expander("**📄 Customize your Receipt**"):
@@ -1011,7 +998,7 @@ with tab1:
     try:
         sales_result = supabase.table("sales_master_history").select("*").eq("user_id", user_id).order("sale_date", desc=True).limit(50).execute()
         sales = sales_result.data
-        st.write(sales_result)
+       
         if not sales:
             st.warning("No sales found for this user.")
         else:
