@@ -119,7 +119,7 @@ if token is None:
 if token:
     try:
         # replace SECRET and algorithms with your actual values
-        payload = jwt.decode(token, SECRET, algorithms=["HS256"])
+        payload = jwt.decode(token,jwt_SECRET_KEY,ALGORITHM  )
         st.session_state["token"] = token
         st.session_state["logged_in"] = True
     except jwt.ExpiredSignatureError:
