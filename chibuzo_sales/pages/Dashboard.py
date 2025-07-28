@@ -717,6 +717,7 @@ def login_md(email, password):
     st.session_state.user_id = user_id
     st.session_state.logged_in = True
     st.session_state.user = user
+    st.session_state.access_code = user.get("access_code")
     st.session_state.role = role
     st.session_state.plan = sub.get("plan", "free")
     st.session_state.subscription_active = sub.get("is_active", False)
@@ -1096,9 +1097,13 @@ elif choice == 'Login':
                         # Only allow Employee login if MD is already identified
                         if "user_id" in st.session_state:
                             success = login_employee(email, password)
-                        else:
-                            st.error("❌ MD must be logged in first. No user_id (tenant) found.")
-                            success = False
+                            md_user_id = st.session_state.get("user_id")
+                            md_info = supabase.table("users").select("access_code").eq("user_id", md_user_id).single().execute()
+                            if md_info.data:
+                                st.session_state["access_code"] = md_info.data.get("access_code")
+                            else:
+                                st.error("❌ MD must be logged in first. No user_id (tenant) found.")
+                                success = False
 
                     # ✅ After successful login
                     if success:
