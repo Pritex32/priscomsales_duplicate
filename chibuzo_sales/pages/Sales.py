@@ -131,7 +131,7 @@ if not st.session_state.get("logged_in"):
         </div>
     """, unsafe_allow_html=True)
     time.sleep(2)    
-    switch_page("Dashboard")
+    st.rerun()
 
 
 
