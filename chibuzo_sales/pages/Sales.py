@@ -110,10 +110,25 @@ def decode_jwt(token):
     
 
 
-# Validate session using JWT
+# 1. Grab your JWT from localStorage
 token = st.session_state.get("token")
+if token is None:
+    token = st_javascript("localStorage.getItem('login_token')")
 
-if not st.session_state.get("logged_in"):
+# 2. Try to decode it and set logged_in
+if token:
+    try:
+        # replace SECRET and algorithms with your actual values
+        payload = jwt.decode(token, SECRET, algorithms=["HS256"])
+        st.session_state["token"] = token
+        st.session_state["logged_in"] = True
+    except jwt.ExpiredSignatureError:
+        st.session_state["logged_in"] = False
+else:
+    st.session_state["logged_in"] = False
+
+# 3. Now guard your pages
+if not st.session_state["logged_in"]:
     st.markdown("""
         <div style="
             background-color: #ffe6e6;
@@ -126,11 +141,11 @@ if not st.session_state.get("logged_in"):
         ">
             <h3 style="color: #cc0000; margin: 0 0 10px;">❌ Session Expired</h3>
             <p style="color: #333; font-size: 16px; margin: 0;">
-                Your session has expired. Redirecting to login page..
+                Your session has expired. Redirecting to login page...
             </p>
         </div>
     """, unsafe_allow_html=True)
-    time.sleep(2)    
+    time.sleep(2)
     st.rerun()
 
 
