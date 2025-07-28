@@ -642,7 +642,7 @@ if st.session_state.get("role") == "md":
             ]
 
             st.write("#### Filtered Logins")
-            st.dataframe(filtered_df[['login_time', 'role', 'ip_address', 'device']], use_container_width=True)
+            st.dataframe(filtered_df[['login_time', 'role', 'ip_address', 'device','username']], use_container_width=True)
 
             # ✅ Add download button for filtered data
             csv_data = filtered_df.to_csv(index=False).encode('utf-8')
