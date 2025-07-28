@@ -806,14 +806,18 @@ def update_inventory_balances(selected_date,user_id):
 
 # Trigger Inventory Update and Move to History
 if selected == 'Home':
-    col5,col6=st.columns(2)
+    col5, col6 = st.columns(2)
+    
+    # ✅ Left Column: Low Stock Items
     with col5:
         low_stock_items = get_low_stock_items(user_id)
         if low_stock_items:
             st.markdown("""
-               <div style="padding: 15px; background-color: #fff4e5; border-left: 6px solid #ffa726; border-radius: 5px; color: black;">
-               ⚠️<strong>Warning:</strong> The following items are low in stock:  </div>""", unsafe_allow_html=True)
-            max_display = 3  # Show first 5
+                <div style="padding: 15px; background-color: #fff4e5; border-left: 6px solid #ffa726; border-radius: 5px; color: black;">
+                ⚠️<strong>Warning:</strong> The following items are low in stock:  
+                </div>
+            """, unsafe_allow_html=True)
+            max_display = 3  # Show first 3
             for item in low_stock_items[:max_display]:
                 st.write(f"**🔻 {item['item_name']}: {item['closing_balance']} units left (reorder level: {item['reorder_level']})**")
             if len(low_stock_items) > max_display:
@@ -823,75 +827,88 @@ if selected == 'Home':
         else:
             st.success("✅ All items are sufficiently stocked.")
     
+    # ✅ Right Column: Return Item to Inventory
     with col6:
         with st.expander('**➕ Return Item to Inventory**'):
-          
-            with st.form("return_inventory_form"):
-                item_dict = fetch_inventory_items(user_id)
-                item_options = ["Select an item"] + list(item_dict.keys())
-                item_name = st.selectbox("Select Item", item_options, key="item_selectbox")
-                item_id = item_dict.get(item_name, None)
-
-                return_quantity = st.number_input('Return Quantity', min_value=1, step=1)
-                submit = st.form_submit_button("Submit")
-
-                if submit:
-                    if item_name == "Select an item" or item_id is None:
-                        st.warning("Please select a valid item.")
-                    else:
-                        try:                              
-                            log_data = {
-                                "user_id": user_id,
-                                "item_id": item_id,
-                                "item_name": item_name,
-                                "log_date": selected_date.isoformat(),
-                                "last_updated": selected_date.isoformat()}
-
-                            # Check if an entry already exists for today
-                            existing_log = supabase.table("inventory_master_log")\
-                                 .select("*")\
-                                 .eq("user_id", user_id)\
-                                 .eq("item_id", item_id)\
-                                 .eq("log_date", selected_date)\
-                                 .execute().data
-
-                            if existing_log:
-                                existing_entry = existing_log[0]
-                                previous_return = int(existing_entry.get("return_quantity", 0))
-                                log_data["return_quantity"] = previous_return + return_quantity
-                                log_data["stock_out"] = existing_entry.get("stock_out", 0)
-                                log_data["supplied_quantity"] = existing_entry.get("supplied_quantity", 0)
-                               
-                                response = supabase.table("inventory_master_log")\
-                                           .update(log_data)\
-                                            .eq("user_id", user_id)\
-                                            .eq("item_id", item_id)\
-                                           .eq("log_date", selected_date)\
-                                           .execute()
+            
+            # ✅ Step 1: Access Code Security Check
+            access_input = st.text_input("Enter Access Code", type="password", key="access_code_input")
+            correct_access_code = st.session_state.get("access_code")
+            
+            if access_input:
+                if access_input == correct_access_code:
+                    st.success("✅ Access granted. You can now return an item.")
+                    
+                    with st.form("return_inventory_form"):
+                        item_dict = fetch_inventory_items(user_id)
+                        item_options = ["Select an item"] + list(item_dict.keys())
+                        item_name = st.selectbox("Select Item", item_options, key="item_selectbox")
+                        item_id = item_dict.get(item_name, None)
+                        
+                        return_quantity = st.number_input('Return Quantity', min_value=1, step=1)
+                        submit = st.form_submit_button("Submit")
+                        
+                        if submit:
+                            if item_name == "Select an item" or item_id is None:
+                                st.warning("Please select a valid item.")
                             else:
-                                # If new, insert fresh log
-                                log_data["return_quantity"] = return_quantity
-                                log_data["stock_out"] = 0
-                                log_data["supplied_quantity"] = 0
-                                response = supabase.table("inventory_master_log")\
-                                                         .insert(log_data)\
-                                                         .execute()
-                                                      
-                            st.success(f"{return_quantity} units of '{item_name}' returned and stock updated.")
-                            st.rerun()
-                                # Show updated log for this date
-                            updated_row = inventory[
-                                        (inventory["item_id"] == item_id) &  (inventory["log_date"] == selected_date)]
-                            if not updated_row.empty:
-                                st.info("📦 Updated inventory log:")
-                                st.dataframe(updated_row)
-                            else:
-                                st.info("ℹ️ No inventory log found for this item today.")
+                                try:
+                                    log_data = {
+                                        "user_id": user_id,
+                                        "item_id": item_id,
+                                        "item_name": item_name,
+                                        "log_date": selected_date.isoformat(),
+                                        "last_updated": selected_date.isoformat()
+                                    }
+                                    
+                                    # ✅ Check if an entry already exists for today
+                                    existing_log = supabase.table("inventory_master_log") \
+                                        .select("*") \
+                                        .eq("user_id", user_id) \
+                                        .eq("item_id", item_id) \
+                                        .eq("log_date", selected_date) \
+                                        .execute().data
+                                    
+                                    if existing_log:
+                                        existing_entry = existing_log[0]
+                                        previous_return = int(existing_entry.get("return_quantity", 0))
+                                        log_data["return_quantity"] = previous_return + return_quantity
+                                        log_data["stock_out"] = existing_entry.get("stock_out", 0)
+                                        log_data["supplied_quantity"] = existing_entry.get("supplied_quantity", 0)
+                                        
+                                        response = supabase.table("inventory_master_log") \
+                                            .update(log_data) \
+                                            .eq("user_id", user_id) \
+                                            .eq("item_id", item_id) \
+                                            .eq("log_date", selected_date) \
+                                            .execute()
+                                    else:
+                                        # ✅ If new, insert fresh log
+                                        log_data["return_quantity"] = return_quantity
+                                        log_data["stock_out"] = 0
+                                        log_data["supplied_quantity"] = 0
+                                        response = supabase.table("inventory_master_log") \
+                                            .insert(log_data) \
+                                            .execute()
+                                    
+                                    st.success(f"{return_quantity} units of '{item_name}' returned and stock updated.")
+                                    st.rerun()
+                                    
+                                    # ✅ Show updated log for this date
+                                    updated_row = inventory[
+                                        (inventory["item_id"] == item_id) & (inventory["log_date"] == selected_date)
+                                    ]
+                                    if not updated_row.empty:
+                                        st.info("📦 Updated inventory log:")
+                                        st.dataframe(updated_row)
+                                    else:
+                                        st.info("ℹ️ No inventory log found for this item today.")
+                                
+                                except Exception as e:
+                                    st.error("❌ Failed to process the return. Please try again later.")
+                else:
+                    st.error("❌ Incorrect access code. Please try again.")
 
-
-                                          
-                        except Exception as e:
-                            st.error("❌ Failed to process the return. Please try again later.")
         # this add divided line                    
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
