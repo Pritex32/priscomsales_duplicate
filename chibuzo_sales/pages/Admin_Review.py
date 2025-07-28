@@ -544,8 +544,7 @@ logs = supabase.table("login_logs") \
 if logs.data:
     st.write("### Recent Logins")
     for log in logs.data:
-        st.write(f"📅 **{log['login_time']}** | 🌐 IP: {log['ip_address']} | 💻 Device: {log['device']}")|username: {log['username']}")
-else:
+        st.write(f"📅 **{log['login_time']}** | 🌐 IP: {log['ip_address']} | 💻 Device: {log['device']}")|👤 Username:{log['username']} else:
     st.info("No login history found.")
 
 
