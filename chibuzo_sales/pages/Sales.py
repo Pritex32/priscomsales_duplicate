@@ -147,6 +147,7 @@ def session_expired_ui():
     """, unsafe_allow_html=True)
     time.sleep(2)
     switch_page("Dashboard")  # ✅ Redirect to Login, not Dashboard
+    
  session_expired_ui()
    
 
