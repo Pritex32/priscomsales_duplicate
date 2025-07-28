@@ -960,11 +960,12 @@ with tab1:
             # ➕ Upload logo
             st.markdown("##### 🖼 Upload Company Logo max 10mb (optional)")
             logo_file = st.file_uploader("Upload PNG or JPG logo", type=["png", "jpg", "jpeg"])
-            if logo_file:
+            if logo_file and "logo_uploaded" not in st.session_state:
                 file_size_mb = logo_file.size / (1024 * 1024)
 
                 if file_size_mb > max_size_mb:
                     st.error(f"❌ File too large! Please upload a file under {max_size_mb}MB.")
+                    st.stop()
                 else:
                     image = Image.open(logo_file)
                     temp_png = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
@@ -977,6 +978,7 @@ with tab1:
                     logo_url = f"https://ecsrlqvifparesxakokl.supabase.co/storage/v1/object/public/logos/{file_path}"
 
                     supabase.table("users").update({"logo_url": logo_url}).eq("user_id", user_id).execute()
+                    st.session_state["logo_uploaded"] = True
                     st.success("✅ Logo uploaded successfully.")
             else:
                 logo_url = user_data.get("logo_url", "")
