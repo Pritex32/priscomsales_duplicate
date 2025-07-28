@@ -598,7 +598,7 @@ if st.session_state.get("role") == "md":
             st.write("#### Recent Logins")
             df_logins = pd.DataFrame(last_login_record.data)
             if not df_logins.empty:
-                st.dataframe(df_logins[['login_time', 'role', 'ip_address', 'device']], use_container_width=True)
+                st.dataframe(df_logins[['login_time', 'role', 'ip_address', 'device','username']], use_container_width=True)
                 csv_data = df_logins.to_csv(index=False).encode('utf-8')
                 st.download_button(
                    label="⬇️ Download Login History as CSV",
