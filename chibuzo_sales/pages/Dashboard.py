@@ -799,7 +799,7 @@ def track_login(user_id, role,user_name):
     login_data = {
         "user_id": user_id,
         "role": role,
-        "user_name": user_name, 
+        "username": user_name, 
         "login_time": str(datetime.now()),
         "ip_address": ip_address,
         "device": device_info
@@ -810,7 +810,7 @@ def track_login(user_id, role,user_name):
         supabase.table("login_logs").insert(login_data).execute()
         print(f"✅ Login tracked: {login_data}")
     except Exception as e:
-        print(f"❌ Failed to track login: {e}")
+        print(f"❌ Failed to track login.}")
 
 
 
