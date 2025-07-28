@@ -37,7 +37,7 @@ jwt_SECRET_KEY = "4606"  # Use env vars in production
 ALGORITHM = "HS256"
 
 #Decode function
-def generate_jwt(user_id, username, role,plan="free", is_active=False, email=None):
+def generate_jwt(user_id, username, role,plan="free", is_active=False, email=None,access_code=None):
     payload = {
         "user_id": user_id,
         "username": username,
@@ -45,6 +45,7 @@ def generate_jwt(user_id, username, role,plan="free", is_active=False, email=Non
          "plan": plan,
         "is_active": is_active,
         "email": email,
+        "access_code": access_code,
         "exp": datetime.utcnow() + timedelta(hours=4)
     }
     
@@ -76,6 +77,7 @@ def restore_login_from_jwt():
                 st.session_state.plan = user_data.get("plan", "free")
                 st.session_state.is_active = user_data.get("is_active", False)
                 st.session_state.user_email = user_data.get("email", "")
+                st.session_state.access_code = user_data.get("access_code", "")
                 if user_data["role"] == "employee":
                     st.session_state.employee_user = {"name": user_data["username"]}
             else:
