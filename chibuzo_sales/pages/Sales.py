@@ -992,6 +992,7 @@ with tab1:
                 st.rerun()
 
 
+
     # 📦 Sales and Receipt Logic (outside expander)
     try:
         sales_result = supabase.table("sales_master_history").select("*").eq("user_id", user_id).order("sale_date", desc=True).limit(50).execute()
