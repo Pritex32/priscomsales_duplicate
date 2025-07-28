@@ -544,7 +544,7 @@ logs = supabase.table("login_logs") \
 if logs.data:
     st.write("### Recent Logins")
     for log in logs.data:
-        st.write(f"📅 **{log['login_time']}** | 🌐 IP: {log['ip_address']} | 💻 Device: {log['device']}")
+        st.write(f"📅 **{log['login_time']}** | 🌐 IP: {log['ip_address']} | 💻 Device: {log['device']}")|username: {log['username']}")
 else:
     st.info("No login history found.")
 
@@ -559,7 +559,7 @@ if st.session_state.get("role") == "md":
     # ✅ Get the last 5 logins globally
     last_login_record = (
         supabase.table("login_logs")
-        .select("user_id, login_time, role, ip_address, device")
+        .select("user_id, login_time, role, ip_address, device,username")
         .order("login_time", desc=True)
         .limit(5)
         .execute()
