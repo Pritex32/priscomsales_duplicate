@@ -1112,9 +1112,9 @@ with tab1:
 
 
                     receipt_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
-                    pdf.output(receipt_file)
+                    pdf.output(receipt_file, dest='F')
                     # ✅ Save file path in session state for reuse (email)
-                 
+                    st.session_state['receipt_file'] = receipt_file
 
                     with open(receipt_file, "rb") as f:
                         base64_pdf = base64.b64encode(f.read()).decode("utf-8")
