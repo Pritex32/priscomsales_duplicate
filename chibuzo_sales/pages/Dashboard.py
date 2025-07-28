@@ -91,13 +91,14 @@ ALGORITHM = "HS256"
 
 
 
-def generate_jwt(user_id, username, role,plan="free", is_active=False,email=None):
+def generate_jwt(user_id, username, role,plan="free", is_active=False,email=None,access_code=None):
     payload = {
         "user_id": user_id,
         "username": username,
         "role": role,
         "plan": plan,
         "email": email,
+        'access_code':access_code,
         "is_active": is_active,
         "exp": datetime.utcnow() + timedelta(hours=4)
     }
@@ -129,6 +130,7 @@ def restore_login_from_jwt():
                 st.session_state.user = user_data
                 st.session_state.plan = user_data.get("plan", "free").lower()
                 st.session_state.is_active = user_data.get("is_active", False)
+                st.session_state.access_code = user_data.get("access_code", "")
 
                 # ✅ This is the critical fix
                 if user_data["role"] == "employee":
