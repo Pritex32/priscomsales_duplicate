@@ -132,8 +132,9 @@ if not st.session_state.get("logged_in"):
             </p>
         </div>
     """, unsafe_allow_html=True)
-    time.sleep(3)
-    switch_page("Dashboard")
+    time.sleep(1)
+    if st.button('Login'):
+        switch_page("Dashboard")
    
    
 
