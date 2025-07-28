@@ -932,6 +932,7 @@ max_size_mb = 10
 
 with tab1:
     st.markdown("___")
+
     # Add custom CSS for expander
     st.markdown("""
     <style>
@@ -947,9 +948,10 @@ with tab1:
 
     # ✅ Expander for logo and account details
     col1, col2 = st.columns(2)
+
     with st.expander("**📄 Customize your Receipt**"):
-        
         col1, col2 = st.columns(2)
+
         with col1:
             # 👉 Fetch or create user settings
             user_data = supabase.table("users").select("*").eq("user_id", user_id).single().execute().data
@@ -960,26 +962,34 @@ with tab1:
             # ➕ Upload logo
             st.markdown("##### 🖼 Upload Company Logo max 10mb (optional)")
             logo_file = st.file_uploader("Upload PNG or JPG logo", type=["png", "jpg", "jpeg"])
-            if logo_file and "logo_uploaded" not in st.session_state:
-                file_size_mb = logo_file.size / (1024 * 1024)
+            upload_logo = st.button("Upload Logo")
 
-                if file_size_mb > max_size_mb:
-                    st.error(f"❌ File too large! Please upload a file under {max_size_mb}MB.")
+            if upload_logo:
+                if not logo_file:
+                    st.warning("⚠️ Please select a logo file first.")
                     st.stop()
                 else:
-                    image = Image.open(logo_file)
-                    temp_png = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
-                    image.save(temp_png, format="PNG")
-                    temp_png.close()
-                    unique_id = str(uuid.uuid4())
-                    file_path = f"{user_id}/logo_{unique_id}.png"
-                    with open(temp_png.name, "rb") as f:
-                        supabase.storage.from_("logos").upload(file_path, f, {"content-type": "image/png"})
-                    logo_url = f"https://ecsrlqvifparesxakokl.supabase.co/storage/v1/object/public/logos/{file_path}"
+                    file_size_mb = logo_file.size / (1024 * 1024)
 
-                    supabase.table("users").update({"logo_url": logo_url}).eq("user_id", user_id).execute()
-                    st.session_state["logo_uploaded"] = True
-                    st.success("✅ Logo uploaded successfully.")
+                    if file_size_mb > max_size_mb:
+                        st.error(f"❌ File too large! Please upload a file under {max_size_mb}MB.")
+                        st.stop()
+                    else:
+                        image = Image.open(logo_file)
+                        temp_png = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+                        image.save(temp_png, format="PNG")
+                        temp_png.close()
+
+                        unique_id = str(uuid.uuid4())
+                        file_path = f"{user_id}/logo_{unique_id}.png"
+
+                        with open(temp_png.name, "rb") as f:
+                            supabase.storage.from_("logos").upload(file_path, f, {"content-type": "image/png"})
+
+                        logo_url = f"https://ecsrlqvifparesxakokl.supabase.co/storage/v1/object/public/logos/{file_path}"
+
+                        supabase.table("users").update({"logo_url": logo_url}).eq("user_id", user_id).execute()
+                        st.success("✅ Logo uploaded successfully.")
             else:
                 logo_url = user_data.get("logo_url", "")
 
@@ -995,6 +1005,7 @@ with tab1:
                 }).eq("user_id", user_id).execute()
                 st.success("✅ Account details saved.")
                 st.rerun()
+
 
     # 📦 Sales and Receipt Logic (outside expander)
     try:
