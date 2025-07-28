@@ -127,8 +127,9 @@ if token:
 else:
     st.session_state["logged_in"] = False
 
-# 3. Now guard your pages
-if not st.session_state["logged_in"]:
+
+
+if not st.session_state.get("logged_in"):
     st.markdown("""
         <div style="
             background-color: #ffe6e6;
@@ -141,12 +142,14 @@ if not st.session_state["logged_in"]:
         ">
             <h3 style="color: #cc0000; margin: 0 0 10px;">❌ Session Expired</h3>
             <p style="color: #333; font-size: 16px; margin: 0;">
-                Your session has expired. Redirecting to login page...
+                Your session has expired. Redirecting to login page..
             </p>
         </div>
     """, unsafe_allow_html=True)
-    time.sleep(2)
-    st.rerun()
+    time.sleep(3)
+    switch_page("Dashboard")
+   
+   
 
 
 
