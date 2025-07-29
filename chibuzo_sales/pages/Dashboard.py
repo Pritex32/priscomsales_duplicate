@@ -1231,15 +1231,31 @@ def initialize_payment(email, amount, user_id):
     return response.json()
 
 
-# ✅ Check current subscription status
 def check_subscription(user_id):
     result = supabase.table("subscription").select("*").eq("user_id", user_id).execute()
+    
     if result.data:
         sub = result.data[0]
-        expires_at = datetime.strptime(sub["expires_at"], "%Y-%m-%d").date()
-        if sub["is_active"] and expires_at >= date.today():
-            return True, expires_at
+        expires_at_value = sub.get("expires_at")
+
+        if expires_at_value:
+            # If Supabase returns string like '2025-07-29' or '2025-07-29T14:20:10'
+            if isinstance(expires_at_value, str):
+                try:
+                    expires_at = datetime.fromisoformat(expires_at_value).date()
+                except ValueError:
+                    # Fallback for unexpected formats
+                    expires_at = datetime.strptime(expires_at_value.split("T")[0], "%Y-%m-%d").date()
+            elif isinstance(expires_at_value, date):
+                expires_at = expires_at_value
+            else:
+                return False, None
+
+            if sub.get("is_active") and expires_at >= date.today():
+                return True, expires_at
+
     return False, None
+
     
 # Simulated user info — in production, this should come from your auth/session
 if "user_id" not in st.session_state or "user_email" not in st.session_state:
