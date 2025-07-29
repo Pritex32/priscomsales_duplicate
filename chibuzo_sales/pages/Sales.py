@@ -780,7 +780,7 @@ with tab1:
 
             with open(proforma_file, "rb") as f:
                 base64_pdf = base64.b64encode(f.read()).decode("utf-8")
-                download_link = f'<a href="data:application/pdf;base64,{base64_pdf}" download="proforma_{proforma_id}.pdf">📥 Download Proforma PDF</a>'
+                download_link = f'<a href="data:application/pdf;base64,{base64_pdf}" download="proforma_{customer_name}_{date.today()}.pdf".replace(" ", "_")">📥 Download Proforma PDF</a>'
                 st.markdown(download_link, unsafe_allow_html=True)
 
 
