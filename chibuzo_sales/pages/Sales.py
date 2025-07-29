@@ -1110,7 +1110,7 @@ with tab1:
                         "Payment Method": selected_sale["payment_method"],
                         "Payment Status": selected_sale["payment_status"],
                         "Notes": selected_sale.get("notes", "None")
-                    }.items():
+                    }
                      
                         # Replace unsupported characters for FPDF (latin-1)
                         for key, value in fields.items():
