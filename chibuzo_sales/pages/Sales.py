@@ -162,10 +162,25 @@ def restore_login_from_jwt():
 
 
 
-# ✅ Always try to restore if not logged in
-if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
+
     restore_login_from_jwt()
 
+# 1. Grab your JWT from localStorage
+token = st.session_state.get("token")
+if token is None:
+    token = st_javascript("localStorage.getItem('login_token')")
+
+# 2. Try to decode it and set logged_in
+if token:
+    try:
+        # replace SECRET and algorithms with your actual values
+        payload = jwt.decode(token,jwt_SECRET_KEY,ALGORITHM  )
+        st.session_state["token"] = token
+        st.session_state["logged_in"] = True
+    except jwt.ExpiredSignatureError:
+        st.session_state["logged_in"] = False
+else:
+    st.session_state["logged_in"] = False
 
 
 
