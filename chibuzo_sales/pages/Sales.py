@@ -169,8 +169,7 @@ def restore_login_from_jwt():
 if not st.session_state.get("logged_in"):
     restore_login_from_jwt()
 
-    # === Verify Token Again ===
-   restore_login_from_jwt()
+
 
 # 1. Grab your JWT from localStorage
 token = st.session_state.get("token")
