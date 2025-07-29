@@ -1113,12 +1113,12 @@ with tab1:
                     }
                      
                         # Replace unsupported characters for FPDF (latin-1)
-                        for key, value in fields.items():
-                            safe_value = str(value).replace("—", "-").encode('latin-1', 'replace').decode('latin-1')
-                            safe_key = str(key).replace("—", "-").encode('latin-1', 'replace').decode('latin-1')
+                    for key, value in fields.items():
+                        safe_value = str(value).replace("—", "-").encode('latin-1', 'replace').decode('latin-1')
+                        safe_key = str(key).replace("—", "-").encode('latin-1', 'replace').decode('latin-1')
                         
-                            pdf.cell(60, 8, f"{safe_key}:", border=0)  # Fixed width for label
-                            pdf.cell(100, 8, f"{safe_value}", ln=True)
+                        pdf.cell(60, 8, f"{safe_key}:", border=0)  # Fixed width for label
+                        pdf.cell(100, 8, f"{safe_value}", ln=True)
                         
                     pdf.ln(10)
                     # Add thank you footer
