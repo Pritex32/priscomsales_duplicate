@@ -141,11 +141,6 @@ st.markdown("""
 
 
 
-if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
-    st.warning("Please log in first.")
-    st.stop()
-
-
 
 
 from supabase import create_client
@@ -302,6 +297,11 @@ if not st.session_state.get("logged_in"):
     time.sleep(3)
     switch_page("Dashboard")
    
+
+
+if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
+    st.warning("Please log in first.")
+    st.stop()
 
 
 def restore_subscription_info():
