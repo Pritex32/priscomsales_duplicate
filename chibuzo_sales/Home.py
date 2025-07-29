@@ -1,6 +1,6 @@
 import streamlit as st
 st.set_page_config(
-    page_title='SALES MANAGEMENT SYSTEM',
+    page_title='PriscomSales - Sales & Inventory Software',
     page_icon='👋 ',
     layout="wide",
 
@@ -158,6 +158,31 @@ with col11:
 At **PriscomSales**, we provide powerful tools to help you record sales, manage inventory, forecast growth, and generate daily reports — all from one easy-to-use platform.
 
 """)
+
+seo_html = """
+<meta name="description" content="PriscomSales helps Nigerian businesses manage sales, inventory, and invoices with ease.">
+<meta name="keywords" content="sales software Nigeria, POS system, inventory management, PriscomSales, business software">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://priscomsale.online" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "PriscomSales",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "url": "https://priscomsale.online",
+  "description": "Sales and Inventory Management Software for businesses in Nigeria.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "NGN"
+  }
+}
+</script>
+"""
+
+st.markdown(seo_html, unsafe_allow_html=True)
 with col22:  
     if st.button("Login/Signup"):
         switch_page("Dashboard") 
