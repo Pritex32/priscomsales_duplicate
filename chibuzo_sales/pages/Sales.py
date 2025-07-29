@@ -777,10 +777,13 @@ with tab1:
 
             proforma_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
             pdf.output(proforma_file)
+            # Sanitize file name
+            safe_customer_name = customer_name.replace(" ", "_") if customer_name else "customer"
+            filename = f"proforma_{safe_customer_name}_{date.today()}.pdf"
 
             with open(proforma_file, "rb") as f:
                 base64_pdf = base64.b64encode(f.read()).decode("utf-8")
-                download_link = f'<a href="data:application/pdf;base64,{base64_pdf}" download="proforma_{customer_name}_{date.today()}.pdf".replace(" ", "_")">📥 Download Proforma PDF</a>'
+                download_link = f'<a href="data:application/pdf;base64,{base64_pdf}" download="{filename}">📥 Download Proforma PDF</a>'
                 st.markdown(download_link, unsafe_allow_html=True)
 
 
