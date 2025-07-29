@@ -1373,8 +1373,8 @@ if reference:
                 
     else:
         st.error("❌ Payment failed or could not be verified.")
-elif "upgrade_attempted" in st.session_state and st.session_state.upgrade_attempted:
-    st.info("ℹ️ No payment reference in URL. Please check your email for Paystack confirmation.")
+else: 
+    st.info("ℹ️ No payment reference in URL.")
 
 # to update the plan on jwt token
 def login_or_upgrade_success(user_id, username, role, plan, is_active):
