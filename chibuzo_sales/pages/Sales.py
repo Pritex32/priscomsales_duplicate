@@ -1073,8 +1073,10 @@ with tab1:
                     header_color = (0, 102, 204)  # Blue Header
                     pdf.set_fill_color(*header_color)
                     pdf.set_text_color(255, 255, 255)  # White text
-                    pdf.set_font("Arial", size=16
+                    pdf.set_font("Arial", size=16)
                     pdf.cell(0, 10, txt=safe_text(f"{tenant_name} SALES RECEIPT"), ln=True, align="C")
+                     # ✅ Reset text color for body
+                    pdf.set_text_color(0, 0, 0)
                     pdf.ln(5)
                     pdf.set_font("Arial", size=12)
                     if phone_number:
