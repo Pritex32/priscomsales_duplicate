@@ -252,11 +252,10 @@ def restore_login_from_jwt():
                 st.session_state.login_failed = True
 
 
-# Run this first
-# Run this first
-if st.session_state.get("logged_in"):
-    restore_login_from_jwt()
 
+# ✅ Always try to restore if not logged in
+if not st.session_state.get("logged_in"):
+    restore_login_from_jwt()
 
 # 1. Grab your JWT from localStorage
 token = st.session_state.get("token")
@@ -277,7 +276,7 @@ else:
 
 
 
-if not st.session_state.get("logged_in"):
+if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
     st.markdown("""
         <div style="
             background-color: #ffe6e6;
