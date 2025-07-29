@@ -604,6 +604,17 @@ except:
     st.error("❌ Invalid user ID format.")
     st.stop()
 
+# ✅ Get tenant name from users table
+tenant_name = "My Company"  # default fallback
+try:
+    response = supabase.table("users").select("tenant_name").eq("user_id", user_id).single().execute()
+    if response.data and response.data.get("tenant_name"):
+        tenant_name = response.data["tenant_name"].strip()
+    else:
+        st.info("⚠️ Kindly set up your Business Name in Settings → Business Profile.")
+except Exception as e:
+    st.error("❌ Failed to fetch tenant name.")
+
 
 # getting the employee id
 employee_lookup = supabase.table("employees").select("employee_id").eq("user_id", user_id).eq("name", user_name).limit(1).execute()
@@ -709,11 +720,13 @@ with tab1:
                 st.error("❌ Please enter customer name.")
                 st.stop()
 
-            tenant_name = user_data.get("tenant_name", "My Company")
+            tenant_name = "My Company" 
             expiry_date = date.today() + timedelta(days=7)
             proforma_data = {
             
             "user_id": user_id,
+            'employee_id':employee_id,
+            "employee_name":employee_name,
             "tenant_name": tenant_name,
             "date": str(sale_date),
             "customer_name": customer_name,
@@ -1018,7 +1031,7 @@ with tab1:
             if not user_data:
                 supabase.table("users").insert({"user_id": user_id}).execute()
                 user_data = {"user_id": user_id, "account_number": "", "bank_name": "", "logo_url": "","phone_number": "",
-                    "address": "",tenant_name:""}
+                    "address": "",'tenant_name':""}
 
             # ➕ Upload logo
             st.markdown("##### 🖼 Upload Company Logo max 10mb (optional)")
