@@ -950,7 +950,7 @@ with tab1:
             if not user_data:
                 supabase.table("users").insert({"user_id": user_id}).execute()
                 user_data = {"user_id": user_id, "account_number": "", "bank_name": "", "logo_url": "","phone_number": "",
-                    "address": ""}
+                    "address": "",tenant_name:""}
 
             # ➕ Upload logo
             st.markdown("##### 🖼 Upload Company Logo max 10mb (optional)")
@@ -1084,6 +1084,7 @@ with tab1:
                     pdf.set_text_color(0, 0, 0)
                     pdf.ln(5)
                     pdf.set_font("Arial", size=12)
+                   
                     if phone_number:
                         pdf.cell(0, 8, txt=f"Phone: {phone_number}", ln=True, align="C")
                     if address:
