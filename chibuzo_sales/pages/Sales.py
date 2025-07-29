@@ -135,6 +135,28 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+from supabase import create_client
+# supabase configurations
+
+@st.cache_resource
+def get_supabase_client():
+    supabase_url = 'https://ecsrlqvifparesxakokl.supabase.co' # Your Supabase project URL
+    supabase_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjc3JscXZpZnBhcmVzeGFrb2tsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2NjczMDMsImV4cCI6MjA2MDI0MzMwM30.Zts7p1C3MNFqYYzp-wo3e0z-9MLfRDoY2YJ5cxSexHk'
+    try:
+        supabase = create_client(supabase_url, supabase_key)
+       
+        return supabase
+
+    except Exception as e:
+        st.error("❌ Failed to connect to database. Please check your internet or try again later.")
+        # Optional: Print or log error for debugging during development
+        # st.write(e)
+        st.stop()
+    
+
+# Initialize Supabase client
+supabase = get_supabase_client() # use this to call the supabase database
+
 
 
    
@@ -168,16 +190,6 @@ def restore_login_from_jwt():
     # === Restore Login ===
 if not st.session_state.get("logged_in"):
     restore_login_from_jwt()
-user_id = st.session_state.get("user_id")
-if not user_id:
-    st.error("❌ No valid user ID in session. Please log in again.")
-    st.stop()
-
-try:
-    user_id = int(user_id)
-except Exception:
-    st.error("❌ User ID is not a valid integer.")
-    st.stop()
 
 
 
