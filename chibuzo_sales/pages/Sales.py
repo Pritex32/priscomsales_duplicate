@@ -1075,10 +1075,6 @@ with tab1:
                     pdf.set_text_color(255, 255, 255)  # White text
                     pdf.set_font("Arial", size=16)
 
-                    # Header row
-                    pdf.cell(60, 10, "Field", border=1, align="C", fill=True)
-                    pdf.cell(130, 10, "Value", border=1, align="C", fill=True)
-                    pdf.ln()
                     pdf.cell(0, 10, txt=safe_text(f"{tenant_name} SALES RECEIPT"), ln=True, align="C")
                      # ✅ Reset text color for body
                     pdf.set_text_color(0, 0, 0)
