@@ -712,7 +712,7 @@ with tab1:
         tenant_name = user_data.get("tenant_name", "My Company")
         expiry_date = date.today() + timedelta(days=7)
         proforma_data = {
-            "proforma_id": proforma_id,
+            
             "user_id": user_id,
             "tenant_name": tenant_name,
             "date": str(sale_date),
