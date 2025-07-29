@@ -1229,8 +1229,18 @@ def initialize_payment(email, amount, user_id):
    
     response = requests.post("https://api.paystack.co/transaction/initialize", json=data, headers=headers)
     return response.json()
-    
 
+
+# ✅ Check current subscription status
+def check_subscription(user_id):
+    result = supabase.table("subscription").select("*").eq("user_id", user_id).execute()
+    if result.data:
+        sub = result.data[0]
+        expires_at = datetime.strptime(sub["expires_at"], "%Y-%m-%d").date()
+        if sub["is_active"] and expires_at >= date.today():
+            return True, expires_at
+    return False, None
+    
 # Simulated user info — in production, this should come from your auth/session
 if "user_id" not in st.session_state or "user_email" not in st.session_state:
     st.error(" ")
@@ -1239,27 +1249,32 @@ if "user_id" not in st.session_state or "user_email" not in st.session_state:
 user_id = st.session_state["user_id"]
 email = st.session_state["user_email"]
 
-if st.button("Upgrade To Pro (₦10000)"):
-    st.info('Upgrade to 1 month plan,you will have complete access to all your sales data.')
-    result = initialize_payment(email, 10000, user_id)
+# ✅ Show/Hide Upgrade Button
+is_active, expires_at = check_subscription(user_id)
+
+if is_active:
+    st.success(f"✅ You are on the Pro plan until {expires_at}.")
+else:
+    if st.button("Upgrade To Pro (₦10000)"):
+        st.info('Upgrade to 1 month plan,you will have complete access to all your sales data.')
+        result = initialize_payment(email, 10000, user_id)
     
-    if result.get("status") and "data" in result:
-        auth_url = result["data"].get("authorization_url")
+        if result.get("status") and "data" in result:
+            auth_url = result["data"].get("authorization_url")
 
-        if auth_url:
-            # ✅ Show the URL link (ALWAYS)
-            st.markdown(f"[Click here to pay with Paystack]({auth_url})", unsafe_allow_html=True)
+            if auth_url:
+                # ✅ Show the URL link (ALWAYS)
+                st.markdown(f"[Click here to pay with Paystack]({auth_url})", unsafe_allow_html=True)
 
-            # ✅ Also redirect automatically (optional)
-            st.markdown(f"""
-                <script>
-                    window.location.href = "{auth_url}";
-                </script>
-            """, unsafe_allow_html=True)
+                 # ✅ Also redirect automatically (optional)
+                st.markdown(f"""
+                     <script>
+                         window.location.href = "{auth_url}";
+                      </script>""", unsafe_allow_html=True)
+            else:
+                st.error("❌ No authorization URL returned.")
         else:
-            st.error("❌ No authorization URL returned.")
-    else:
-        st.error("❌ Failed to initialize payment.")
+            st.error("❌ Failed to initialize payment.")
 
 # to verify is payment is recieved
 def verify_payment(reference):
@@ -1284,6 +1299,7 @@ def activate_subscription(user_id):
     }).eq("user_id", user_id).execute()
     
     return response
+    
 # ✅ Update session state
 st.session_state.plan = "pro"
 st.session_state.is_active = True
@@ -1335,6 +1351,9 @@ if reference:
         save_transaction(user_id, reference, amount, status)
         
         st.success("🎉 Payment successful! Your Pro subscription is now active.")
+        # ✅ Update session
+        st.session_state.plan = "pro"
+        st.session_state.is_active = True
                 
     else:
         st.error("❌ Payment failed or could not be verified.")
