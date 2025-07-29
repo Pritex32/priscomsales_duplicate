@@ -763,8 +763,8 @@ with tab1:
             for item in item_data:
                 pdf.cell(60, 10, item["item_name"], border=1)
                 pdf.cell(30, 10, str(item["quantity"]), border=1)
-                pdf.cell(50, 10, f"₦{item['unit_price']:,.2f}", border=1)
-                pdf.cell(50, 10, f"₦{item['total_amount']:,.2f}", border=1)
+                pdf.cell(50, 10, safe_text(f"NGN{item['unit_price']:,.2f}"), border=1)
+                pdf.cell(50, 10, safe_text(f"NGN{item['total_amount']:,.2f}"), border=1)
                 pdf.ln()
 
             pdf.ln(5)
