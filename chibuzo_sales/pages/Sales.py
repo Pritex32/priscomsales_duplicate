@@ -1084,13 +1084,13 @@ with tab1:
                     pdf.set_text_color(0, 0, 0)
                     pdf.ln(5)
                     pdf.set_font("Arial", size=12)
-                    pdf.set_text_color(0, 102, 204)  # Blue text for title
-                    pdf.set_draw_color(0, 102, 204)  # Blue underline
-                    pdf.set_line_width(1)
-                    pdf.line(10, pdf.get_y(), 200, pdf.get_y())  # Draw line across the page
-      
+                     
                     if tenant_name:
                         pdf.cell(0, 12, f"{tenant_name} SALES RECEIPT", ln=True, align="C")
+                        pdf.set_text_color(0, 102, 204)  # Blue text for title
+                        pdf.set_text_color(0, 102, 204)  # Blue text for title
+                        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+                        pdf.set_line_width(1)
                     if phone_number:
                         pdf.cell(0, 8, txt=f"Phone: {phone_number}", ln=True, align="C")
                     if address:
