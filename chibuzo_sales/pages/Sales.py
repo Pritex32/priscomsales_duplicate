@@ -614,9 +614,9 @@ try:
     if response.data and response.data.get("tenant_name"):
         tenant_name = response.data["tenant_name"].strip()
     else:
-        st.info("⚠️ Kindly set up your Business Name in Settings → Business Profile.")
+        st.info("⚠️ Kindly set up your receipt invoice.")
 except Exception as e:
-    st.error("❌ Failed to fetch tenant name.")
+    st.error("❌ Failed to fetch tenant name {e}")
 
 
 # getting the employee id
