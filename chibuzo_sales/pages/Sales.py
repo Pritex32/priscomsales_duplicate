@@ -754,18 +754,18 @@ with tab1:
                 pdf.cell(50, 10, f"₦{item['total_amount']:,.2f}", border=1)
                 pdf.ln()
 
-           pdf.ln(5)
-           pdf.cell(0, 10, f"Grand Total: ₦{grand_total:,.2f}", ln=True)
-           pdf.ln(10)
-           pdf.cell(0, 10, "This is a Proforma Invoice. Not valid until payment is made.", ln=True)
+            pdf.ln(5)
+            pdf.cell(0, 10, f"Grand Total: ₦{grand_total:,.2f}", ln=True)
+            pdf.ln(10)
+            pdf.cell(0, 10, "This is a Proforma Invoice. Not valid until payment is made.", ln=True)
 
-           proforma_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
-           pdf.output(proforma_file)
+            proforma_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
+            pdf.output(proforma_file)
 
-           with open(proforma_file, "rb") as f:
-               base64_pdf = base64.b64encode(f.read()).decode("utf-8")
-               download_link = f'<a href="data:application/pdf;base64,{base64_pdf}" download="proforma_{proforma_id}.pdf">📥 Download Proforma PDF</a>'
-               st.markdown(download_link, unsafe_allow_html=True)
+            with open(proforma_file, "rb") as f:
+                base64_pdf = base64.b64encode(f.read()).decode("utf-8")
+                download_link = f'<a href="data:application/pdf;base64,{base64_pdf}" download="proforma_{proforma_id}.pdf">📥 Download Proforma PDF</a>'
+                st.markdown(download_link, unsafe_allow_html=True)
 
 
 
