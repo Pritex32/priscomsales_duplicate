@@ -521,6 +521,9 @@ def fetch_sales_data(user_id, limit=10):
     else:
         print("No sales data found or an error occurred.")
         return pd.DataFrame()
+# ✅ Add this function at the top of your PDF generation section
+def safe_text(text):
+    return str(text).encode('latin-1', 'replace').decode('latin-1')
 
 @st.cache_data(ttl=7200)
 def fetch_expenses_master_data(user_id):
