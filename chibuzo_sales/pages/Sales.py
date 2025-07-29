@@ -206,9 +206,6 @@ if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
 
 
 
-if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
-    st.warning("Please log in first.")
-    st.stop()
 
 
 
