@@ -1086,13 +1086,11 @@ with tab1:
                     pdf.set_font("Arial", size=12)
                      
                     if tenant_name:
-                        pdf.cell(0, 12, f"{tenant_name} SALES RECEIPT", ln=True, align="C")
-                        pdf.set_text_color(0, 102, 204)  # Blue text for title
-                       
+                        pdf.cell(0, 16, f"{tenant_name} SALES RECEIPT", ln=True, align="C")
                         pdf.line(10, pdf.get_y(), 200, pdf.get_y())
                         pdf.set_line_width(1)
                     if phone_number:
-                        pdf.cell(0, 8, txt=f"Phone: {phone_number}", ln=True, align="C")
+                        pdf.cell(0, 10, txt=f"Phone: {phone_number}", ln=True, align="C")
                     if address:
                         pdf.multi_cell(0, 8, txt=f"Address: {address}", align="C")
                     if account_number and bank_name:
@@ -1102,9 +1100,9 @@ with tab1:
                     # ✅ SECTION: Sale Info Title
                     pdf.set_font("Arial", 'B', 12)
                     pdf.set_fill_color(220, 220, 220)
+                    pdf.set_line_width(0.1)
                     pdf.cell(60, 10, "Field", border=1, align="C", fill=True)
                     pdf.cell(130, 10, "Value", border=1, align="C", fill=True)
-                    pdf.set_line_width(1)
                     pdf.ln()
 
                     pdf.set_font("Arial","", size=12)
