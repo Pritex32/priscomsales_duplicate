@@ -771,7 +771,7 @@ with tab1:
                 pdf.ln()
 
             pdf.ln(5)
-            pdf.cell(0, 10, f"Grand Total: ₦{grand_total:,.2f}", ln=True)
+            pdf.cell(0, 10, safe_text(f"Grand Total: NGN{grand_total:,.2f}"), ln=True)
             pdf.ln(10)
             pdf.cell(0, 10, "This is a Proforma Invoice. Not valid until payment is made.", ln=True)
 
