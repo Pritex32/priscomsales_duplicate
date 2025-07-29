@@ -168,6 +168,16 @@ def restore_login_from_jwt():
     # === Restore Login ===
 if not st.session_state.get("logged_in"):
     restore_login_from_jwt()
+user_id = st.session_state.get("user_id")
+if not user_id:
+    st.error("❌ No valid user ID in session. Please log in again.")
+    st.stop()
+
+try:
+    user_id = int(user_id)
+except Exception:
+    st.error("❌ User ID is not a valid integer.")
+    st.stop()
 
 
 
