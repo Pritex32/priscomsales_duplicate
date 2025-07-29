@@ -426,7 +426,7 @@ import mimetypes
 
 def upload_invoice(file, folder, filename,user_id):
     bucket = "salesinvoices"  # Make sure the bucket name matches your Supabase Storage bucket
-    path_in_bucket = f"{folder}/{filename}"
+    path_in_bucket = f"{folder}/{user_id}/{filename}"
 
     # Determine MIME type dynamically
     mime_type, _ = mimetypes.guess_type(filename)
