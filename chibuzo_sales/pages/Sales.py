@@ -165,9 +165,8 @@ def restore_login_from_jwt():
             st.session_state.login_failed = True
 
 
-
-
- with st.spinner("Checking your session..."):
+# ✅ Session Check with Spinner
+with st.spinner("Checking your session..."):
     # === Restore Login ===
     if not st.session_state.get("logged_in"):
         restore_login_from_jwt()
