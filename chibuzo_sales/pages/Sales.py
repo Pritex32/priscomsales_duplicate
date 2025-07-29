@@ -1060,25 +1060,25 @@ with tab1:
                         temp_logo_path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
                         urllib.request.urlretrieve(logo_url, temp_logo_path)
                         img = Image.open(temp_logo_path)
-                        max_width = 30 # mm
+                        max_width = 40 # mm
                         aspect_ratio = img.height / img.width
                         height = max_width * aspect_ratio
                         pdf.image(temp_logo_path, x=10, y=10, w=max_width, h=height)
-                        pdf.set_y(10 + height + 5)
-                        pdf.set_y(45)
+                        pdf.set_y(15 + height)
+                        pdf.set_y(20)
                     else:
                         pdf.set_y(20)
                     pdf.set_font("Arial", size=12)
-                    pdf.cell(200, 10, txt=safe_text(f"{tenant_name} SALES RECEIPT"), ln=True, align="C")
-                    pdf.ln(10)
+                    pdf.cell(0, 10, txt=safe_text(f"{tenant_name} SALES RECEIPT"), ln=True, align="C")
+                    pdf.ln(5)
                     pdf.set_font("Arial", size=12)
                     if phone_number:
                         pdf.cell(200, 10, txt=f"Phone: {phone_number}", ln=True, align="C")
                     if address:
-                        pdf.multi_cell(0, 10, txt=f"Address: {address}", align="C")
+                        pdf.multi_cell(0, 8, txt=f"Address: {address}", align="C")
                     if account_number and bank_name:
                         pdf.cell(200, 10, txt=f"Bank Account: {account_number} - {bank_name}", ln=True, align="C")
-                    pdf.ln(10)
+                    pdf.ln(5)
 
                     # ✅ SECTION: Sale Info Title
                     pdf.set_font("Arial", 'B', 12)
