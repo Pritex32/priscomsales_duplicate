@@ -1084,7 +1084,8 @@ with tab1:
                     pdf.set_text_color(0, 0, 0)
                     pdf.ln(5)
                     pdf.set_font("Arial", size=12)
-                   
+                    if tenant_name:
+                        pdf.cell(0, 12, f"{tenant_name} SALES RECEIPT", ln=True, align="C")
                     if phone_number:
                         pdf.cell(0, 8, txt=f"Phone: {phone_number}", ln=True, align="C")
                     if address:
