@@ -1092,8 +1092,8 @@ with tab1:
                     pdf.set_fill_color(220, 220, 220)
                     pdf.cell(60, 10, "Field", border=1, align="C", fill=True)
                     pdf.cell(130, 10, "Value", border=1, align="C", fill=True)
-                    pdf.cell(0, 8, "Transaction Details", ln=True)
-                    pdf.ln(4)
+                   
+                    pdf.ln()
 
                     pdf.set_font("Arial","", size=12)
                     fields= {
@@ -1114,13 +1114,16 @@ with tab1:
                      
                         # Replace unsupported characters for FPDF (latin-1)
                     for key, value in fields.items():
-                        safe_value = str(value).replace("—", "-").encode('latin-1', 'replace').decode('latin-1')
-                        safe_key = str(key).replace("—", "-").encode('latin-1', 'replace').decode('latin-1')
+                        safe_key = str(key).encode('latin-1', 'replace').decode('latin-1')
+                        safe_value = str(value).encode('latin-1', 'replace').decode('latin-1')
+
+                       # Column 1: Field
+                        pdf.cell(60, 10, safe_key, border=1)
+
+                            # Column 2: Value
+                        pdf.cell(130, 10, safe_value, border=1)
+                        pdf.ln(10)
                         
-                        pdf.cell(60, 8, f"{safe_key}:", border=0)  # Fixed width for label
-                        pdf.cell(100, 8, f"{safe_value}", ln=True)
-                        
-                    pdf.ln(10)
                     # Add thank you footer
                     pdf.set_y(265)
                     pdf.set_font("Arial", "I", 12)
