@@ -1204,7 +1204,7 @@ if st.session_state.get("logged_in") and st.session_state.get("role") == "md":
 
 
 
-
+st.markdown("___")
 
 import requests
 
@@ -1239,7 +1239,7 @@ if "user_id" not in st.session_state or "user_email" not in st.session_state:
 user_id = st.session_state["user_id"]
 email = st.session_state["user_email"]
 
-if st.button("Upgrade to Pro (₦10000)"):
+if st.button("Upgrade To Pro (₦10000)"):
     st.info('Upgrade to 1 month plan,you will have complete access to all your sales data.')
     result = initialize_payment(email, 10000, user_id)
     
