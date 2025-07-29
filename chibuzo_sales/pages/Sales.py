@@ -1088,7 +1088,7 @@ with tab1:
                     if tenant_name:
                         pdf.cell(0, 12, f"{tenant_name} SALES RECEIPT", ln=True, align="C")
                         pdf.set_text_color(0, 102, 204)  # Blue text for title
-                        pdf.set_text_color(0, 102, 204)  # Blue text for title
+                       
                         pdf.line(10, pdf.get_y(), 200, pdf.get_y())
                         pdf.set_line_width(1)
                     if phone_number:
@@ -1104,7 +1104,7 @@ with tab1:
                     pdf.set_fill_color(220, 220, 220)
                     pdf.cell(60, 10, "Field", border=1, align="C", fill=True)
                     pdf.cell(130, 10, "Value", border=1, align="C", fill=True)
-                   
+                    pdf.set_line_width(1)
                     pdf.ln()
 
                     pdf.set_font("Arial","", size=12)
