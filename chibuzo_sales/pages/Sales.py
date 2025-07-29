@@ -1069,11 +1069,11 @@ with tab1:
                     else:
                         pdf.set_y(20)
                     # ✅ Colors and Fonts
+                    # ✅ Header
                     header_color = (0, 102, 204)  # Blue Header
-                    pdf.set_font("Arial", size=16)
-                    # ✅ Draw Header Background
                     pdf.set_fill_color(*header_color)
-                    pdf.set_text_color(255, 255, 255)
+                    pdf.set_text_color(255, 255, 255)  # White text
+                    pdf.set_font("Arial", size=16
                     pdf.cell(0, 10, txt=safe_text(f"{tenant_name} SALES RECEIPT"), ln=True, align="C")
                     pdf.ln(5)
                     pdf.set_font("Arial", size=12)
