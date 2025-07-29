@@ -990,6 +990,7 @@ with tab1:
             account_number = st.text_input("Company Account Number", value=user_data.get("account_number", ""))
             bank_name = st.text_input("Bank Name", value=user_data.get("bank_name", ""))
             phone_number = st.text_input("Company Phone Number", value=user_data.get("phone_number", ""))
+            tenant_name = st.text_input("Business Name", value=user_data.get("tenant_name", ""))
             address = st.text_area("Company Address", value=user_data.get("address", ""))
 
             # Save account info if changed
@@ -997,6 +998,7 @@ with tab1:
                 supabase.table("users").update({
                     "account_number": account_number,
                     "bank_name": bank_name,
+                    "tenant_name": tenant_name,
                     "phone_number": phone_number,
                     "address": address
                 }).eq("user_id", user_id).execute()
@@ -1074,8 +1076,10 @@ with tab1:
                     pdf.set_fill_color(*header_color)
                     pdf.set_text_color(255, 255, 255)  # White text
                     pdf.set_font("Arial", size=16)
+                    tenant_name = user_data.get("tenant_name", "My Company")
+                    pdf.set_font("Arial", 'B', 16)
+                    pdf.cell(0, 12, f"{tenant_name} SALES RECEIPT", ln=True, align="C")
 
-                    pdf.cell(0, 10, txt=safe_text(f"{tenant_name} SALES RECEIPT"), ln=True, align="C")
                      # ✅ Reset text color for body
                     pdf.set_text_color(0, 0, 0)
                     pdf.ln(5)
