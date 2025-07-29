@@ -700,18 +700,18 @@ with tab1:
         due_date = st.date_input("Due Date", value=date.today(), key="due_date") if payment_status != "paid" else None
         invoice_number = st.text_input("Invoice Number (optional)", key="invoice_number")
         notes = st.text_area("Notes", key="notes")
-    if st.button("💾 Save Proforma"):
-        st.warning('Preinvoice expires after 7 days')
-        if not valid_selected_items:
-            st.error("❌ Please select items.")
-            st.stop()
-        if not customer_name:
-            st.error("❌ Please enter customer name.")
-            st.stop()
+        if st.button("💾 Save Proforma"):
+            st.warning('Preinvoice expires after 7 days')
+            if not valid_selected_items:
+                st.error("❌ Please select items.")
+                st.stop()
+            if not customer_name:
+                st.error("❌ Please enter customer name.")
+                st.stop()
 
-        tenant_name = user_data.get("tenant_name", "My Company")
-        expiry_date = date.today() + timedelta(days=7)
-        proforma_data = {
+            tenant_name = user_data.get("tenant_name", "My Company")
+            expiry_date = date.today() + timedelta(days=7)
+            proforma_data = {
             
             "user_id": user_id,
             "tenant_name": tenant_name,
@@ -725,47 +725,47 @@ with tab1:
             "notes": notes
         }
 
-        supabase.table("proforma_invoices").insert(proforma_data).execute()
-        st.success("✅ Proforma created successfully!")
-        # Generate Proforma PDF
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", 'B', 16)
-        pdf.cell(0, 10, f"{tenant_name} PROFORMA INVOICE", ln=True, align="C")
-        pdf.ln(5)
-        pdf.set_font("Arial", size=12)
-        pdf.cell(0, 10, f"Customer: {customer_name}", ln=True)
-        pdf.cell(0, 10, f"Phone: {customer_phone}", ln=True)
-        pdf.cell(0, 10, f"Expiry: {expiry_date}", ln=True)
-        pdf.ln(5)
+            supabase.table("proforma_invoices").insert(proforma_data).execute()
+            st.success("✅ Proforma created successfully!")
+            # Generate Proforma PDF
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Arial", 'B', 16)
+            pdf.cell(0, 10, f"{tenant_name} PROFORMA INVOICE", ln=True, align="C")
+            pdf.ln(5)
+            pdf.set_font("Arial", size=12)
+            pdf.cell(0, 10, f"Customer: {customer_name}", ln=True)
+            pdf.cell(0, 10, f"Phone: {customer_phone}", ln=True)
+            pdf.cell(0, 10, f"Expiry: {expiry_date}", ln=True)
+            pdf.ln(5)
 
-        pdf.set_font("Arial", 'B', 12)
-        pdf.cell(60, 10, "Item", border=1)
-        pdf.cell(30, 10, "Qty", border=1)
-        pdf.cell(50, 10, "Unit Price", border=1)
-        pdf.cell(50, 10, "Total", border=1)
-        pdf.ln()
-
-        pdf.set_font("Arial", "", 12)
-        for item in item_data:
-            pdf.cell(60, 10, item["item_name"], border=1)
-            pdf.cell(30, 10, str(item["quantity"]), border=1)
-            pdf.cell(50, 10, f"₦{item['unit_price']:,.2f}", border=1)
-            pdf.cell(50, 10, f"₦{item['total_amount']:,.2f}", border=1)
+            pdf.set_font("Arial", 'B', 12)
+            pdf.cell(60, 10, "Item", border=1)
+            pdf.cell(30, 10, "Qty", border=1)
+            pdf.cell(50, 10, "Unit Price", border=1)
+            pdf.cell(50, 10, "Total", border=1)
             pdf.ln()
 
-        pdf.ln(5)
-        pdf.cell(0, 10, f"Grand Total: ₦{grand_total:,.2f}", ln=True)
-        pdf.ln(10)
-        pdf.cell(0, 10, "This is a Proforma Invoice. Not valid until payment is made.", ln=True)
+            pdf.set_font("Arial", "", 12)
+           for item in item_data:
+               pdf.cell(60, 10, item["item_name"], border=1)
+               pdf.cell(30, 10, str(item["quantity"]), border=1)
+               pdf.cell(50, 10, f"₦{item['unit_price']:,.2f}", border=1)
+               pdf.cell(50, 10, f"₦{item['total_amount']:,.2f}", border=1)
+               pdf.ln()
 
-        proforma_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
-        pdf.output(proforma_file)
+           pdf.ln(5)
+           pdf.cell(0, 10, f"Grand Total: ₦{grand_total:,.2f}", ln=True)
+           pdf.ln(10)
+           pdf.cell(0, 10, "This is a Proforma Invoice. Not valid until payment is made.", ln=True)
 
-        with open(proforma_file, "rb") as f:
-            base64_pdf = base64.b64encode(f.read()).decode("utf-8")
-            download_link = f'<a href="data:application/pdf;base64,{base64_pdf}" download="proforma_{proforma_id}.pdf">📥 Download Proforma PDF</a>'
-            st.markdown(download_link, unsafe_allow_html=True)
+           proforma_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf").name
+           pdf.output(proforma_file)
+
+           with open(proforma_file, "rb") as f:
+               base64_pdf = base64.b64encode(f.read()).decode("utf-8")
+               download_link = f'<a href="data:application/pdf;base64,{base64_pdf}" download="proforma_{proforma_id}.pdf">📥 Download Proforma PDF</a>'
+               st.markdown(download_link, unsafe_allow_html=True)
 
 
 
