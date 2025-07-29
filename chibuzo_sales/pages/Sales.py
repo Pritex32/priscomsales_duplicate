@@ -253,20 +253,9 @@ def fetch_subscription_data(user_id):
         st.error(f"Error fetching subscription data.")
         return pd.DataFrame()
 
-if not st.session_state.get("logged_in"):
-    st.stop()  # this stop the app from running after login expires
 
 
-user_id = st.session_state.get("user_id")
-if not user_id:
-    st.error("❌ No valid user ID in session. Please log in again.")
-    st.stop()
 
-try:
-    user_id = int(user_id)
-except Exception:
-    st.error("❌ User ID is not a valid integer.")
-    st.stop()
 
 
 
