@@ -1050,10 +1050,7 @@ with tab1:
                     - **Amount Paid:** ₦{selected_sale.get('amount_paid', 0):,.2f}
                     - **Balance:** ₦{selected_sale.get('amount_balance', 0):,.2f}
                     - **Payment Method:** {selected_sale['payment_method']}
-                    - **Payment Status:** {selected_sale['payment_status']}
-                    - **Bank Account:** {account_number} - {bank_name}
-                    - **Phone:** {phone_number}
-                    - **Address:** {address}
+                    - **Payment Status:** {selected_sale['payment_status']}                 
                     - **Notes:** {selected_sale.get('notes', 'None')}   """)
 
                 if st.button("Download Receipt PDF", key="download_selected_receipt_btn"):
@@ -1078,7 +1075,7 @@ with tab1:
                     if phone_number:
                         pdf.cell(200, 10, txt=f"Phone: {phone_number}", ln=True, align="C")
                     if address:
-                        pdf.cell(200, 10, txt=f"Address: {address}", ln=True, align="C")
+                        pdf.multi_cell(0, 10, txt=f"Address: {address}", align="C")
                     if account_number and bank_name:
                         pdf.cell(200, 10, txt=f"Bank Account: {account_number} - {bank_name}", ln=True, align="C")
                     pdf.ln(10)
