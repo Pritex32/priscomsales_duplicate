@@ -136,25 +136,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
-    st.markdown("""
-        <div style="
-            background-color: #ffe6e6;
-            border-left: 6px solid #ff4d4d;
-            padding: 16px;
-            border-radius: 8px;
-            font-family: 'Segoe UI', sans-serif;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-top: 20px;
-        ">
-            <h3 style="color: #cc0000; margin: 0 0 10px;">❌ Session Expired</h3>
-            <p style="color: #333; font-size: 16px; margin: 0;">
-                Your session has expired. Redirecting to login page..
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
-    time.sleep(3)
-    switch_page("Dashboard")
+
    
 
 # === Restore Login from JWT ===
@@ -205,7 +187,25 @@ else:
     st.session_state["logged_in"] = False
 
 
-
+if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
+    st.markdown("""
+        <div style="
+            background-color: #ffe6e6;
+            border-left: 6px solid #ff4d4d;
+            padding: 16px;
+            border-radius: 6px;
+            font-family: 'Segoe UI', sans-serif;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        ">
+            <h3 style="color: #cc0000; margin: 0 0 10px;">❌ Session Expired</h3>
+            <p style="color: #333; font-size: 16px; margin: 0;">
+                Your session has expired. Redirecting to login page..
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+    time.sleep(3)
+    switch_page("Dashboard")
 
 
 
