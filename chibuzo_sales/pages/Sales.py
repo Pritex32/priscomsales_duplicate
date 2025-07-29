@@ -154,40 +154,26 @@ def restore_login_from_jwt():
                 st.session_state.access_code = user_data.get("access_code", "")
                 if user_data["role"] == "employee":
                     st.session_state.employee_user = {"name": user_data["username"]}
-            else:
-                # 🛑 Token is invalid or expired — force logout
-                st.session_state.clear()
-                st_javascript("""localStorage.removeItem("login_token");""")
-                st.session_state.login_failed = True
+                else:
+                     # 🛑 Token is invalid or expired — force logout
+                      # ❌ Token expired or invalid
+                    force_logout("Your session has expired. Redirecting to login page...")
+        else:
+            st.session_state.logged_in = False
 
 
 
 # ✅ Always try to restore if not logged in
-if not st.session_state.get("logged_in"):
+if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
     restore_login_from_jwt()
 
 
-# 1. Grab your JWT from localStorage
-token = st.session_state.get("token")
-if token is None:
-    token = st_javascript("localStorage.getItem('login_token')")
 
-# 2. Try to decode it and set logged_in
-if token:
-    try:
-        # replace SECRET and algorithms with your actual values
-        payload = jwt.decode(token,jwt_SECRET_KEY,ALGORITHM  )
-        st.session_state["token"] = token
-        st.session_state["logged_in"] = True
-    except jwt.ExpiredSignatureError:
-        st.session_state["logged_in"] = False
-else:
-    st.session_state["logged_in"] = False
-
-
-
-if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
-    st.markdown("""
+# === Force Logout ===
+def force_logout(message):
+    st.session_state.clear()
+    st_javascript("""localStorage.removeItem("login_token");""")
+    st.markdown(f"""
         <div style="
             background-color: #ffe6e6;
             border-left: 6px solid #ff4d4d;
@@ -199,18 +185,18 @@ if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
         ">
             <h3 style="color: #cc0000; margin: 0 0 10px;">❌ Session Expired</h3>
             <p style="color: #333; font-size: 16px; margin: 0;">
-                Your session has expired. Redirecting to login page..
+                {message}
             </p>
         </div>
     """, unsafe_allow_html=True)
-    time.sleep(3)
+    time.sleep(2)
     switch_page("Dashboard")
-   
+    st.stop()
+
 
 
 if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
-    st.warning("Please log in first.")
-    st.stop()
+     force_logout("Please log in first.")
 
 
 
