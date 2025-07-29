@@ -110,50 +110,6 @@ def decode_jwt(token):
     
 
 
-# 1. Grab your JWT from localStorage
-token = st.session_state.get("token")
-if token is None:
-    token = st_javascript("localStorage.getItem('login_token')")
-
-# 2. Try to decode it and set logged_in
-if token:
-    try:
-        # replace SECRET and algorithms with your actual values
-        payload = jwt.decode(token,jwt_SECRET_KEY,ALGORITHM  )
-        st.session_state["token"] = token
-        st.session_state["logged_in"] = True
-    except jwt.ExpiredSignatureError:
-        st.session_state["logged_in"] = False
-else:
-    st.session_state["logged_in"] = False
-
-
-
-if not st.session_state.get("logged_in"):
-    st.markdown("""
-        <div style="
-            background-color: #ffe6e6;
-            border-left: 6px solid #ff4d4d;
-            padding: 16px;
-            border-radius: 8px;
-            font-family: 'Segoe UI', sans-serif;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-top: 20px;
-        ">
-            <h3 style="color: #cc0000; margin: 0 0 10px;">❌ Session Expired</h3>
-            <p style="color: #333; font-size: 16px; margin: 0;">
-                Your session has expired. Redirecting to login page..
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
-    time.sleep(3)
-    switch_page("Dashboard")
-   
-   
-
-
-
-
 
 
 
@@ -307,7 +263,45 @@ if st.session_state.get("logged_in"):
     restore_login_from_jwt()
 
 
+# 1. Grab your JWT from localStorage
+token = st.session_state.get("token")
+if token is None:
+    token = st_javascript("localStorage.getItem('login_token')")
 
+# 2. Try to decode it and set logged_in
+if token:
+    try:
+        # replace SECRET and algorithms with your actual values
+        payload = jwt.decode(token,jwt_SECRET_KEY,ALGORITHM  )
+        st.session_state["token"] = token
+        st.session_state["logged_in"] = True
+    except jwt.ExpiredSignatureError:
+        st.session_state["logged_in"] = False
+else:
+    st.session_state["logged_in"] = False
+
+
+
+if not st.session_state.get("logged_in"):
+    st.markdown("""
+        <div style="
+            background-color: #ffe6e6;
+            border-left: 6px solid #ff4d4d;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Segoe UI', sans-serif;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        ">
+            <h3 style="color: #cc0000; margin: 0 0 10px;">❌ Session Expired</h3>
+            <p style="color: #333; font-size: 16px; margin: 0;">
+                Your session has expired. Redirecting to login page..
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+    time.sleep(3)
+    switch_page("Dashboard")
+   
 
 
 def restore_subscription_info():
