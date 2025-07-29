@@ -1089,6 +1089,9 @@ with tab1:
 
                     # ✅ SECTION: Sale Info Title
                     pdf.set_font("Arial", 'B', 12)
+                    pdf.set_fill_color(220, 220, 220)
+                    pdf.cell(60, 10, "Field", border=1, align="C", fill=True)
+                    pdf.cell(130, 10, "Value", border=1, align="C", fill=True)
                     pdf.cell(0, 8, "Transaction Details", ln=True)
                     pdf.ln(4)
 
@@ -1120,7 +1123,7 @@ with tab1:
                     # Add thank you footer
                     pdf.set_y(265)
                     pdf.set_font("Arial", "I", 12)
-                    pdf.set_text_color(120, 120, 120)
+                    pdf.set_text_color(100, 100, 100)
                     pdf.cell(0, 10, "Thank you for supporting our business - your trust means the world to us!", ln=True, align="C")
 
 
