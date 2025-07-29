@@ -949,7 +949,8 @@ with tab1:
             user_data = supabase.table("users").select("*").eq("user_id", user_id).single().execute().data
             if not user_data:
                 supabase.table("users").insert({"user_id": user_id}).execute()
-                user_data = {"user_id": user_id, "account_number": "", "bank_name": "", "logo_url": ""}
+                user_data = {"user_id": user_id, "account_number": "", "bank_name": "", "logo_url": "","phone_number": "",
+                    "address": ""}
 
             # ➕ Upload logo
             st.markdown("##### 🖼 Upload Company Logo max 10mb (optional)")
@@ -988,14 +989,18 @@ with tab1:
             # ➕ Account details
             account_number = st.text_input("Company Account Number", value=user_data.get("account_number", ""))
             bank_name = st.text_input("Bank Name", value=user_data.get("bank_name", ""))
+            phone_number = st.text_input("Company Phone Number", value=user_data.get("phone_number", ""))
+            address = st.text_area("Company Address", value=user_data.get("address", ""))
 
             # Save account info if changed
             if st.button("💾 Save Account Details"):
                 supabase.table("users").update({
                     "account_number": account_number,
-                    "bank_name": bank_name
+                    "bank_name": bank_name,
+                    "phone_number": phone_number,
+                    "address": address
                 }).eq("user_id", user_id).execute()
-                st.success("✅ Account details saved.")
+                st.success("✅ Company details saved.")
                 st.rerun()
 
 
@@ -1027,7 +1032,12 @@ with tab1:
                 if st.button(" Show Receipt", key="show_receipt_btn"):
                     if logo_url:
                         st.image(logo_url, width=150)
-                    st.markdown(f"""   
+                    st.markdown(f""" 
+                    ### Company Details
+                    - **Phone:** {phone_number}
+                    - **Address:** {address}
+                    - **Bank Account:** {account_number} - {bank_name}
+                    ___
                     ###  Sales Receipt
                     - **Sale ID:** {selected_sale['sale_id']}
                     - **Employee Name:** {selected_sale.get('employee_name', 'N/A')}
@@ -1042,6 +1052,8 @@ with tab1:
                     - **Payment Method:** {selected_sale['payment_method']}
                     - **Payment Status:** {selected_sale['payment_status']}
                     - **Bank Account:** {account_number} - {bank_name}
+                    - **Phone:** {phone_number}
+                    - **Address:** {address}
                     - **Notes:** {selected_sale.get('notes', 'None')}   """)
 
                 if st.button("Download Receipt PDF", key="download_selected_receipt_btn"):
@@ -1062,10 +1074,15 @@ with tab1:
                     pdf.set_font("Arial", size=12)
                     pdf.cell(200, 10, txt=safe_text(f"{tenant_name} SALES RECEIPT"), ln=True, align="C")
                     pdf.ln(10)
+                    pdf.set_font("Arial", size=12)
+                    if phone_number:
+                        pdf.cell(200, 10, txt=f"Phone: {phone_number}", ln=True, align="C")
+                    if address:
+                        pdf.cell(200, 10, txt=f"Address: {address}", ln=True, align="C")
                     if account_number and bank_name:
-                        pdf.set_font("Arial", size=12)
                         pdf.cell(200, 10, txt=f"Bank Account: {account_number} - {bank_name}", ln=True, align="C")
-                        pdf.ln(5)
+                    pdf.ln(10)
+
                     # ✅ SECTION: Sale Info Title
                     pdf.set_font("Arial", 'B', 12)
                     pdf.cell(0, 8, "Transaction Details", ln=True)
@@ -1601,9 +1618,7 @@ with tab2:
 
 
 with tab3:
-    if st.session_state.get("role") != "md":
-        st.warning("🚫 You are not authorized to view this page.")
-        st.stop()   
+     
     st.markdown("""
     <h2 style='color: green; font-weight: 600;'>💰 View Customers with Pending Payments</h2>""", unsafe_allow_html=True)
     col11,col12=st.columns([3,1])
