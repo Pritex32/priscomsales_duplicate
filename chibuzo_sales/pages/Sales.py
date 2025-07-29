@@ -1096,7 +1096,7 @@ with tab1:
                     pdf.ln(4)
 
                     pdf.set_font("Arial","", size=12)
-                    for key, value in {
+                    fields= {
                         "Sale ID": selected_sale["sale_id"],
                         "Employee": selected_sale.get("employee_name", "N/A"),
                         "Date": selected_sale["sale_date"],
@@ -1113,11 +1113,12 @@ with tab1:
                     }.items():
                      
                         # Replace unsupported characters for FPDF (latin-1)
-                        safe_value = str(value).replace("—", "-").encode('latin-1', 'replace').decode('latin-1')
-                        safe_key = str(key).replace("—", "-").encode('latin-1', 'replace').decode('latin-1')
+                        for key, value in fields.items():
+                            safe_value = str(value).replace("—", "-").encode('latin-1', 'replace').decode('latin-1')
+                            safe_key = str(key).replace("—", "-").encode('latin-1', 'replace').decode('latin-1')
                         
-                        pdf.cell(60, 8, f"{safe_key}:", border=0)  # Fixed width for label
-                        pdf.cell(100, 8, f"{safe_value}", ln=True)
+                            pdf.cell(60, 8, f"{safe_key}:", border=0)  # Fixed width for label
+                            pdf.cell(100, 8, f"{safe_value}", ln=True)
                         
                     pdf.ln(10)
                     # Add thank you footer
