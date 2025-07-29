@@ -1068,7 +1068,7 @@ with tab1:
                        
                     else:
                         pdf.set_y(20)
-                    pdf.set_font("Arial", size=12)
+                    pdf.set_font("Arial", size=14)
                     pdf.cell(0, 10, txt=safe_text(f"{tenant_name} SALES RECEIPT"), ln=True, align="C")
                     pdf.ln(5)
                     pdf.set_font("Arial", size=12)
