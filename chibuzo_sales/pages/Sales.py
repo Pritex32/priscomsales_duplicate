@@ -109,11 +109,37 @@ def decode_jwt(token):
         return None
     
 
+# === Restore Login from JWT ===
+def restore_login_from_jwt():
+    if not st.session_state.get("logged_in"):
+        token = st_javascript("""localStorage.getItem("login_token");""")
+        if token and token != "null":
+            user_data = decode_jwt(token)
+            if user_data:
+                st.session_state.logged_in = True
+                st.session_state.user_id = int(user_data["user_id"])
+                st.session_state.username = user_data["username"]
+                st.session_state.role = user_data["role"]
+                st.session_state.role = user_data["role"]
+                st.session_state.plan = user_data.get("plan", "free")
+                st.session_state.is_active = user_data.get("is_active", False)
+                st.session_state.user_email = user_data.get("email", "")
+                st.session_state.access_code = user_data.get("access_code", "")
+                if user_data["role"] == "employee":
+                    st.session_state.employee_user = {"name": user_data["username"]}
+            else:
+                # 🛑 Token is invalid or expired — force logout
+                st.session_state.clear()
+                st_javascript("""localStorage.removeItem("login_token");""")
+                st.session_state.login_failed = True
+
+
+# Run this first
+restore_login_from_jwt()
 
 
 
-
-# this changes all buttons to green
+# this will make all button green
 st.markdown("""
     <style>
     /* Style all Streamlit buttons */
@@ -135,101 +161,55 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-from supabase import create_client
-# supabase configurations
 
-@st.cache_resource
-def get_supabase_client():
-    supabase_url = 'https://ecsrlqvifparesxakokl.supabase.co' # Your Supabase project URL
-    supabase_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjc3JscXZpZnBhcmVzeGFrb2tsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2NjczMDMsImV4cCI6MjA2MDI0MzMwM30.Zts7p1C3MNFqYYzp-wo3e0z-9MLfRDoY2YJ5cxSexHk'
-    try:
-        supabase = create_client(supabase_url, supabase_key)
-       
-        return supabase
-
-    except Exception as e:
-        st.error("❌ Failed to connect to database. Please check your internet or try again later.")
-        # Optional: Print or log error for debugging during development
-        # st.write(e)
-        st.stop()
-    
-
-# Initialize Supabase client
-supabase = get_supabase_client() # use this to call the supabase database
-
-
-
-   
-
-# === Restore Login from JWT ===
-def restore_login_from_jwt():
-    if not st.session_state.get("logged_in"):
-        token = st_javascript("""localStorage.getItem("login_token");""")
-        if token and token != "null":
-            user_data = decode_jwt(token)
-            if user_data:
-                st.session_state.logged_in = True
-                st.session_state["token"] = token
-                st.session_state.user_id = int(user_data["user_id"])
-                st.session_state.username = user_data["username"]
-                st.session_state.role = user_data["role"]
-                st.session_state.plan = user_data.get("plan", "free")
-                st.session_state.is_active = user_data.get("is_active", False)
-                st.session_state.user_email = user_data.get("email", "")
-                st.session_state.access_code = user_data.get("access_code", "")
-                if user_data["role"] == "employee":
-                    st.session_state.employee_user = {"name": user_data["username"]}
-            else:
-                # 🛑 Token is invalid or expired — force logout
-                st.session_state.clear()
-                st_javascript("""localStorage.removeItem("login_token");""")
-        else:
-            st.session_state.login_failed = True
-
-
-    # === Restore Login ===
+# === Session Validation === # this stops you when you are logged out
 if not st.session_state.get("logged_in"):
-    restore_login_from_jwt()
-
-
-
-# 1. Grab your JWT from localStorage
-token = st.session_state.get("token")
-if token is None:
-    token = st_javascript("localStorage.getItem('login_token')")
-
-# 2. Try to decode it and set logged_in
-if token:
-    try:
-        # replace SECRET and algorithms with your actual values
-        payload = jwt.decode(token,jwt_SECRET_KEY,ALGORITHM  )
-        st.session_state["token"] = token
-        st.session_state["logged_in"] = True
-    except jwt.ExpiredSignatureError:
-        st.session_state["logged_in"] = False
-else:
-    st.session_state["logged_in"] = False
-
-
-if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
     st.markdown("""
         <div style="
             background-color: #ffe6e6;
             border-left: 6px solid #ff4d4d;
             padding: 16px;
-            border-radius: 6px;
+            border-radius: 8px;
             font-family: 'Segoe UI', sans-serif;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-top: 20px;
         ">
             <h3 style="color: #cc0000; margin: 0 0 10px;">❌ Session Expired</h3>
             <p style="color: #333; font-size: 16px; margin: 0;">
-                Your session has expired. Redirecting to login page..
+                Your session has expired.  Redirecting to login page....
             </p>
         </div>
     """, unsafe_allow_html=True)
     time.sleep(3)
-    switch_page("Dashboard")
+    switch_page("Dashboard")  # Replace "Login" with your actual login page name
+   
+    st.stop()
+   
+    
+
+
+if not st.session_state.get("logged_in"):
+    st.stop()  # this stop the app from running after login expires
+
+user_id = st.session_state.get("user_id")
+if not user_id:
+    st.error("❌ No valid user ID in session. Please log in again.")
+    st.stop()
+
+try:
+    user_id = int(user_id)
+except Exception:
+    st.error("❌ User ID is not a valid integer.")
+    st.stop()
+
+
+
+
+
+# this shows the logged user info
+if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
+    st.warning("Please log in first.")
+    st.stop()
 
 
 
