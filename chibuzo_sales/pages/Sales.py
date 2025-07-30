@@ -731,8 +731,19 @@ with tab1:
             if not customer_name:
                 st.error("❌ Please enter customer name.")
                 st.stop()
-
+            # ✅ Fetch tenant_name from Supabase
+            
             tenant_name = "My Company" 
+            md_user_id = st.session_state.get("user_id")
+            # ✅ Check if MD user_id exists
+            user_id = md_user_id  # For clarity
+            if not user_id:
+                st.error("❌ Unable to create proforma. No MD user ID found.")
+                st.stop()
+            if md_user_id:
+                tenant_info = supabase.table("users").select("tenant_name").eq("user_id", md_user_id).single().execute()
+                if tenant_info.data:
+                    tenant_name = tenant_info.data.get("tenant_name", tenant_name)
             expiry_date = date.today() + timedelta(days=7)
             proforma_data = {
             
@@ -1355,7 +1366,7 @@ with tab1:
                            
                            # ✅ Send email via Brevo
                             response = api_instance.send_transac_email(email_data)
-                            st.success(f"✅ Receipt sent successfully to {customer_email}.")
+                            st.success(f"✅ Receipt sent successfully to {customer_email}")
                             
                           
                         else:
