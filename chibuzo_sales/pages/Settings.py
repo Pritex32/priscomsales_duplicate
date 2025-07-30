@@ -465,7 +465,7 @@ elif choice == "Change Access Code":
             new_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))  # Example: AB12CD34
             supabase.table("users").update({"access_code": new_code}).eq("user_id", user_id).execute()
             st.success(f"✅ New Access Code Generated: {new_code}")
-            st.info("Share this code with employees so they can log in.")
+            time.sleep(5)
             st.rerun()
 
         st.divider()
