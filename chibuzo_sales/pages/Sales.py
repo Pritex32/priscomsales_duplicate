@@ -723,7 +723,7 @@ with tab1:
         due_date = st.date_input("Due Date", value=date.today(), key="due_date") if payment_status != "paid" else None
         invoice_number = st.text_input("Invoice Number (optional)", key="invoice_number")
         notes = st.text_area("Notes", key="notes")
-        if st.button("💾 Save Proforma"):
+        if st.button("💾 Generate Preinvoice"):
             st.warning('Preinvoice expires after 7 days')
             if not valid_selected_items:
                 st.error("❌ Please select items.")
