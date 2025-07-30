@@ -1044,6 +1044,7 @@ max_size_mb = 10
 
 with tab1:
     st.markdown("___")
+    st.subheader('Customize Receipt')
 
     # ✅ Check if already verified in session
     if not st.session_state.get("access_verified", False):
@@ -1061,7 +1062,7 @@ with tab1:
 
     else:
         # ✅ Expander for logo and account details
-        st.subheader('Customize Receipt')
+       
         with st.expander("**📄 Customize your Receipt**"):
             col1, col2 = st.columns(2)
 
