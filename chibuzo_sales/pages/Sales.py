@@ -1362,7 +1362,7 @@ with tab1:
                             st.warning("⚠ Please enter a valid email address.")
 
                     except Exception as e:
-                        st.error(f"❌ Error sending email: {str(e)}")
+                        st.error(f"❌ Error sending email.}")
 
             else:
                 st.info("ℹ Generate a receipt first before sending an email.")
