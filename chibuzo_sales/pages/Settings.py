@@ -14,6 +14,8 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 import bcrypt
 import pandas as pd
 import hashlib
+import random
+import string
 
 from streamlit_option_menu import option_menu
 from datetime import datetime,date,timedelta
