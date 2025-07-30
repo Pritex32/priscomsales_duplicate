@@ -40,6 +40,9 @@ from streamlit_javascript import st_javascript
 from io import BytesIO
 import urllib.request
 import base64
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
+from sib_api_v3_sdk.models import SendSmtpEmail
 
 
 
