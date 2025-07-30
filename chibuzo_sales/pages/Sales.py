@@ -1311,7 +1311,7 @@ with tab1:
                 if search_query:
                     filtered_data = search_transactions(search_query, sales_df, expenses_df, restock_df, payment_df)
 
-                    if not filtered_data.empty:
+                    if  filtered_data.empty:
                         st.warning("No transactions found matching your search.")
                 else:
                     st.info("Please enter a search term to begin.")
