@@ -418,7 +418,7 @@ if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in
 
 
 
-choice = st.radio("Select an Option", ["Settings",'Change Access Code,'"Change Password", "API Integration"])
+choice = st.radio("Select an Option", ["Settings",'Change Access Code',"Change Password", "API Integration"])
 
 
 
