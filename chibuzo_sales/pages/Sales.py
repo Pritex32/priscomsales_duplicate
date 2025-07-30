@@ -413,7 +413,7 @@ BREVO_API_KEY = os.getenv("BREVO_API_KEY")
 configuration = sib_api_v3_sdk.Configuration()
 configuration.api_key['api-key'] = os.getenv("BREVO_API_KEY")  # Store in .env or Streamlit secrets
 api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
-st.write("configuration.api_key['api-key']")
+st.write(configuration.api_key['api-key'])
 
 # -------- Helper Functions --------
 import tempfile
