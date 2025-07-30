@@ -1135,7 +1135,14 @@ with tab1:
                     st.success("✅ Company details saved.")
                     st.rerun()
 
-
+    company_data = supabase.table("users").select("tenant_name, logo_url, phone_number, address, account_number, bank_name").eq("user_id", user_id).single().execute().data
+    tenant_name = company_data.get("tenant_name", "My Company")
+    logo_url = company_data.get("logo_url", "")
+    phone_number = company_data.get("phone_number", "")
+    address = company_data.get("address", "")
+    account_number = company_data.get("account_number", "")
+    bank_name = company_data.get("bank_name", "")
+ 
     # 📦 Sales and Receipt Logic (outside expander)
     try:
         sales_result = supabase.table("sales_master_history").select("*").eq("user_id", user_id).order("sale_date", desc=True).limit(50).execute()
@@ -1206,7 +1213,7 @@ with tab1:
                     pdf.set_fill_color(*header_color)
                     pdf.set_text_color(255, 255, 255)  # White text
                     pdf.set_font("Arial", size=16)
-                    tenant_name = user_data.get("tenant_name", "My Company")
+                
                     pdf.set_font("Arial", 'B', 16)
                     pdf.cell(0, 12, f"{tenant_name} SALES RECEIPT", ln=True, align="C")
 
