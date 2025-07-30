@@ -418,7 +418,9 @@ if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in
 
 
 
-
+if "role" not in st.session_state or st.session_state.role != "md":
+        st.warning("🚫 You are not authorized to view this page.")
+        st.stop()
 
 choice = st.radio("Select an Option", ["Settings",'Change Access Code',"Change Password", "API Integration"])
 
@@ -487,9 +489,7 @@ elif choice == "Change Access Code":
 
 
 elif choice == "Change Password":
-    if "role" not in st.session_state or st.session_state.role != "md":
-        st.warning("🚫 You are not authorized to view this page.")
-        st.stop()
+    
     st.subheader("🔐 Change Your Password")
 
     with st.form("change_password_form"):
