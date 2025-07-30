@@ -477,7 +477,7 @@ elif choice == "Change Access Code":
             if new_manual_code.strip():
                 supabase.table("users").update({"access_code": new_manual_code.strip()}).eq("user_id", user_id).execute()
                 st.success(f"✅ Access Code changed to: {new_manual_code}")
-                st.info("Employees must use this new code to log in.")
+                time.sleep(4)
                 st.rerun()
             else:
                 st.warning("⚠ Please enter a valid access code.")
