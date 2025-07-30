@@ -1045,72 +1045,93 @@ max_size_mb = 10
 with tab1:
     st.markdown("___")
 
-       # ✅ Expander for logo and account details
-    col1, col2 = st.columns(2)
+    # ✅ Check if already verified in session
+    if not st.session_state.get("access_verified", False):
+        access_input = st.text_input("Enter Access Code", type="password")
+        if st.button("Verify Access Code"):
+            # ✅ Fetch access code from DB
+            user_data = supabase.table("users").select("access_code").eq("user_id", user_id).single().execute().data
 
-    with st.expander("**📄 Customize your Receipt**"):
-        col1, col2 = st.columns(2)
+            if user_data and user_data.get("access_code") == access_input.strip():
+                st.session_state["access_verified"] = True
+                st.success("✅ Access granted!")
+                st.rerun()
+            else:
+                st.error("❌ Invalid Access Code. Please try again.")
 
-        with col1:
-            # 👉 Fetch or create user settings
-            user_data = supabase.table("users").select("*").eq("user_id", user_id).single().execute().data
-            if not user_data:
-                supabase.table("users").insert({"user_id": user_id}).execute()
-                user_data = {"user_id": user_id, "account_number": "", "bank_name": "", "logo_url": "","phone_number": "",
-                    "address": "",'tenant_name':""}
+    else:
+        # ✅ Expander for logo and account details
+        with st.expander("**📄 Customize your Receipt**"):
+            col1, col2 = st.columns(2)
 
-            # ➕ Upload logo
-            st.markdown("##### 🖼 Upload Company Logo max 10mb (optional)")
-            logo_file = st.file_uploader("Upload PNG or JPG logo", type=["png", "jpg", "jpeg"])
-            upload_logo = st.button("Upload Logo")
+            with col1:
+                # 👉 Fetch or create user settings
+                user_data = supabase.table("users").select("*").eq("user_id", user_id).single().execute().data
+                if not user_data:
+                    supabase.table("users").insert({"user_id": user_id}).execute()
+                    user_data = {
+                        "user_id": user_id,
+                        "account_number": "",
+                        "bank_name": "",
+                        "logo_url": "",
+                        "phone_number": "",
+                        "address": "",
+                        "tenant_name": ""
+                    }
 
-            if upload_logo:
-                if not logo_file:
-                    st.warning("⚠️ Please select a logo file first.")
-                    st.stop()
-                else:
-                    file_size_mb = logo_file.size / (1024 * 1024)
+                # ➕ Upload logo
+                st.markdown("##### 🖼 Upload Company Logo max 10mb (optional)")
+                logo_file = st.file_uploader("Upload PNG or JPG logo", type=["png", "jpg", "jpeg"])
+                upload_logo = st.button("Upload Logo")
 
-                    if file_size_mb > max_size_mb:
-                        st.error(f"❌ File too large! Please upload a file under {max_size_mb}MB.")
+                if upload_logo:
+                    if not logo_file:
+                        st.warning("⚠️ Please select a logo file first.")
                         st.stop()
                     else:
-                        image = Image.open(logo_file)
-                        temp_png = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
-                        image.save(temp_png, format="PNG")
-                        temp_png.close()
+                        file_size_mb = logo_file.size / (1024 * 1024)
 
-                        unique_id = str(uuid.uuid4())
-                        file_path = f"{user_id}/logo_{unique_id}.png"
+                        if file_size_mb > max_size_mb:
+                            st.error(f"❌ File too large! Please upload a file under {max_size_mb}MB.")
+                            st.stop()
+                        else:
+                            image = Image.open(logo_file)
+                            temp_png = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+                            image.save(temp_png, format="PNG")
+                            temp_png.close()
 
-                        with open(temp_png.name, "rb") as f:
-                            supabase.storage.from_("logos").upload(file_path, f, {"content-type": "image/png"})
+                            unique_id = str(uuid.uuid4())
+                            file_path = f"{user_id}/logo_{unique_id}.png"
 
-                        logo_url = f"https://ecsrlqvifparesxakokl.supabase.co/storage/v1/object/public/logos/{file_path}"
+                            with open(temp_png.name, "rb") as f:
+                                supabase.storage.from_("logos").upload(file_path, f, {"content-type": "image/png"})
 
-                        supabase.table("users").update({"logo_url": logo_url}).eq("user_id", user_id).execute()
-                        st.success("✅ Logo uploaded successfully.")
-            else:
-                logo_url = user_data.get("logo_url", "")
+                            logo_url = f"https://ecsrlqvifparesxakokl.supabase.co/storage/v1/object/public/logos/{file_path}"
 
-            # ➕ Account details
-            account_number = st.text_input("Company Account Number", value=user_data.get("account_number", ""))
-            bank_name = st.text_input("Bank Name", value=user_data.get("bank_name", ""))
-            phone_number = st.text_input("Company Phone Number", value=user_data.get("phone_number", ""))
-            tenant_name = st.text_input("Business Name", value=user_data.get("tenant_name", ""))
-            address = st.text_area("Company Address", value=user_data.get("address", ""))
+                            supabase.table("users").update({"logo_url": logo_url}).eq("user_id", user_id).execute()
+                            st.success("✅ Logo uploaded successfully.")
+                else:
+                    logo_url = user_data.get("logo_url", "")
 
-            # Save account info if changed
-            if st.button("💾 Save Account Details"):
-                supabase.table("users").update({
+
+                # ➕ Account details
+                account_number = st.text_input("Company Account Number", value=user_data.get("account_number", ""))
+                bank_name = st.text_input("Bank Name", value=user_data.get("bank_name", ""))
+                phone_number = st.text_input("Company Phone Number", value=user_data.get("phone_number", ""))
+                tenant_name = st.text_input("Business Name", value=user_data.get("tenant_name", ""))
+                address = st.text_area("Company Address", value=user_data.get("address", ""))
+
+                # Save account info if changed
+                if st.button("💾 Save Account Details"):
+                    supabase.table("users").update({
                     "account_number": account_number,
                     "bank_name": bank_name,
                     "tenant_name": tenant_name,
                     "phone_number": phone_number,
                     "address": address
                 }).eq("user_id", user_id).execute()
-                st.success("✅ Company details saved.")
-                st.rerun()
+                    st.success("✅ Company details saved.")
+                    st.rerun()
 
 
     # 📦 Sales and Receipt Logic (outside expander)
