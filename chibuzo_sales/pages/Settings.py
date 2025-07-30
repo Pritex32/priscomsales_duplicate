@@ -418,7 +418,7 @@ if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in
 
 
 
-choice = st.radio("Select an Option", ["Settings","Change Password", "API Integration"])
+choice = st.radio("Select an Option", ["Settings",'Change Access Code,'"Change Password", "API Integration"])
 
 
 
@@ -441,6 +441,44 @@ if choice == "Settings":
 </div>
 """, unsafe_allow_html=True)
 
+elif choice == "Change Access Code":
+    st.title("🔐 Change Access Code")
+
+    # ✅ Fetch MD user data
+    user_data = supabase.table("users").select("access_code").eq("user_id", user_id).single().execute().data
+
+    if not user_data:
+        st.error("❌ Unable to load MD details. Please log in as MD.")
+    else:
+        current_access_code = user_data.get("access_code", "")
+
+        # ✅ Show current access code
+        st.markdown(f"**Current Access Code:** `{current_access_code if current_access_code else 'Not Set'}`")
+
+        st.divider()
+
+        # ✅ Option 1: Generate a new random access code
+        st.subheader("Generate a New Access Code")
+        if st.button("🔑 Generate New Access Code"):
+            new_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))  # Example: AB12CD34
+            supabase.table("users").update({"access_code": new_code}).eq("user_id", user_id).execute()
+            st.success(f"✅ New Access Code Generated: {new_code}")
+            st.info("Share this code with employees so they can log in.")
+            st.rerun()
+
+        st.divider()
+
+        # ✅ Option 2: Set a Custom Access Code
+        st.subheader("Set a Custom Access Code")
+        new_manual_code = st.text_input("Enter New Access Code")
+        if st.button("💾 Save Custom Access Code"):
+            if new_manual_code.strip():
+                supabase.table("users").update({"access_code": new_manual_code.strip()}).eq("user_id", user_id).execute()
+                st.success(f"✅ Access Code changed to: {new_manual_code}")
+                st.info("Employees must use this new code to log in.")
+                st.rerun()
+            else:
+                st.warning("⚠ Please enter a valid access code.")
 
 
 
