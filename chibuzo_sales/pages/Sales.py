@@ -408,6 +408,11 @@ if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in
     show_plan_status()
 
 
+# ✅ Initialize Brevo API client
+configuration = sib_api_v3_sdk.Configuration()
+configuration.api_key['api-key'] = os.getenv("BREVO_API_KEY")  # Store in .env or Streamlit secrets
+api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
+
 
 # -------- Helper Functions --------
 import tempfile
@@ -1330,38 +1335,28 @@ with tab1:
                             customer_name = selected_sale.get('customer_name', 'Customer')
                             sale_id = selected_sale.get('sale_id', 'N/A')
                             total_amount = selected_sale.get('total_amount', 0)
+                            tenant_name = st.session_state.get('tenant_name', 'Priscomac Sales')
 
                             # ✅ Compose email content
-                            message = Mail(
-                                from_email="priscomac@gmail.com",  # ✅ Verified sender
-                                to_emails=customer_email,
+                            email_data = SendSmtpEmail(
+                                sender={"name": "PriscomSales", "email": "oluomachiukanwa32@gmail.com"},
+                                to=[{"email": customer_email}],
                                 subject=f"Receipt for Sale #{sale_id}",
                                 html_content=f"""
                                     <p>Dear {customer_name},</p>
-                                    <p>Thank you for your purchase! Please find your receipt attached below.</p>
-                                    <p><b>Total:</b> ₦{total_amount:,.2f}</p>
-                                    <p>Best regards,<br>{tenant_name} Team</p>
-                                """
-                            )
+                                   <p>Thank you for your purchase! Please find your receipt attached below.</p>
+                                   <p><b>Total:</b> ₦{total_amount:,.2f}</p>
+                                   <p>Best regards,<br>{tenant_name} Team</p> """,
+                                attachment=[{
+                                "content": encoded_pdf,
+                                "name": f"receipt_{sale_id}.pdf"}])
 
-                            # ✅ Attach PDF to email
-                            attachment = Attachment()
-                            attachment.file_content = encoded_pdf
-                            attachment.file_type = "application/pdf"
-                            attachment.file_name = f"receipt_{sale_id}.pdf"
-                            attachment.disposition = "attachment"
-                            message.attachment = attachment
-
-                            # ✅ Send email using SendGrid
-                            sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-                            response = sg.send(message)
-
-                            # ✅ Check response
-                            if response.status_code in [200, 202]:
-                                st.success(f"✅ Receipt sent successfully to {customer_email}.")
-                            else:
-                                st.error(f"❌ Failed to send email. Status Code: {response.status_code}")
-
+                           
+                           # ✅ Send email via Brevo
+                            response = api_instance.send_transac_email(email_data)
+                            st.success(f"✅ Receipt sent successfully to {customer_email}.")
+                            
+                          
                         else:
                             st.warning("⚠ Please enter a valid email address.")
 
