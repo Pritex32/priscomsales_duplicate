@@ -1061,6 +1061,7 @@ with tab1:
 
     else:
         # ✅ Expander for logo and account details
+        st.subheader('Customize Receipt')
         with st.expander("**📄 Customize your Receipt**"):
             col1, col2 = st.columns(2)
 
