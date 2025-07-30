@@ -1134,7 +1134,7 @@ with tab1:
                 }).eq("user_id", user_id).execute()
                     st.success("✅ Company details saved.")
                     st.rerun()
-
+    st.subheader('Generate receipts')
     company_data = supabase.table("users").select("tenant_name, logo_url, phone_number, address, account_number, bank_name").eq("user_id", user_id).single().execute().data
     tenant_name = company_data.get("tenant_name", "My Company")
     logo_url = company_data.get("logo_url", "")
