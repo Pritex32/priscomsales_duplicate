@@ -409,10 +409,11 @@ if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in
 
 
 # ✅ Initialize Brevo API client
+BREVO_API_KEY = os.getenv("BREVO_API_KEY")
 configuration = sib_api_v3_sdk.Configuration()
 configuration.api_key['api-key'] = os.getenv("BREVO_API_KEY")  # Store in .env or Streamlit secrets
 api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
-
+st.write("configuration.api_key['api-key']")
 
 # -------- Helper Functions --------
 import tempfile
@@ -1339,7 +1340,7 @@ with tab1:
 
                             # ✅ Compose email content
                             email_data = SendSmtpEmail(
-                                sender={"name": "PriscomSales", "email": "oluomachiukanwa32@gmail.com"},
+                                sender={"name": "Priscomac", "email": "oluomachiukanwa32@gmail.com"},
                                 to=[{"email": customer_email}],
                                 subject=f"Receipt for Sale #{sale_id}",
                                 html_content=f"""
