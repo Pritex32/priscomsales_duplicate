@@ -1100,12 +1100,15 @@ elif choice == 'Login':
                         if "user_id" in st.session_state:
                             success = login_employee(email, password)
                             md_user_id = st.session_state.get("user_id")
-                            md_info = supabase.table("users").select("access_code").eq("user_id", md_user_id).single().execute()
-                            if md_info.data:
-                                st.session_state["access_code"] = md_info.data.get("access_code")
+                            if md_user_id is None:
+                                st.warning("⚠️ No MD user_id found in session. Skipping MD access code fetch.")
                             else:
-                                st.error("❌ MD must be logged in first. No user_id (tenant) found.")
-                                success = False
+                                md_info = supabase.table("users").select("access_code").eq("user_id", md_user_id).single().execute()
+                                if md_info.data:
+                                    st.session_state["access_code"] = md_info.data.get("access_code")
+                                else:
+                                    st.error("❌ No MD session found. Please log in as MD first.")
+                                    success = False
 
                     # ✅ After successful login
                     if success:
@@ -1136,13 +1139,6 @@ elif choice == 'Login':
                       
         if st.session_state.get("employee_logged_in") or st.session_state.get("logged_in"):
             sync_plan_from_db(user_id)                
-
-        # ❗ Login validation warnings
-        if login_type == "MD" and not st.session_state.get("logged_in"):
-            st.error("❌ You must be logged in as an MD to access this page.")
-
-        if login_type == "Employee" and not st.session_state.get("employee_logged_in"):
-            st.error("❌ You must be logged in as an Employee to access this page.")
 
 
 st.markdown("___")
