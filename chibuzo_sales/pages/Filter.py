@@ -622,6 +622,11 @@ def download_button(df, filename):
 # ========================================
 if table_option == "Sales" and not sales_df.empty:
     st.subheader("🔍 Filter Sales Data")
+    # Generate unique options dynamically
+    customer_names = sales_df['customer_name'].dropna().unique().tolist()
+    employee_names = sales_df['employee_name'].dropna().unique().tolist()
+    customer_phones = sales_df['customer_phone'].dropna().unique().tolist()
+    item_names = sales_df['item_name'].dropna().unique().tolist()
 
     sales_filter_option = st.selectbox(
         "Select a Filter for Sales",
@@ -631,24 +636,24 @@ if table_option == "Sales" and not sales_df.empty:
     filtered_df = sales_df.copy()
 
     if sales_filter_option == "Customer Name":
-        name = st.text_input("Enter Customer Name")
-        if name:
-            filtered_df = filtered_df[filtered_df['customer_name'].str.contains(name, case=False, na=False)]
+        selected_customers = st.multiselect("Select Customer(s)", customer_names)
+        if selected_customers:
+            filtered_df = filtered_df[filtered_df['customer_name'].isin(selected_customers)]
 
     elif sales_filter_option == "Employee Name":
-        employee = st.text_input("Enter Employee Name")
-        if employee:
-            filtered_df = filtered_df[filtered_df['employee_name'].str.contains(employee, case=False, na=False)]
+        selected_employees = st.multiselect("Select Employee(s)", employee_names)
+        if selected_employees:
+            filtered_df = filtered_df[filtered_df['employee_name'].isin(selected_employees)]
 
     elif sales_filter_option == "Customer Phone":
-        phone = st.text_input("Enter Customer Phone")
-        if phone:
-            filtered_df = filtered_df[filtered_df['customer_phone'].str.contains(phone, case=False, na=False)]
+        selected_phones = st.multiselect("Select Phone(s)", customer_phones)
+        if selected_phones:
+            filtered_df = filtered_df[filtered_df['customer_phone'].isin(selected_phones)]
 
     elif sales_filter_option == "Item Name":
-        item = st.text_input("Enter Item Name")
-        if item:
-            filtered_df = filtered_df[filtered_df['item_name'].str.contains(item, case=False, na=False)]
+        selected_items = st.multiselect("Select Item(s)", item_names)
+        if selected_items:
+            filtered_df = filtered_df[filtered_df['item_name'].isin(selected_items)]
 
     elif sales_filter_option == "Sale Date Range":
         today = datetime.date.today()
