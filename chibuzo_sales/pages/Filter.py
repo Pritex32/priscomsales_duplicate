@@ -734,6 +734,7 @@ elif table_option == "Restock" and not restock_df.empty:
 # ========================================
 elif table_option == "Expenses" and not expenses_df.empty:
     st.subheader("🔍 Filter Expenses Data")
+
     vendor_names = expenses_df['vendor_name'].dropna().unique().tolist()
     expense_filter_option = st.selectbox(
         "Select a Filter for Expenses",
@@ -747,6 +748,7 @@ elif table_option == "Expenses" and not expenses_df.empty:
         if selected_vendors:
             filtered_df = filtered_df[filtered_df['vendor_name'].isin(selected_vendors)]
 
+    # ✅ Date Range LAST
     expenses_df['expense_date'] = pd.to_datetime(expenses_df['expense_date'], errors='coerce')
 
     if expenses_df['expense_date'].isnull().all():
@@ -765,7 +767,7 @@ elif table_option == "Expenses" and not expenses_df.empty:
             filtered_df = filtered_df[
                 (filtered_df['expense_date'] >= pd.to_datetime(start_date)) &
                 (filtered_df['expense_date'] <= pd.to_datetime(end_date))
-                ]
+            ]
 
     st.write("### Filtered Expenses Data")
     if not filtered_df.empty:
