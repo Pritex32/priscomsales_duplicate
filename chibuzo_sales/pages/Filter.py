@@ -654,32 +654,33 @@ if table_option == "Sales" and not sales_df.empty:
         selected_items = st.multiselect("Select Item(s)", item_names)
         if selected_items:
             filtered_df = filtered_df[filtered_df['item_name'].isin(selected_items)]
-
+    # ✅ Date range LAST with empty check
+    sales_df['sale_date'] = pd.to_datetime(sales_df['sale_date'], errors='coerce')
     if sales_df['sale_date'].isnull().all():
-            st.warning("⚠ No valid dates available in Sales data.")
+        st.warning("⚠ No valid dates available in Sales data.")
+    else:
+        min_date = sales_df['sale_date'].min().date()
+        max_date = sales_df['sale_date'].max().date()
+
+        start_date = st.date_input("Start Date", min_date)
+        end_date = st.date_input("End Date", max_date)
+
+        if start_date > end_date:
+            st.error("⚠ Start date cannot be after end date")
         else:
-            min_date = sales_df['sale_date'].min().date()
-            max_date = sales_df['sale_date'].max().date()
-
-            start_date = st.date_input("Start Date", min_date)
-            end_date = st.date_input("End Date", max_date)
-
-            if start_date > end_date:
-                st.error("⚠ Start date cannot be after end date")
-            else:
-                filtered_df['sale_date'] = pd.to_datetime(filtered_df['sale_date'], errors='coerce')
-                filtered_df = filtered_df[
+            filtered_df['sale_date'] = pd.to_datetime(filtered_df['sale_date'], errors='coerce')
+            filtered_df = filtered_df[
                     (filtered_df['sale_date'] >= pd.to_datetime(start_date)) &
                     (filtered_df['sale_date'] <= pd.to_datetime(end_date))
                 ]
 
             # ✅ Show filtered results
-            st.write("### Filtered Sales Data")
-            if not filtered_df.empty:
-                st.dataframe(filtered_df.tail(10))
-                download_button(filtered_df, "filtered_sales.xlsx")
-            else:
-                st.warning("No records found for the selected filters.")
+        st.write("### Filtered Sales Data")
+        if not filtered_df.empty:
+            st.dataframe(filtered_df.tail(10))
+            download_button(filtered_df, "filtered_sales.xlsx")
+        else:
+            st.warning("No records found for the selected filters.")
 else:
     st.warning("⚠ Sales table is empty.")
     
