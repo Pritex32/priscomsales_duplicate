@@ -727,7 +727,7 @@ elif table_option == "Restock" and not restock_df.empty:
         st.dataframe(filtered_df.tail(10))
         download_button(filtered_df, "filtered_restock.xlsx")
     else:
-        st.warning("No records found for the selected filters."))
+        st.warning("No records found for the selected filters.")
 
 # ========================================
 # ✅ EXPENSE FILTERS
