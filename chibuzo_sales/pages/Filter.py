@@ -517,7 +517,7 @@ def fetch_sales_data(user_id):
     else:
         st.info("No sales data found or an error occurred.")
         return pd.DataFrame()
-
+        
 @st.cache_data(ttl=7200)
 def fetch_expenses_master_data(user_id):
     response = supabase.table("expenses_master").select("*").eq("user_id", user_id).execute()
@@ -525,10 +525,11 @@ def fetch_expenses_master_data(user_id):
     
     expenses_df = pd.DataFrame(data)
     
-    if not expenses_df.empty:
-        return expenses_df
-    else:
+    if expenses_df.empty:
         st.info("No data found or an error occurred.")
+    
+    return expenses_df  # ✅ Always return a DataFrame
+
 
 # Fetch and display the payment data
 @st.cache_data(ttl=7200) # cache data for 2 hrs
