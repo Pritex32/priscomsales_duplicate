@@ -630,7 +630,7 @@ if table_option == "Sales" and not sales_df.empty:
 
     sales_filter_option = st.selectbox(
         "Select a Filter for Sales",
-        ["None", "Customer Name", "Employee Name", "Customer Phone", "Item Name", "Sale Date Range"]
+        ["None", "Customer Name", "Employee Name", "Customer Phone", "Item Name"]
     )
 
     filtered_df = sales_df.copy()
@@ -655,31 +655,40 @@ if table_option == "Sales" and not sales_df.empty:
         if selected_items:
             filtered_df = filtered_df[filtered_df['item_name'].isin(selected_items)]
 
-    elif sales_filter_option == "Sale Date Range":
-        today = datetime.date.today()
-        start_date = st.date_input("Start Date", today)
-        end_date = st.date_input("End Date", today)
-
-        if start_date > end_date:
-            st.error("⚠ Start date cannot be after end date")
+    if sales_df['sale_date'].isnull().all():
+            st.warning("⚠ No valid dates available in Sales data.")
         else:
-            # Ensure date column is in datetime format
-            filtered_df['sale_date'] = pd.to_datetime(filtered_df['sale_date'], errors='coerce')
-            filtered_df = filtered_df[
-                (filtered_df['sale_date'] >= pd.to_datetime(start_date)) &
-                (filtered_df['sale_date'] <= pd.to_datetime(end_date))
-            ]
+            min_date = sales_df['sale_date'].min().date()
+            max_date = sales_df['sale_date'].max().date()
 
-    st.write("### Filtered Sales Data")
-    st.dataframe(filtered_df.tail(10))
-    download_button(filtered_df, "filtered_sales.xlsx")
+            start_date = st.date_input("Start Date", min_date)
+            end_date = st.date_input("End Date", max_date)
 
+            if start_date > end_date:
+                st.error("⚠ Start date cannot be after end date")
+            else:
+                filtered_df['sale_date'] = pd.to_datetime(filtered_df['sale_date'], errors='coerce')
+                filtered_df = filtered_df[
+                    (filtered_df['sale_date'] >= pd.to_datetime(start_date)) &
+                    (filtered_df['sale_date'] <= pd.to_datetime(end_date))
+                ]
+
+            # ✅ Show filtered results
+            st.write("### Filtered Sales Data")
+            if not filtered_df.empty:
+                st.dataframe(filtered_df.tail(10))
+                download_button(filtered_df, "filtered_sales.xlsx")
+            else:
+                st.warning("No records found for the selected filters.")
+else:
+    st.warning("⚠ Sales table is empty.")
+    
 # ========================================
 # ✅ RESTOCK FILTERS
 # ========================================
 elif table_option == "Restock" and not restock_df.empty:
     st.subheader("🔍 Filter Restock Data")
-
+    restock_items = restock_df['item_name'].dropna().unique().tolist()
     restock_filter_option = st.selectbox(
         "Select a Filter for Restock",
         ["None", "Item Name", "Restock Date Range"]
@@ -688,9 +697,9 @@ elif table_option == "Restock" and not restock_df.empty:
     filtered_df = restock_df.copy()
 
     if restock_filter_option == "Item Name":
-        item = st.text_input("Enter Item Name")
-        if item:
-            filtered_df = filtered_df[filtered_df['item_name'].str.contains(item, case=False, na=False)]
+        selected_items = st.multiselect("Select Item(s)", restock_items)
+        if selected_items:
+            filtered_df = filtered_df[filtered_df['item_name'].isin(selected_items)]
 
     elif restock_filter_option == "Restock Date Range":
         today = datetime.date.today()
