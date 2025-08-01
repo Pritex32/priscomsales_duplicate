@@ -780,6 +780,7 @@ elif table_option == "Expenses" and not expenses_df.empty:
 # ========================================
 elif table_option == "Payments" and not payment_df.empty:
     st.subheader("🔍 Filter Payments Data")
+
     payment_methods = payment_df['payment_method'].dropna().unique().tolist()
     payment_filter_option = st.selectbox(
         "Select a Filter for Payments",
@@ -788,8 +789,7 @@ elif table_option == "Payments" and not payment_df.empty:
 
     filtered_df = payment_df.copy()
 
-
-    elif payment_filter_option == "Amount":
+    if payment_filter_option == "Amount":
         amount = st.number_input("Enter Amount", min_value=0.0, step=0.01)
         filter_type = st.radio("Filter Type", ["Equal To", "Greater Than or Equal To"])
         if amount > 0:
@@ -802,6 +802,7 @@ elif table_option == "Payments" and not payment_df.empty:
         selected_methods = st.multiselect("Select Payment Method(s)", payment_methods)
         if selected_methods:
             filtered_df = filtered_df[filtered_df['payment_method'].isin(selected_methods)]
+
     # ✅ Date Range LAST
     payment_df['payment_date'] = pd.to_datetime(payment_df['payment_date'], errors='coerce')
 
@@ -819,9 +820,9 @@ elif table_option == "Payments" and not payment_df.empty:
         else:
             filtered_df['payment_date'] = pd.to_datetime(filtered_df['payment_date'], errors='coerce')
             filtered_df = filtered_df[
-                    (filtered_df['payment_date'] >= pd.to_datetime(start_date)) &
-                    (filtered_df['payment_date'] <= pd.to_datetime(end_date))
-                ]
+                (filtered_df['payment_date'] >= pd.to_datetime(start_date)) &
+                (filtered_df['payment_date'] <= pd.to_datetime(end_date))
+            ]
 
     st.write("### Filtered Payments Data")
     if not filtered_df.empty:
@@ -829,7 +830,7 @@ elif table_option == "Payments" and not payment_df.empty:
         download_button(filtered_df, "filtered_payments.xlsx")
     else:
         st.warning("No records found for the selected filters.")
-   
+
 
     
 else:
