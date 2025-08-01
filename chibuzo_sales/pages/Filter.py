@@ -675,12 +675,12 @@ if table_option == "Sales" and not sales_df.empty:
                 ]
 
             # ✅ Show filtered results
-        st.write("### Filtered Sales Data")
-        if not filtered_df.empty:
-            st.dataframe(filtered_df.tail(10))
-            download_button(filtered_df, "filtered_sales.xlsx")
-        else:
-            st.warning("No records found for the selected filters.")
+    st.write("### Filtered Sales Data")
+    if not filtered_df.empty:
+        st.dataframe(filtered_df.tail(10))
+        download_button(filtered_df, "filtered_sales.xlsx")
+    else:
+        st.warning("No records found for the selected filters.")
 
     
 # ========================================
@@ -691,7 +691,7 @@ elif table_option == "Restock" and not restock_df.empty:
     restock_items = restock_df['item_name'].dropna().unique().tolist()
     restock_filter_option = st.selectbox(
         "Select a Filter for Restock",
-        ["None", "Item Name", "Restock Date Range"]
+        ["None", "Item Name"]
     )
 
     filtered_df = restock_df.copy()
@@ -701,46 +701,62 @@ elif table_option == "Restock" and not restock_df.empty:
         if selected_items:
             filtered_df = filtered_df[filtered_df['item_name'].isin(selected_items)]
 
-    elif restock_filter_option == "Restock Date Range":
-        today = datetime.date.today()
-        start_date = st.date_input("Start Date", today)
-        end_date = st.date_input("End Date", today)
+     # ✅ Date Range LAST
+    restock_df['purchase_date'] = pd.to_datetime(restock_df['purchase_date'], errors='coerce')
+
+    if restock_df['purchase_date'].isnull().all():
+        st.warning("⚠ No valid dates available in Restock data.")
+    else:
+        min_date = restock_df['purchase_date'].min().date()
+        max_date = restock_df['purchase_date'].max().date()
+
+        start_date = st.date_input("Start Date", min_date)
+        end_date = st.date_input("End Date", max_date)
 
         if start_date > end_date:
             st.error("⚠ Start date cannot be after end date")
         else:
             filtered_df['purchase_date'] = pd.to_datetime(filtered_df['purchase_date'], errors='coerce')
             filtered_df = filtered_df[
-                (filtered_df['purchase_date'] >= pd.to_datetime(start_date)) &
-                (filtered_df['purchase_date'] <= pd.to_datetime(end_date))
-            ]
+                    (filtered_df['purchase_date'] >= pd.to_datetime(start_date)) &
+                    (filtered_df['purchase_date'] <= pd.to_datetime(end_date))
+                ]
 
     st.write("### Filtered Restock Data")
-    st.dataframe(filtered_df.tail(10))
-    download_button(filtered_df, "filtered_restock.xlsx")
+    if not filtered_df.empty:
+        st.dataframe(filtered_df.tail(10))
+        download_button(filtered_df, "filtered_restock.xlsx")
+    else:
+        st.warning("No records found for the selected filters."))
 
 # ========================================
 # ✅ EXPENSE FILTERS
 # ========================================
 elif table_option == "Expenses" and not expenses_df.empty:
     st.subheader("🔍 Filter Expenses Data")
-
+    vendor_names = expenses_df['vendor_name'].dropna().unique().tolist()
     expense_filter_option = st.selectbox(
         "Select a Filter for Expenses",
-        ["None", "Vendor Name", "Expense Date Range"]
+        ["None", "Vendor Name"]
     )
 
     filtered_df = expenses_df.copy()
 
     if expense_filter_option == "Vendor Name":
-        vendor = st.text_input("Enter Vendor Name")
-        if vendor:
-            filtered_df = filtered_df[filtered_df['vendor_name'].str.contains(vendor, case=False, na=False)]
+        selected_vendors = st.multiselect("Select Vendor(s)", vendor_names)
+        if selected_vendors:
+            filtered_df = filtered_df[filtered_df['vendor_name'].isin(selected_vendors)]
 
-    elif expense_filter_option == "Expense Date Range":
-        today = datetime.date.today()
-        start_date = st.date_input("Start Date", today)
-        end_date = st.date_input("End Date", today)
+    expenses_df['expense_date'] = pd.to_datetime(expenses_df['expense_date'], errors='coerce')
+
+    if expenses_df['expense_date'].isnull().all():
+        st.warning("⚠ No valid dates available in Expenses data.")
+    else:
+        min_date = expenses_df['expense_date'].min().date()
+        max_date = expenses_df['expense_date'].max().date()
+
+        start_date = st.date_input("Start Date", min_date)
+        end_date = st.date_input("End Date", max_date)
 
         if start_date > end_date:
             st.error("⚠ Start date cannot be after end date")
@@ -749,38 +765,29 @@ elif table_option == "Expenses" and not expenses_df.empty:
             filtered_df = filtered_df[
                 (filtered_df['expense_date'] >= pd.to_datetime(start_date)) &
                 (filtered_df['expense_date'] <= pd.to_datetime(end_date))
-            ]
+                ]
 
     st.write("### Filtered Expenses Data")
-    st.dataframe(filtered_df.tail(10))
-    download_button(filtered_df, "filtered_expenses.xlsx")
+    if not filtered_df.empty:
+        st.dataframe(filtered_df.tail(10))
+        download_button(filtered_df, "filtered_expenses.xlsx")
+    else:
+        st.warning("No records found for the selected filters.")
 
+    
 # ========================================
 # ✅ PAYMENT FILTERS
 # ========================================
 elif table_option == "Payments" and not payment_df.empty:
     st.subheader("🔍 Filter Payments Data")
-
+    payment_methods = payment_df['payment_method'].dropna().unique().tolist()
     payment_filter_option = st.selectbox(
         "Select a Filter for Payments",
-        ["None", "Payment Date Range", "Amount", "Payment Method"]
+        ["None", "Amount", "Payment Method"]
     )
 
     filtered_df = payment_df.copy()
 
-    if payment_filter_option == "Payment Date Range":
-        today = datetime.date.today()
-        start_date = st.date_input("Start Date", today)
-        end_date = st.date_input("End Date", today)
-
-        if start_date > end_date:
-            st.error("⚠ Start date cannot be after end date")
-        else:
-            filtered_df['payment_date'] = pd.to_datetime(filtered_df['payment_date'], errors='coerce')
-            filtered_df = filtered_df[
-                (filtered_df['payment_date'] >= pd.to_datetime(start_date)) &
-                (filtered_df['payment_date'] <= pd.to_datetime(end_date))
-            ]
 
     elif payment_filter_option == "Amount":
         amount = st.number_input("Enter Amount", min_value=0.0, step=0.01)
@@ -791,16 +798,39 @@ elif table_option == "Payments" and not payment_df.empty:
             else:
                 filtered_df = filtered_df[filtered_df['amount'] >= amount]
 
-    elif payment_filter_option == "Payment Method":
-        methods = payment_df['payment_method'].dropna().unique().tolist()
-        method = st.selectbox("Select Payment Method", methods)
-        filtered_df = filtered_df[filtered_df['payment_method'] == method]
+    if payment_filter_option == "Payment Method":
+        selected_methods = st.multiselect("Select Payment Method(s)", payment_methods)
+        if selected_methods:
+            filtered_df = filtered_df[filtered_df['payment_method'].isin(selected_methods)]
+    # ✅ Date Range LAST
+    payment_df['payment_date'] = pd.to_datetime(payment_df['payment_date'], errors='coerce')
 
-    
+    if payment_df['payment_date'].isnull().all():
+        st.warning("⚠ No valid dates available in Payments data.")
+    else:
+        min_date = payment_df['payment_date'].min().date()
+        max_date = payment_df['payment_date'].max().date()
+
+        start_date = st.date_input("Start Date", min_date)
+        end_date = st.date_input("End Date", max_date)
+
+        if start_date > end_date:
+            st.error("⚠ Start date cannot be after end date")
+        else:
+            filtered_df['payment_date'] = pd.to_datetime(filtered_df['payment_date'], errors='coerce')
+            filtered_df = filtered_df[
+                    (filtered_df['payment_date'] >= pd.to_datetime(start_date)) &
+                    (filtered_df['payment_date'] <= pd.to_datetime(end_date))
+                ]
 
     st.write("### Filtered Payments Data")
-    st.dataframe(filtered_df.tail(10))
-    download_button(filtered_df, "filtered_payments.xlsx")
+    if not filtered_df.empty:
+        st.dataframe(filtered_df.tail(10))
+        download_button(filtered_df, "filtered_payments.xlsx")
+    else:
+        st.warning("No records found for the selected filters.")
+   
 
+    
 else:
     st.warning("No data available for the selected table.")
