@@ -681,8 +681,7 @@ if table_option == "Sales" and not sales_df.empty:
             download_button(filtered_df, "filtered_sales.xlsx")
         else:
             st.warning("No records found for the selected filters.")
-else:
-    st.warning("⚠ Sales table is empty.")
+
     
 # ========================================
 # ✅ RESTOCK FILTERS
