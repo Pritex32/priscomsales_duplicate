@@ -798,7 +798,7 @@ elif table_option == "Payments" and not payment_df.empty:
             else:
                 filtered_df = filtered_df[filtered_df['amount'] >= amount]
 
-    if payment_filter_option == "Payment Method":
+    elif payment_filter_option == "Payment Method":
         selected_methods = st.multiselect("Select Payment Method(s)", payment_methods)
         if selected_methods:
             filtered_df = filtered_df[filtered_df['payment_method'].isin(selected_methods)]
