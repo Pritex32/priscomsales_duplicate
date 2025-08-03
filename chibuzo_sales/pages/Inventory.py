@@ -1041,6 +1041,15 @@ if selected == 'Filter':
 
         # Show filtered table
         st.dataframe(filtered_df)
+        # ✅ Add download button (CSV)
+        if not filtered_df.empty:
+            csv_data = filtered_df.to_csv(index=False)
+            st.download_button(
+                label="📥 Download Filtered Data as CSV",
+                data=csv_data,
+                file_name="filtered_inventory.csv",
+                mime="text/csv"
+            )
 
     else:
         st.warning("⚠️ Inventory log table is empty.")
@@ -1202,6 +1211,7 @@ if selected =='Delete':
 # Allow duplicates for the same item across different days
 
 # ❌ But no duplicates for the same item on the same day
+
 
 
 
