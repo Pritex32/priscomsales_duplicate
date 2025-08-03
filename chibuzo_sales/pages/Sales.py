@@ -1807,6 +1807,134 @@ with tab3:
         if st.button("🔄 Refresh", use_container_width=True,key='payment_refersh'):
             st.cache_data.clear()
             st.rerun()
+
+
+
+
+with tab3:
+    st.subheader("📂 Pending Proforma Invoices")
+
+    # ✅ Fetch Proforma Invoices
+    proformas = supabase.table("proforma_invoices").select("*").eq("user_id", user_id).execute()
+
+    if proformas.data:
+        # --- Pagination Setup ---
+        items_per_page = 5
+        total_items = len(proformas.data)
+        total_pages = (total_items // items_per_page) + (1 if total_items % items_per_page > 0 else 0)
+
+        # ✅ Current page
+        page = st.number_input("Page", min_value=1, max_value=total_pages, value=1, step=1)
+
+        # ✅ Slice data for current page
+        start_idx = (page - 1) * items_per_page
+        end_idx = start_idx + items_per_page
+        page_data = proformas.data[start_idx:end_idx]
+
+        st.caption(f"Showing {start_idx + 1}-{min(end_idx, total_items)} of {total_items} proforma invoices.")
+
+        # ✅ Loop through paginated proforma data
+        for p in page_data:
+            st.markdown(f"""
+            **Customer:** {p['customer_name']}  
+            **Total:** ₦{p['grand_total']:,}  
+            **Expiry:** {p['expiry_date']}
+            """)
+
+            col1, col2, col3 = st.columns([1, 1, 1])
+
+            # ✅ View PDF
+            with col1:
+                if st.button(f"View PDF", key=f"view_{p['proforma_id']}"):
+                    pdf_bytes = create_proforma_pdf(p['tenant_name'], p)
+                    st.download_button(
+                        label="⬇️ Download",
+                        data=pdf_bytes,
+                        file_name=f"proforma_{p['proforma_id']}.pdf",
+                        mime="application/pdf",
+                        key=f"download_pdf_{p['proforma_id']}"
+                    )
+
+            # ✅ Convert to Invoice (Requires Upload)
+            with col2:
+                with st.expander(f"Convert Proforma #{p['proforma_id']} to Invoice"):
+                    st.write("Upload proof of payment to complete conversion:")
+
+                    # ✅ Check if invoice URL already exists in DB
+                    if p.get("invoice_url"):
+                        st.success("✅ Invoice already uploaded.")
+                        st.write(f"🔗 [View Uploaded Invoice]({p['invoice_url']})")
+                        convert_enabled = True
+                    else:
+                        uploaded_invoice = st.file_uploader(
+                            f"Upload Invoice for {p['customer_name']}",
+                            type=["pdf", "jpg", "jpeg", "png"],
+                            key=f"upload_invoice_{p['proforma_id']}"
+                        )
+
+                        if uploaded_invoice:
+                            if st.button(f"📤 Upload Invoice", key=f"upload_btn_{p['proforma_id']}"):
+                                # ✅ Upload file using custom function
+                                unique_id = str(uuid.uuid4())
+                                file_name = f"invoice_{unique_id}_{uploaded_invoice.name}"
+                                file_url = upload_invoice(uploaded_invoice, "salesinvoices", file_name, user_id)
+
+                                if file_url:
+                                    # ✅ Update the proforma record with invoice_url
+                                    supabase.table("proforma_invoices").update({
+                                        "invoice_url": file_url
+                                    }).eq("proforma_id", p['proforma_id']).execute()
+
+                                    st.success("✅ Invoice uploaded successfully!")
+                                    st.rerun()
+                                else:
+                                    st.error("❌ Failed to upload invoice.")
+
+                            convert_enabled = False
+                        else:
+                            st.info("Please upload an invoice file before converting.")
+                            convert_enabled = False
+
+                    # ✅ Convert Button (Enabled only after invoice exists)
+                    if convert_enabled:
+                        if st.button(f"✅ Confirm & Convert", key=f"confirm_{p['proforma_id']}"):
+                            # ✅ Move record to sales table
+                            sale_data = p.copy()
+                            sale_data["status"] = "paid"
+
+                            supabase.table("sales_master_log").insert(sale_data).execute()
+                            supabase.table("proforma_invoices").delete().eq("proforma_id", p['proforma_id']).execute()
+
+                            st.success(f"✅ Proforma #{p['proforma_id']} converted to Invoice successfully!")
+                            st.rerun()
+
+            # ✅ Delete Proforma
+            with col3:
+                if st.button(f"Delete", key=f"delete_{p['proforma_id']}"):
+                    supabase.table("proforma_invoices").delete().eq("proforma_id", p['proforma_id']).execute()
+                    st.warning("❌ Proforma deleted!")
+                    st.rerun()
+
+    else:
+        st.info("No pending proforma invoices.")
+
+
+
+
+
+
+                        
+
+            # ✅ Delete Proforma
+            with col3:
+                if st.button(f"Delete", key=f"delete_{p['id']}"):
+                    supabase.table("proforma_invoices").delete().eq("proforma_id", p['proforma_id']).execute()
+                    st.warning("❌ Proforma deleted!")
+                    st.rerun()
+    else:
+        st.info("No pending proforma invoices.")
+
+
     # Pagination setup
     transactions = get_pending_transactions(user_id)
     per_page = 5
@@ -2380,6 +2508,7 @@ with tab5:
             data=csv,
             file_name="sales_records.csv",
             mime="text/csv")
+
 
 
 
