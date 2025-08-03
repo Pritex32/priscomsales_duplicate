@@ -1945,6 +1945,33 @@ with tab3:
         st.info("No pending proforma invoices.")
 
 
+with tab3:
+    st.subheader("📂 All Proforma Invoices")
+
+    # ✅ Fetch all proformas for the user
+    proformas = supabase.table("proforma_invoices").select("*").eq("user_id", user_id).execute()
+
+    if proformas.data:
+        # ✅ Convert to DataFrame
+        proforma_df = pd.DataFrame(proformas.data)
+
+        # ✅ Display in Streamlit
+        with st.expander('**All Proforma Invoices**')
+            st.dataframe(proforma_df)
+
+        # ✅ Download as CSV
+        proforma_csv = proforma_df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="⬇️ Download Proforma Invoices (CSV)",
+            data=proforma_csv,
+            file_name="proforma_invoices.csv",
+            mime="text/csv"
+        )
+    else:
+        st.info("No proforma invoices found.")
+
+
+
 
 
 
@@ -2525,6 +2552,7 @@ with tab5:
             data=csv,
             file_name="sales_records.csv",
             mime="text/csv")
+
 
 
 
