@@ -115,7 +115,7 @@ def decode_jwt(token):
 def handle_session_expiration():
     st.session_state["logged_in"] = False
     st.session_state["session_expired"] = True
-    st.rerun()# or redirect logic
+    
     
 # === Restore Login from JWT ===
 def restore_login_from_jwt():
@@ -144,11 +144,6 @@ def restore_login_from_jwt():
                 st.session_state.clear()
                 st_javascript("""localStorage.removeItem("login_token");""")
                 st.session_state.login_failed = True
-
-
-# Run this first
-
-# === Session Validation ===
 
 
 restore_login_from_jwt()
@@ -2554,6 +2549,7 @@ with tab5:
             data=csv,
             file_name="sales_records.csv",
             mime="text/csv")
+
 
 
 
