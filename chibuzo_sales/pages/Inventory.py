@@ -988,6 +988,7 @@ if selected == 'Filter':
     if not df_logs.empty:
         with st.expander("🔍 Filter Inventory Log", expanded=True):
             df_logs["log_date"] = pd.to_datetime(df_logs["log_date"])
+            filter_mode = st.radio("Filter By:", ["Item Name", "Keyword"])
 
         # Get unique values for filters
             item_options = df_logs["item_name"].unique()
@@ -995,6 +996,13 @@ if selected == 'Filter':
             max_date = df_logs["log_date"].max().date()
             min_supply = int(df_logs["supplied_quantity"].min())
             max_supply = int(df_logs["supplied_quantity"].max())
+            # Inputs based on filter mode
+            selected_item = None
+            keyword = ""
+            if filter_mode == "Item Name":
+                selected_item = st.selectbox("Select an Item", options=item_options)
+            else:
+                keyword = st.text_input("Search by keyword (e.g., 'makeup')", "")
 
         # Sidebar filters
             selected_item = st.selectbox("Select an Item", options=item_options)
@@ -1020,6 +1028,13 @@ if selected == 'Filter':
             (df_logs["supplied_quantity"] >= supply_range[0]) &
             (df_logs["supplied_quantity"] <= supply_range[1])
         ]
+        # Apply selected filter mode
+        if filter_mode == "Item Name" and selected_item:
+            filtered_df = filtered_df[filtered_df["item_name"] == selected_item]
+        elif filter_mode == "Keyword" and keyword.strip():
+            filtered_df = filtered_df[
+            filtered_df["item_name"].str.contains(keyword, case=False, na=False)]
+
 
         # Show filtered table
         st.dataframe(filtered_df)
@@ -1184,4 +1199,5 @@ if selected =='Delete':
 # Allow duplicates for the same item across different days
 
 # ❌ But no duplicates for the same item on the same day
+
 
