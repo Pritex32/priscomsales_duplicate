@@ -33,89 +33,6 @@ import jwt
 import streamlit.components.v1 as components
 from streamlit_javascript import st_javascript
 
-jwt_SECRET_KEY = "4606"  # Use env vars in production
-ALGORITHM = "HS256"
-
-#Decode function
-def generate_jwt(user_id, username, role,plan="free", is_active=False, email=None,access_code=None):
-    payload = {
-        "user_id": user_id,
-        "username": username,
-        "role": role,
-         "plan": plan,
-        "is_active": is_active,
-        "email": email,
-        "access_code": access_code,
-        "exp": datetime.utcnow() + timedelta(hours=4)
-    }
-    
-    token = jwt.encode(payload, jwt_SECRET_KEY, algorithm=ALGORITHM)
-    return token
-def decode_jwt(token):
-    try:
-        return jwt.decode(token, jwt_SECRET_KEY, algorithms=[ALGORITHM])
-    except jwt.ExpiredSignatureError:
-        return None
-    except jwt.InvalidTokenError:
-        return None
-    
-
-# Restore login from browser localStorage
-
-# === Restore Login from JWT ===
-def restore_login_from_jwt():
-    if not st.session_state.get("logged_in"):
-        token = st_javascript("""localStorage.getItem("login_token");""")
-        if token and token != "null":
-            user_data = decode_jwt(token)
-            if user_data:
-                st.session_state.logged_in = True
-                st.session_state.user_id = int(user_data["user_id"])
-                st.session_state.username = user_data["username"]
-                st.session_state.role = user_data["role"]
-                st.session_state.role = user_data["role"]
-                st.session_state.plan = user_data.get("plan", "free")
-                st.session_state.is_active = user_data.get("is_active", False)
-                st.session_state.user_email = user_data.get("email", "")
-                st.session_state.access_code = user_data.get("access_code", "")
-                if user_data["role"] == "employee":
-                    st.session_state.employee_user = {"name": user_data["username"]}
-            else:
-                # 🛑 Token is invalid or expired — force logout
-                st.session_state.clear()
-                st_javascript("""localStorage.removeItem("login_token");""")
-                st.session_state.login_failed = True
-
-# Run this first
-if st.session_state.get("logged_in"):
-    restore_login_from_jwt()
-
-# this makes all button green color
-st.markdown("""
-    <style>
-    /* Style all Streamlit buttons */
-    div.stButton > button {
-        background-color: #4CAF50;
-        color: white;
-        font-weight: bold;
-        border: none;
-        border-radius: 6px;
-        padding: 10px 20px;
-        font-size: 16px;
-        transition: background-color 0.3s ease;
-    }
-
-    /* Optional: Add hover effect */
-    div.stButton > button:hover {
-        background-color: #45a049;
-        color: white;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-
-
-
 #Only show spinner on first load
 if "loaded" not in st.session_state:
     st.markdown("""
@@ -146,33 +63,134 @@ if "loaded" not in st.session_state:
     st.session_state.loaded = True
     st.rerun()  # 🔁 Rerun app to remove loader and show main content
 
+jwt_SECRET_KEY = "4606"  # Use env vars in production
+ALGORITHM = "HS256"
+
+#Decode function
+def generate_jwt(user_id, username, role,plan="free", is_active=False, email=None,access_code=None):
+    payload = {
+        "user_id": user_id,
+        "username": username,
+        "role": role,
+         "plan": plan,
+        "is_active": is_active,
+        "email": email,
+        "access_code": access_code,
+        "exp": datetime.utcnow() + timedelta(hours=4)
+    }
+    
+    token = jwt.encode(payload, jwt_SECRET_KEY, algorithm=ALGORITHM)
+    return token
+def decode_jwt(token):
+    try:
+        return jwt.decode(token, jwt_SECRET_KEY, algorithms=[ALGORITHM])
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.InvalidTokenError:
+        return None
+    
+
+# Restore login from browser localStorage
+
+# === Restore Login from JWT ===
+
+# === Restore Login from JWT ===
+def restore_login_from_jwt():
+    if not st.session_state.get("logged_in"):
+        token = st_javascript("""localStorage.getItem("login_token");""")
+        if token and token != "null":
+            user_data = decode_jwt(token)
+            if user_data and user_data != "expired":
+           
+                st.session_state.logged_in = True
+                st.session_state.jwt_token = token  # ✅ Store token
+                st.session_state.user_id = int(user_data["user_id"])
+                st.session_state.username = user_data["username"]
+                st.session_state.role = user_data["role"]
+                st.session_state.role = user_data["role"]
+                st.session_state.plan = user_data.get("plan", "free")
+                st.session_state.is_active = user_data.get("is_active", False)
+                st.session_state.user_email = user_data.get("email", "")
+                st.session_state.access_code = user_data.get("access_code", "")
+                if user_data["role"] == "employee":
+                    st.session_state.employee_user = {"name": user_data["username"]}
+            elif user_data == "expired":
+                handle_session_expiration()
+            else:
+                # 🛑 Token is invalid or expired — force logout
+                st.session_state.clear()
+                st_javascript("""localStorage.removeItem("login_token");""")
+                st.session_state.login_failed = True
+
+
+# Run this first
+
 # === Session Validation ===
 # === Session Validation === # this stops you when you are logged out
-if not st.session_state.get("logged_in"):
+def handle_session_expiration():
+    st.session_state["logged_in"] = False
+    st.session_state["session_expired"] = True
+    st.rerun()# or redirect logic
+
+restore_login_from_jwt()
+
+if st.session_state.get("session_expired", False):
     st.markdown("""
         <div style="
             background-color: #ffe6e6;
-            border-left: 6px solid #ff4d4d;
-            padding: 16px;
-            border-radius: 8px;
+            border-left: 1px solid #ff9999;
+            padding: 10px;
+            border-radius: 6px;
             font-family: 'Segoe UI', sans-serif;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             margin-top: 20px;
         ">
-            <h3 style="color: #cc0000; margin: 0 0 10px;">❌ Session Expired</h3>
-            <p style="color: #333; font-size: 16px; margin: 0;">
-                Your session has expired.  Redirecting to login page....
+            <h3 style="color: #cc0000; margin: 0 0 8px; font-size: 18px;">❌ Session Expired</h3>
+            <p style="color: #333; font-size: 15px; margin: 0;">
+                Your session has expired. Redirecting to login page...
             </p>
         </div>
     """, unsafe_allow_html=True)
+
+    # Wait before redirect
     time.sleep(3)
-    switch_page("Dashboard")  # Replace "Login" with your actual login page name
-    st.stop()
-   
+
+    # Reset so message won't repeat
+    st.session_state["session_expired"] = False
+     # Redirect
+    switch_page("Dasboard")
+    
+# this makes all button green color
+st.markdown("""
+    <style>
+    /* Style all Streamlit buttons */
+    div.stButton > button {
+        background-color: #4CAF50;
+        color: white;
+        font-weight: bold;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 20px;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+    }
+
+    /* Optional: Add hover effect */
+    div.stButton > button:hover {
+        background-color: #45a049;
+        color: white;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
+
+
     
 
-if not st.session_state.get("logged_in"):
-    st.stop()  # this stop the app from running after login expires
+if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
+    st.warning("Please log in first.")
+    st.stop(
 
 
 user_id = st.session_state.get("user_id")
@@ -192,10 +210,7 @@ except Exception:
 
 
 
-
-if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
-    st.warning("Please log in first.")
-    st.stop()
+)
 
  # Protect this page — allow only MDs
 if "role" not in st.session_state or st.session_state.role != "md":
