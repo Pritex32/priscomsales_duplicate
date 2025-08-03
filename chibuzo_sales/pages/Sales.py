@@ -2277,6 +2277,14 @@ with tab5:
                 Sales_Count=("item_name", "count")
             ).sort_values("Quantity_Sold", ascending=False).reset_index()
             st.dataframe(top_products.head(10))
+        top_products_csv = top_products.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="⬇️ Download All Top Products (CSV)",
+            data=top_products_csv,
+            file_name="top_products.csv",
+            mime="text/csv",
+            key="download_top_products")
+
         st.markdown("___")    
         st.markdown("### Low Selling Products")
         if "item_name" in filtered_sales.columns:
@@ -2285,6 +2293,14 @@ with tab5:
             Total_Sales=("total_amount", "sum")
         ).sort_values("Quantity_Sold").reset_index()
         st.dataframe(low_products.head(10))
+        # ✅ Download full data
+        low_products_csv = low_products.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="⬇️ Download All Low Selling Products (CSV)",
+            data=low_products_csv,
+            file_name="low_selling_products.csv",
+            mime="text/csv",
+            key="download_low_products")
 
         st.markdown("___")
         # --- Top Customers ---
@@ -2295,12 +2311,26 @@ with tab5:
                 Purchases=("customer_name", "count")
             ).sort_values("Total_Spent", ascending=False).reset_index()
             st.dataframe(top_customers.head(10))
+        top_customers_csv = top_customers.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="⬇️ Download All Top Customers (CSV)",
+            data=top_customers_csv,
+            file_name="top_customers.csv",
+            mime="text/csv",
+            key="download_top_customers")
 
         # --- Credit Sales ---
         st.markdown("___")
         st.markdown("### 🧾 Top 10 Credit Sales")
         credit_sales = filtered_sales[filtered_sales["amount_paid"] == 0]
         st.dataframe(credit_sales.head(10))
+        credit_sales_csv = credit_sales.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="⬇️ Download All Credit Sales (CSV)",
+            data=credit_sales_csv,
+            file_name="credit_sales.csv",
+            mime="text/csv",
+            key="download_credit_sales")
 
         # --- Partial Payments ---
         st.markdown("___")
@@ -2309,6 +2339,14 @@ with tab5:
             (filtered_sales["amount_paid"] > 0) & (filtered_sales["amount_paid"] < filtered_sales["total_amount"])
         ]
         st.dataframe(partial_sales.head(10))
+        # ✅ Download full data
+        partial_sales_csv = partial_sales.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="⬇️ Download All Partial Payments (CSV)",
+            data=partial_sales_csv,
+            file_name="partial_payments.csv",
+            mime="text/csv",
+            key="download_partial_sales")
 
         
         # --- Unpaid Expenses ---
@@ -2316,6 +2354,14 @@ with tab5:
         st.markdown("### 🧾 Showing Top 10 Unpaid Expenses")
         unpaid_expenses = filtered_expenses[filtered_expenses["amount_paid"] < filtered_expenses["total_amount"]]
         st.dataframe(unpaid_expenses.head(10))
+        # ✅ Download full data
+        unpaid_expenses_csv = unpaid_expenses.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="⬇️ Download All Unpaid Expenses (CSV)",
+            data=unpaid_expenses_csv,
+            file_name="unpaid_expenses.csv",
+            mime="text/csv",
+            key="download_unpaid_expenses")
 
 
         st.markdown("### 📋 Showing Top 10 All Sales Records ")
@@ -2330,5 +2376,6 @@ with tab5:
             data=csv,
             file_name="sales_records.csv",
             mime="text/csv")
+
 
 
