@@ -193,7 +193,7 @@ st.markdown("""
     
 
 
-
+user_name = st.session_state.get("username", "Unknown User")
 user_id = st.session_state.get("user_id")
 if not user_id:
     st.error("❌ No valid user ID in session. Please log in again.")
