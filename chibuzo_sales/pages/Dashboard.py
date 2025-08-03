@@ -84,6 +84,8 @@ if "loaded" not in st.session_state:
 load_dotenv()
 
 import os
+import secrets
+st.write(secrets.token_hex(32))
 
 
 jwt_SECRET_KEY = "4606"  # Use env vars in production
@@ -1416,6 +1418,7 @@ with st.sidebar.expander('Submit Feedback'):
 
 
     
+
 
 
 
