@@ -177,7 +177,7 @@ st.sidebar.markdown("---")  # Adds a separator
 if st.sidebar.button("📩 Contact Developer"):
     st.sidebar.markdown("[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/prisca-ukanwa-800a1117a/)")
 
-col11,col22=st.columns([6,1])
+col11,col22=st.columns([7.5,1])
 with col11:
     
     st.markdown("""
@@ -257,6 +257,7 @@ top_products = pd.DataFrame({
 })
 
 st.bar_chart(top_products.set_index("Product"))
+
 
 
 
