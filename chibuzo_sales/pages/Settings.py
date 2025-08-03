@@ -151,8 +151,10 @@ def restore_login_from_jwt():
         token = st_javascript("""localStorage.getItem("login_token");""")
         if token and token != "null":
             user_data = decode_jwt(token)
-            if user_data:
+            if user_data and user_data != "expired":
+           
                 st.session_state.logged_in = True
+                st.session_state.jwt_token = token  # ✅ Store token
                 st.session_state.user_id = int(user_data["user_id"])
                 st.session_state.username = user_data["username"]
                 st.session_state.role = user_data["role"]
@@ -163,6 +165,8 @@ def restore_login_from_jwt():
                 st.session_state.access_code = user_data.get("access_code", "")
                 if user_data["role"] == "employee":
                     st.session_state.employee_user = {"name": user_data["username"]}
+            elif user_data == "expired":
+                handle_session_expiration()
             else:
                 # 🛑 Token is invalid or expired — force logout
                 st.session_state.clear()
@@ -171,31 +175,44 @@ def restore_login_from_jwt():
 
 
 # Run this first
-restore_login_from_jwt()
 
 # === Session Validation ===
 # === Session Validation === # this stops you when you are logged out
-if not st.session_state.get("logged_in"):
+def handle_session_expiration():
+    st.session_state["logged_in"] = False
+    st.session_state["session_expired"] = True
+    st.rerun()# or redirect logic
+
+restore_login_from_jwt()
+
+if st.session_state.get("session_expired", False):
     st.markdown("""
         <div style="
             background-color: #ffe6e6;
-            border-left: 6px solid #ff4d4d;
-            padding: 16px;
-            border-radius: 8px;
+            border-left: 1px solid #ff9999;
+            padding: 10px;
+            border-radius: 6px;
             font-family: 'Segoe UI', sans-serif;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             margin-top: 20px;
         ">
-            <h3 style="color: #cc0000; margin: 0 0 10px;">❌ Session Expired</h3>
-            <p style="color: #333; font-size: 16px; margin: 0;">
-                Your session has expired. Redirecting to login page..
+            <h3 style="color: #cc0000; margin: 0 0 8px; font-size: 18px;">❌ Session Expired</h3>
+            <p style="color: #333; font-size: 15px; margin: 0;">
+                Your session has expired. Redirecting to login page...
             </p>
         </div>
     """, unsafe_allow_html=True)
+
+    # Wait before redirect
     time.sleep(3)
-    switch_page("Dashboard")
-   
-   
+
+    # Reset so message won't repeat
+    st.session_state["session_expired"] = False
+     # Redirect
+    switch_page("Dasboard")
+
+# === Session Validation ===
+  
 
 
 if not st.session_state.get("logged_in"):
