@@ -111,8 +111,10 @@ def restore_login_from_jwt():
         token = st_javascript("""localStorage.getItem("login_token");""")
         if token and token != "null":
             user_data = decode_jwt(token)
-            if user_data:
+            if user_data and user_data != "expired":
+           
                 st.session_state.logged_in = True
+                st.session_state.jwt_token = token  # ✅ Store token
                 st.session_state.user_id = int(user_data["user_id"])
                 st.session_state.username = user_data["username"]
                 st.session_state.role = user_data["role"]
@@ -123,6 +125,8 @@ def restore_login_from_jwt():
                 st.session_state.access_code = user_data.get("access_code", "")
                 if user_data["role"] == "employee":
                     st.session_state.employee_user = {"name": user_data["username"]}
+            elif user_data == "expired":
+                handle_session_expiration()
             else:
                 # 🛑 Token is invalid or expired — force logout
                 st.session_state.clear()
@@ -131,7 +135,6 @@ def restore_login_from_jwt():
 
 
 # Run this first
-restore_login_from_jwt()
 
 # === Session Validation ===
 # === Session Validation === # this stops you when you are logged out
@@ -139,8 +142,9 @@ def handle_session_expiration():
     st.session_state["logged_in"] = False
     st.session_state["session_expired"] = True
     st.rerun()# or redirect logic
-# ✅ Session expired UI (only once)
-# ✅ Show message and redirect only when expired
+
+restore_login_from_jwt()
+
 if st.session_state.get("session_expired", False):
     st.markdown("""
         <div style="
