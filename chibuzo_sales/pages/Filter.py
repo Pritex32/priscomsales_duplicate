@@ -167,6 +167,11 @@ def sync_plan_from_db(user_id):
 
 
 # Restore login from browser localStorage
+# === Session Validation ===
+# === Session Validation === # this stops you when you are logged out
+def handle_session_expiration():
+    st.session_state["logged_in"] = False
+    st.session_state["session_expired"] = True
 
 # === Restore Login from JWT ===
 # === Restore Login from JWT ===
@@ -196,16 +201,6 @@ def restore_login_from_jwt():
                 st.session_state.clear()
                 st_javascript("""localStorage.removeItem("login_token");""")
                 st.session_state.login_failed = True
-
-
-# Run this first
-
-# === Session Validation ===
-# === Session Validation === # this stops you when you are logged out
-def handle_session_expiration():
-    st.session_state["logged_in"] = False
-    st.session_state["session_expired"] = True
-    st.rerun()# or redirect logic
 
 restore_login_from_jwt()
 
