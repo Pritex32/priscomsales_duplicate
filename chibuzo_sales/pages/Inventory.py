@@ -494,6 +494,8 @@ def get_low_stock_items(user_id):
 # this is to design the dataframe
 
 
+# Get user role from session (default to 'employee' if not set)
+user_role = st.session_state.get("role", "employee")  # roles: "md" or "employee"
 
 # === Load data ===
 with st.spinner("Fetching data..."): # this is to show data is loading and not to show error until data loads
@@ -520,8 +522,15 @@ if selected == 'Home':
     # to download the entire data
     csv = df_inventory.to_csv(index=False).encode('utf-8')
     st.download_button("⬇️ Download Full Inventory CSV", data=csv, file_name='full_inventory.csv', mime='text/csv')
-
-    selected_date = st.date_input("**Select Date to Update Inventory**", value=date.today())
+    if user_role.lower() != "md":
+        selected_date = st.date_input(
+        "**Select Date to Update Inventory**", 
+        value=date.today(), 
+        min_value=date.today(), 
+        max_value=date.today()
+    )
+    else:
+        selected_date = st.date_input("**Select Date to Update Inventory**", value=date.today())
     
 
     
@@ -1227,6 +1236,7 @@ if selected =='Delete':
 # Allow duplicates for the same item across different days
 
 # ❌ But no duplicates for the same item on the same day
+
 
 
 
