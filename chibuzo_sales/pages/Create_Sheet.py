@@ -206,33 +206,6 @@ st.markdown("""
 
 
 
-
-user_id = st.session_state.get("user_id")
-if not user_id:
-    st.error("❌ No valid user ID in session. Please log in again.")
-    st.stop()
-
-try:
-    user_id = int(user_id)
-except Exception:
-    st.error("❌ User ID is not a valid integer.")
-    st.stop()
-
-
-# validate user
-
-
-
-
-
-if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
-    st.warning("Please log in first.")
-    st.stop()
-
-
-
-
-
 # to get the user id from browser storage
 user_name = st.session_state.get("username", "Unknown User")
 user_id = st.session_state.get("user_id")
@@ -247,6 +220,9 @@ except:
     st.error("❌ Invalid user ID format.")
     st.stop()
 
+if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
+    st.warning("Please log in first.")
+    st.stop()
 
 
 
