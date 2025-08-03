@@ -111,7 +111,12 @@ def decode_jwt(token):
     except jwt.InvalidTokenError:
         return None
     
-
+# === Session Validation === # this stops you when you are logged out
+def handle_session_expiration():
+    st.session_state["logged_in"] = False
+    st.session_state["session_expired"] = True
+    st.rerun()# or redirect logic
+    
 # === Restore Login from JWT ===
 def restore_login_from_jwt():
     if not st.session_state.get("logged_in"):
@@ -144,11 +149,7 @@ def restore_login_from_jwt():
 # Run this first
 
 # === Session Validation ===
-# === Session Validation === # this stops you when you are logged out
-def handle_session_expiration():
-    st.session_state["logged_in"] = False
-    st.session_state["session_expired"] = True
-    st.rerun()# or redirect logic
+
 
 restore_login_from_jwt()
 
@@ -2553,6 +2554,7 @@ with tab5:
             data=csv,
             file_name="sales_records.csv",
             mime="text/csv")
+
 
 
 
