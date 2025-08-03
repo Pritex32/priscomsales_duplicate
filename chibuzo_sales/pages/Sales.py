@@ -2277,30 +2277,29 @@ with tab5:
                 Sales_Count=("item_name", "count")
             ).sort_values("Quantity_Sold", ascending=False).reset_index()
             st.dataframe(top_products.head(10))
-        top_products_csv = top_products.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="⬇️ Download All Top Products (CSV)",
-            data=top_products_csv,
-            file_name="top_products.csv",
-            mime="text/csv",
-            key="download_top_products")
+            top_products_csv = top_products.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="⬇️ Download All Top Products (CSV)",
+                data=top_products_csv,
+                file_name="top_products.csv",
+                mime="text/csv",
+                key="download_top_products")
 
         st.markdown("___")    
         st.markdown("### Low Selling Products")
         if "item_name" in filtered_sales.columns:
             low_products = filtered_sales.groupby("item_name").agg(
             Quantity_Sold=("quantity", "sum"),
-            Total_Sales=("total_amount", "sum")
-        ).sort_values("Quantity_Sold").reset_index()
-        st.dataframe(low_products.head(10))
-        # ✅ Download full data
-        low_products_csv = low_products.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="⬇️ Download All Low Selling Products (CSV)",
-            data=low_products_csv,
-            file_name="low_selling_products.csv",
-            mime="text/csv",
-            key="download_low_products")
+            Total_Sales=("total_amount", "sum")).sort_values("Quantity_Sold").reset_index()
+            st.dataframe(low_products.head(10))
+            # ✅ Download full data
+            low_products_csv = low_products.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="⬇️ Download All Low Selling Products (CSV)",
+                data=low_products_csv,
+                file_name="low_selling_products.csv",
+                mime="text/csv",
+                key="download_low_products")
 
         st.markdown("___")
         # --- Top Customers ---
@@ -2311,13 +2310,13 @@ with tab5:
                 Purchases=("customer_name", "count")
             ).sort_values("Total_Spent", ascending=False).reset_index()
             st.dataframe(top_customers.head(10))
-        top_customers_csv = top_customers.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="⬇️ Download All Top Customers (CSV)",
-            data=top_customers_csv,
-            file_name="top_customers.csv",
-            mime="text/csv",
-            key="download_top_customers")
+            top_customers_csv = top_customers.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="⬇️ Download All Top Customers (CSV)",
+                data=top_customers_csv,
+                file_name="top_customers.csv",
+                mime="text/csv",
+                key="download_top_customers")
 
         # --- Credit Sales ---
         st.markdown("___")
@@ -2376,6 +2375,7 @@ with tab5:
             data=csv,
             file_name="sales_records.csv",
             mime="text/csv")
+
 
 
 
