@@ -202,21 +202,22 @@ if not st.session_state.get("logged_in"):
     st.markdown("""
         <div style="
             background-color: #ffe6e6;
-            border-left: 6px solid #ff4d4d;
-            padding: 16px;
+            border-left: 2px solid #ff9999;
+            padding: 14px;
             border-radius: 8px;
             font-family: 'Segoe UI', sans-serif;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             margin-top: 20px;
         ">
-            <h3 style="color: #cc0000; margin: 0 0 10px;">❌ Session Expired</h3>
-            <p style="color: #333; font-size: 16px; margin: 0;">
-                Your session has expired. Redirecting to login page..
+            <h3 style="color: #cc0000; margin: 0 0 8px; font-size: 18px;">❌ Session Expired</h3>
+            <p style="color: #333; font-size: 15px; margin: 0;">
+                Your session has expired. Redirecting to login page...
             </p>
         </div>
     """, unsafe_allow_html=True)
     time.sleep(3)
     switch_page("Dashboard")
+
    
    
 
