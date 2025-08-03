@@ -135,11 +135,12 @@ restore_login_from_jwt()
 
 # === Session Validation ===
 # === Session Validation === # this stops you when you are logged out
-if session_has_expired:  # your custom check
+def handle_session_expiration():
     st.session_state["logged_in"] = False
     st.session_state["session_expired"] = True
-    switch_page("Dashboard")  # or redirect logic
+    st.rerun()# or redirect logic
 # ✅ Session expired UI (only once)
+# ✅ Show message and redirect only when expired
 if st.session_state.get("session_expired", False):
     st.markdown("""
         <div style="
@@ -157,8 +158,14 @@ if st.session_state.get("session_expired", False):
             </p>
         </div>
     """, unsafe_allow_html=True)
+
+    # Wait before redirect
     time.sleep(3)
-    switch_page("Dashboard")
+
+    # Reset so message won't repeat
+    st.session_state["session_expired"] = False
+     # Redirect
+    switch_page("Dasboard")
 
    
    
