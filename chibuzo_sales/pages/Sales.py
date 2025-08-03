@@ -1219,7 +1219,7 @@ with tab1:
                         temp_logo_path = tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
                         urllib.request.urlretrieve(logo_url, temp_logo_path)
                         img = Image.open(temp_logo_path)
-                        max_width = 40 # mm
+                        max_width = 60 # mm
                         aspect_ratio = img.height / img.width
                         height = max_width * aspect_ratio
                         pdf.image(temp_logo_path, x=10, y=10, w=max_width, h=height)
@@ -2554,6 +2554,7 @@ with tab5:
             data=csv,
             file_name="sales_records.csv",
             mime="text/csv")
+
 
 
 
