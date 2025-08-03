@@ -1847,7 +1847,7 @@ with tab3:
 
             # ✅ Convert to Invoice (Requires Upload)
             with col2:
-                with st.expander(f"Convert Proforma #{p['proforma_id']} to Invoice"):
+                with st.expander(f"**Convert Proforma #{p['proforma_id']} to Invoice**"):
                     st.write("Upload proof of payment to complete conversion:")
 
                     # ✅ Check if invoice URL already exists in DB
@@ -1894,9 +1894,8 @@ with tab3:
                                 sale_ids = []
 
                                 for item in items:
-                                    item_paid = 0  # default for proforma conversion
-                                    item_balance = item["total_amount"] - item_paid
-
+                                    item_paid = item.get("total_amount")   # default for proforma conversion
+                                    item_balance = 0
                                     sale_data = {
                                     "employee_id": p.get("employee_id"),
                                     "employee_name": p.get("employee_name"),
@@ -1913,7 +1912,7 @@ with tab3:
                                     "amount_paid": item_paid,
                                     "amount_balance": item_balance,
                                     "payment_method": p.get("payment_method", "cash"),
-                                    "payment_status": p.get("payment_status", "pending"),
+                                    "payment_status": "paid",
                                     "due_date": p.get("due_date"),
                                     "invoice_number": None,
                                     "invoice_file_url": p.get("invoice_url"),
@@ -1927,18 +1926,20 @@ with tab3:
                                 supabase.table("proforma_invoices").delete().eq("proforma_id", p['proforma_id']).execute()
 
                                 st.success(f"✅ Proforma #{p['proforma_id']} converted to {len(sale_ids)} sales records!")
+                                time.sleep(2)
                                 st.rerun()
                             except Exception as e:
-                                st.error(f"❌ Failed to convert Proforma #{p['proforma_id']}: {e}")
+                                st.error(f"❌ Failed to convert Proforma #{p['proforma_id']}")
 
                             
 
             # ✅ Delete Proforma
             with col3:
-                if st.button(f"Delete", key=f"delete_{p['proforma_id']}"):
-                    supabase.table("proforma_invoices").delete().eq("proforma_id", p['proforma_id']).execute()
-                    st.warning("❌ Proforma deleted!")
-                    st.rerun()
+                if st.session_state.get("loggedin") and st.session_state.get("role") == "md":
+                    if st.button(f"Delete", key=f"delete_{p['proforma_id']}"):
+                        supabase.table("proforma_invoices").delete().eq("proforma_id", p['proforma_id']).execute()
+                        st.warning("❌ Proforma deleted!")
+                        st.rerun()
 
     else:
         st.info("No pending proforma invoices.")
@@ -2524,6 +2525,7 @@ with tab5:
             data=csv,
             file_name="sales_records.csv",
             mime="text/csv")
+
 
 
 
