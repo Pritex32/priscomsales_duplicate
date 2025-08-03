@@ -31,6 +31,35 @@ import base64
 import jwt
 import streamlit.components.v1 as components
 from streamlit_javascript import st_javascript
+#Only show spinner on first load
+if "loaded" not in st.session_state:
+    st.markdown("""
+        <style>
+        .loader {
+          border: 4px solid #f3f3f3;
+          border-top: 4px solid #00FFC6;
+          border-radius: 50%;
+          width: 30px;
+          height: 30px;
+          animation: spin 1s linear infinite;
+          margin: auto;
+          position: relative;
+          top: 50px;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        </style>
+
+        <div class="loader"></div>
+        <h5 style="text-align:center;">Loading PriscomSales App...</h5>
+    """, unsafe_allow_html=True)
+    
+    time.sleep(2)  # Simulate loading time
+    st.session_state.loaded = True
+    st.rerun()  # 🔁 Rerun app to remove loader and show main content
 
 jwt_SECRET_KEY = "4606"  # Use env vars in production
 ALGORITHM = "HS256"
@@ -101,26 +130,65 @@ def restore_login_from_jwt():
         token = st_javascript("""localStorage.getItem("login_token");""")
         if token and token != "null":
             user_data = decode_jwt(token)
-            if user_data:
+            if user_data and user_data != "expired":
+           
                 st.session_state.logged_in = True
+                st.session_state.jwt_token = token  # ✅ Store token
                 st.session_state.user_id = int(user_data["user_id"])
                 st.session_state.username = user_data["username"]
                 st.session_state.role = user_data["role"]
                 st.session_state.role = user_data["role"]
                 st.session_state.plan = user_data.get("plan", "free")
                 st.session_state.is_active = user_data.get("is_active", False)
-                st.session_state.access_code = user_data.get("access_code", "")
                 st.session_state.user_email = user_data.get("email", "")
+                st.session_state.access_code = user_data.get("access_code", "")
                 if user_data["role"] == "employee":
                     st.session_state.employee_user = {"name": user_data["username"]}
+            elif user_data == "expired":
+                handle_session_expiration()
             else:
                 # 🛑 Token is invalid or expired — force logout
                 st.session_state.clear()
                 st_javascript("""localStorage.removeItem("login_token");""")
                 st.session_state.login_failed = True
 
+
 # Run this first
+
+# === Session Validation ===
+# === Session Validation === # this stops you when you are logged out
+def handle_session_expiration():
+    st.session_state["logged_in"] = False
+    st.session_state["session_expired"] = True
+    st.rerun()# or redirect logic
+
 restore_login_from_jwt()
+
+if st.session_state.get("session_expired", False):
+    st.markdown("""
+        <div style="
+            background-color: #ffe6e6;
+            border-left: 1px solid #ff9999;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: 'Segoe UI', sans-serif;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-top: 20px;
+        ">
+            <h3 style="color: #cc0000; margin: 0 0 8px; font-size: 18px;">❌ Session Expired</h3>
+            <p style="color: #333; font-size: 15px; margin: 0;">
+                Your session has expired. Redirecting to login page...
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # Wait before redirect
+    time.sleep(3)
+
+    # Reset so message won't repeat
+    st.session_state["session_expired"] = False
+     # Redirect
+    switch_page("Dasboard")
 
 # this makes all button green color
 st.markdown("""
@@ -145,65 +213,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-
-
-
-#Only show spinner on first load
-if "loaded" not in st.session_state:
-    st.markdown("""
-        <style>
-        .loader {
-          border: 4px solid #f3f3f3;
-          border-top: 4px solid #00FFC6;
-          border-radius: 50%;
-          width: 30px;
-          height: 30px;
-          animation: spin 1s linear infinite;
-          margin: auto;
-          position: relative;
-          top: 50px;
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        </style>
-
-        <div class="loader"></div>
-        <h5 style="text-align:center;">Loading PriscomSales App...</h5>
-    """, unsafe_allow_html=True)
-    
-    time.sleep(2)  # Simulate loading time
-    st.session_state.loaded = True
-    st.rerun()  # 🔁 Rerun app to remove loader and show main content
-
-# === Session Validation ===
-# === Session Validation === # this stops you when you are logged out
-if not st.session_state.get("logged_in"):
-    st.markdown("""
-        <div style="
-            background-color: #ffe6e6;
-            border-left: 2px solid #ff9999;
-            padding: 14px;
-            border-radius: 8px;
-            font-family: 'Segoe UI', sans-serif;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            margin-top: 20px;
-        ">
-            <h3 style="color: #cc0000; margin: 0 0 8px; font-size: 18px;">❌ Session Expired</h3>
-            <p style="color: #333; font-size: 15px; margin: 0;">
-                Your session has expired. Redirecting to login page...
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
-    time.sleep(3)
-    switch_page("Dashboard")
-
-   
     
 
-if not st.session_state.get("logged_in"):
+if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
+    st.warning("Please log in first.")
     st.stop()  # this stop the app from running after login expires
 
 
@@ -223,11 +236,6 @@ except Exception:
 
 
 
-
-
-if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
-    st.warning("Please log in first.")
-    st.stop()
 
 
 
