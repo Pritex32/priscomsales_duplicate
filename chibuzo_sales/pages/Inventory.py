@@ -150,11 +150,13 @@ def decode_jwt(token):
 # === Restore Login from JWT ===
 def restore_login_from_jwt():
     if not st.session_state.get("logged_in"):
-        token = st_javascript("""localStorage.getItem("login_token");""",key=f"get_login_token_1998")
+        token = st_javascript("""localStorage.getItem("login_token");""")
         if token and token != "null":
             user_data = decode_jwt(token)
-            if user_data:
+            if user_data and user_data != "expired":
+           
                 st.session_state.logged_in = True
+                st.session_state.jwt_token = token  # ✅ Store token
                 st.session_state.user_id = int(user_data["user_id"])
                 st.session_state.username = user_data["username"]
                 st.session_state.role = user_data["role"]
@@ -165,25 +167,33 @@ def restore_login_from_jwt():
                 st.session_state.access_code = user_data.get("access_code", "")
                 if user_data["role"] == "employee":
                     st.session_state.employee_user = {"name": user_data["username"]}
+            elif user_data == "expired":
+                handle_session_expiration()
             else:
                 # 🛑 Token is invalid or expired — force logout
                 st.session_state.clear()
-                st_javascript("""localStorage.removeItem("login_token");""",key=f"get_login_token_1778")
+                st_javascript("""localStorage.removeItem("login_token");""")
                 st.session_state.login_failed = True
+
 
 # Run this first
 
-restore_login_from_jwt()
-
 # === Session Validation ===
 # === Session Validation === # this stops you when you are logged out
-if not st.session_state.get("logged_in"):
+def handle_session_expiration():
+    st.session_state["logged_in"] = False
+    st.session_state["session_expired"] = True
+    st.rerun()# or redirect logic
+
+restore_login_from_jwt()
+
+if st.session_state.get("session_expired", False):
     st.markdown("""
         <div style="
             background-color: #ffe6e6;
-            border-left: 2px solid #ff9999;
-            padding: 14px;
-            border-radius: 8px;
+            border-left: 1px solid #ff9999;
+            padding: 10px;
+            border-radius: 6px;
             font-family: 'Segoe UI', sans-serif;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             margin-top: 20px;
@@ -194,14 +204,20 @@ if not st.session_state.get("logged_in"):
             </p>
         </div>
     """, unsafe_allow_html=True)
-    time.sleep(3)
-    switch_page("Dashboard")
 
+    # Wait before redirect
+    time.sleep(3)
+
+    # Reset so message won't repeat
+    st.session_state["session_expired"] = False
+     # Redirect
+    switch_page("Dasboard")
   
 
-
-if not st.session_state.get("logged_in"):
-    st.stop()  # this stop the app from running after login expires
+# this shows the logged user info
+if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
+    st.warning("Please log in first.")
+    st.stop()
 
 user_id = st.session_state.get("user_id")
 if not user_id:
@@ -218,10 +234,6 @@ except Exception:
 
 
 
-# this shows the logged user info
-if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
-    st.warning("Please log in first.")
-    st.stop()
 
 
 
@@ -1211,6 +1223,7 @@ if selected =='Delete':
 # Allow duplicates for the same item across different days
 
 # ❌ But no duplicates for the same item on the same day
+
 
 
 
