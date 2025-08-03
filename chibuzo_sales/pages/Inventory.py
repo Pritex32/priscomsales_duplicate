@@ -146,6 +146,10 @@ def decode_jwt(token):
     
 
 # Restore login from browser localStorage
+def handle_session_expiration():
+    st.session_state["logged_in"] = False
+    st.session_state["session_expired"] = True
+    
 
 # === Restore Login from JWT ===
 def restore_login_from_jwt():
@@ -180,10 +184,6 @@ def restore_login_from_jwt():
 
 # === Session Validation ===
 # === Session Validation === # this stops you when you are logged out
-def handle_session_expiration():
-    st.session_state["logged_in"] = False
-    st.session_state["session_expired"] = True
-    st.rerun()# or redirect logic
 
 restore_login_from_jwt()
 
@@ -969,6 +969,9 @@ if selected == 'Home':
         update_inventory_balances(selected_date, user_id)
         move_requisitions_to_history(selected_date,user_id)  # Move today's requisitions after updating the inventory
         move_restocks_to_history(selected_date,user_id)  # Move today's restocks to history
+        if user_role.lower() != "md" and selected_date != date.today():
+            st.error("❌ Only MD can update past or future dates.")
+            st.stop()
 
 # Display Today's Logs
     with st.expander("📤 Today's Sale "):
@@ -1236,6 +1239,7 @@ if selected =='Delete':
 # Allow duplicates for the same item across different days
 
 # ❌ But no duplicates for the same item on the same day
+
 
 
 
