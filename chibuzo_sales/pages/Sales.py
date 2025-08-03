@@ -776,7 +776,7 @@ with tab1:
             "grand_total": grand_total,
             "status": "pending",
             "expiry_date": str(expiry_date),
-            "items": json.dumps(item_data),
+            "items": item_data,
             "notes": notes
         }
 
@@ -1888,15 +1888,50 @@ with tab3:
                     # ✅ Convert Button (Enabled only after invoice exists)
                     if convert_enabled:
                         if st.button(f"✅ Confirm & Convert", key=f"confirm_{p['proforma_id']}"):
-                            # ✅ Move record to sales table
-                            sale_data = p.copy()
-                            sale_data["status"] = "paid"
+                                  # ✅ Move record to sales table
+                            try:
+                                items = p.get("items", [])
+                                sale_ids = []
 
-                            supabase.table("sales_master_log").insert(sale_data).execute()
-                            supabase.table("proforma_invoices").delete().eq("proforma_id", p['proforma_id']).execute()
+                                for item in items:
+                                    item_paid = 0  # default for proforma conversion
+                                    item_balance = item["total_amount"] - item_paid
 
-                            st.success(f"✅ Proforma #{p['proforma_id']} converted to Invoice successfully!")
-                            st.rerun()
+                                    sale_data = {
+                                    "employee_id": p.get("employee_id"),
+                                    "employee_name": p.get("employee_name"),
+                                    "user_id": p.get("user_id"),
+                                    "sale_date": p.get("date"),
+                                    "customer_name": p.get("customer_name"),
+                                    "customer_phone": p.get("customer_phone"),
+                                    "item_id": item.get("item_id"),
+                                    "item_name": item.get("item_name"),
+                                    "quantity": item.get("quantity"),
+                                    "unit_price": item.get("unit_price"),
+                                    "grand_total": p.get("grand_total"),
+                                    "total_amount": item.get("total_amount"),
+                                    "amount_paid": item_paid,
+                                    "amount_balance": item_balance,
+                                    "payment_method": p.get("payment_method", "cash"),
+                                    "payment_status": p.get("payment_status", "pending"),
+                                    "due_date": p.get("due_date"),
+                                    "invoice_number": None,
+                                    "invoice_file_url": p.get("invoice_url"),
+                                    "notes": p.get("notes"),
+                                }
+
+                                    result = supabase.table("sales_master_log").insert(sale_data).execute()
+                                    sale_ids.append(result.data[0]["sale_id"])
+
+                                  # ✅ Delete Proforma after successful conversion
+                                supabase.table("proforma_invoices").delete().eq("proforma_id", p['proforma_id']).execute()
+
+                                st.success(f"✅ Proforma #{p['proforma_id']} converted to {len(sale_ids)} sales records!")
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"❌ Failed to convert Proforma #{p['proforma_id']}: {e}")
+
+                            
 
             # ✅ Delete Proforma
             with col3:
@@ -2489,6 +2524,7 @@ with tab5:
             data=csv,
             file_name="sales_records.csv",
             mime="text/csv")
+
 
 
 
