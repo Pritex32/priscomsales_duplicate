@@ -160,6 +160,10 @@ if st.session_state.get("session_expired", False):
      # Redirect
     switch_page("Dasboard")
     
+if not st.session_state.get("logged_in"):
+    st.stop()  # this stop the app from running after login expires
+
+    
 # this makes all button green color
 st.markdown("""
     <style>
