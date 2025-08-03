@@ -1021,13 +1021,16 @@ if selected == 'Filter':
             )
 
         # Apply filters
-        filtered_df = df_logs[
-            (df_logs["item_name"] == selected_item) &
-            (df_logs["log_date"] >= pd.to_datetime(date_range[0])) &
-            (df_logs["log_date"] <= pd.to_datetime(date_range[1])) &
-            (df_logs["supplied_quantity"] >= supply_range[0]) &
-            (df_logs["supplied_quantity"] <= supply_range[1])
-        ]
+        if len(date_range) == 2:
+            filtered_df = df_logs[
+                
+                (df_logs["log_date"] >= pd.to_datetime(date_range[0])) &
+                (df_logs["log_date"] <= pd.to_datetime(date_range[1])) &
+                (df_logs["supplied_quantity"] >= supply_range[0]) &
+                (df_logs["supplied_quantity"] <= supply_range[1]) ]
+        else:
+            st.error("⚠️ Please select a valid start and end date.")
+            filtered_df = df_logs  # Show full data as fallback
         # Apply selected filter mode
         if filter_mode == "Item Name" and selected_item:
             filtered_df = filtered_df[filtered_df["item_name"] == selected_item]
@@ -1199,6 +1202,7 @@ if selected =='Delete':
 # Allow duplicates for the same item across different days
 
 # ❌ But no duplicates for the same item on the same day
+
 
 
 
