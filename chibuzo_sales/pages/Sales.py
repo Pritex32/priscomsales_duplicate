@@ -1925,15 +1925,6 @@ with tab3:
 
                         
 
-            # ✅ Delete Proforma
-            with col3:
-                if st.button(f"Delete", key=f"delete_{p['id']}"):
-                    supabase.table("proforma_invoices").delete().eq("proforma_id", p['proforma_id']).execute()
-                    st.warning("❌ Proforma deleted!")
-                    st.rerun()
-    else:
-        st.info("No pending proforma invoices.")
-
 
     # Pagination setup
     transactions = get_pending_transactions(user_id)
@@ -2508,6 +2499,7 @@ with tab5:
             data=csv,
             file_name="sales_records.csv",
             mime="text/csv")
+
 
 
 
