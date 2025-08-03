@@ -135,7 +135,12 @@ restore_login_from_jwt()
 
 # === Session Validation ===
 # === Session Validation === # this stops you when you are logged out
-if not st.session_state.get("logged_in"):
+if session_has_expired:  # your custom check
+    st.session_state["logged_in"] = False
+    st.session_state["session_expired"] = True
+    switch_page("Dashboard")  # or redirect logic
+# ✅ Session expired UI (only once)
+if st.session_state.get("session_expired", False):
     st.markdown("""
         <div style="
             background-color: #ffe6e6;
