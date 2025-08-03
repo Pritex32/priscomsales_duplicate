@@ -215,8 +215,7 @@ if st.session_state.get("session_expired", False):
   
 
 # this shows the logged user info
-if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
-    st.warning("Please log in first.")
+if not st.session_state.get("logged_in"):
     st.stop()
 
 user_id = st.session_state.get("user_id")
@@ -229,6 +228,11 @@ try:
 except Exception:
     st.error("❌ User ID is not a valid integer.")
     st.stop()
+# this shows the logged user info
+if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
+    st.warning("Please log in first.")
+    st.stop()
+
 
 
 
@@ -1223,6 +1227,7 @@ if selected =='Delete':
 # Allow duplicates for the same item across different days
 
 # ❌ But no duplicates for the same item on the same day
+
 
 
 
