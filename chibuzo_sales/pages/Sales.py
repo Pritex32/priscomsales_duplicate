@@ -1841,19 +1841,9 @@ with tab3:
             **Expiry:** {p['expiry_date']}
             """)
 
-            col1, col2, col3 = st.columns([1, 1, 1])
+      col2, col3 = st.columns([3 , 1])
 
-            # ✅ View PDF
-            with col1:
-                if st.button(f"View PDF", key=f"view_{p['proforma_id']}"):
-                    pdf_bytes = create_proforma_pdf(p['tenant_name'], p)
-                    st.download_button(
-                        label="⬇️ Download",
-                        data=pdf_bytes,
-                        file_name=f"proforma_{p['proforma_id']}.pdf",
-                        mime="application/pdf",
-                        key=f"download_pdf_{p['proforma_id']}"
-                    )
+           
 
             # ✅ Convert to Invoice (Requires Upload)
             with col2:
@@ -1923,7 +1913,7 @@ with tab3:
 
 
 
-                        
+    st.markdown("___")                 
 
 
     # Pagination setup
@@ -2499,6 +2489,7 @@ with tab5:
             data=csv,
             file_name="sales_records.csv",
             mime="text/csv")
+
 
 
 
