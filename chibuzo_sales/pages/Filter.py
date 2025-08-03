@@ -234,11 +234,13 @@ if st.session_state.get("session_expired", False):
     st.session_state["session_expired"] = False
      # Redirect
     switch_page("Dasboard")
+
+if not st.session_state.get("logged_in"):
+    st.stop()
+   
    
 
-if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
-    st.warning("Please log in first.")
-    st.stop()
+
 
 
 user_id = st.session_state.get("user_id")
@@ -251,7 +253,9 @@ try:
 except Exception:
     st.error("❌ User ID is not a valid integer.")
     st.stop()
-
+if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
+    st.warning("Please log in first.")
+    st.stop()
 # this changes all buttons to green
 st.markdown("""
     <style>
