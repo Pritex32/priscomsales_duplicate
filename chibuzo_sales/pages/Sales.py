@@ -1956,7 +1956,7 @@ with tab3:
         proforma_df = pd.DataFrame(proformas.data)
 
         # ✅ Display in Streamlit
-        with st.expander('**All Proforma Invoices**')
+        with st.expander('**All Proforma Invoices**'):
             st.dataframe(proforma_df)
 
         # ✅ Download as CSV
@@ -2552,6 +2552,7 @@ with tab5:
             data=csv,
             file_name="sales_records.csv",
             mime="text/csv")
+
 
 
 
