@@ -196,7 +196,7 @@ if not st.session_state.get("logged_in"):
     """, unsafe_allow_html=True)
     time.sleep(3)
     switch_page("Dashboard")
-)
+
   
 
 
@@ -1211,6 +1211,7 @@ if selected =='Delete':
 # Allow duplicates for the same item across different days
 
 # ❌ But no duplicates for the same item on the same day
+
 
 
 
