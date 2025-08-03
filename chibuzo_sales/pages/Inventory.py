@@ -988,7 +988,7 @@ if selected == 'Filter':
     if not df_logs.empty:
         with st.expander("🔍 Filter Inventory Log", expanded=True):
             df_logs["log_date"] = pd.to_datetime(df_logs["log_date"])
-            filter_mode = st.radio("Filter By:", ["Item Name", "Keyword"])
+            filter_mode = st.radio("Filter By:", ["Item Name", "Keyword"], key="filter_mode_radio")
 
         # Get unique values for filters
             item_options = df_logs["item_name"].unique()
@@ -1000,13 +1000,13 @@ if selected == 'Filter':
             selected_item = None
             keyword = ""
             if filter_mode == "Item Name":
-                selected_item = st.selectbox("Select an Item", options=item_options)
+                selected_item = st.selectbox("Select an Item", options=item_options,key="filter_item_select")
             else:
-                keyword = st.text_input("Search by keyword (e.g., 'makeup')", "")
+                keyword = st.text_input("Search by keyword (e.g., 'makeup')", "",key="filter_keyword_input")
 
         # Sidebar filters
-            selected_item = st.selectbox("Select an Item", options=item_options)
-            date_range = st.date_input("Select Date Range", [min_date, max_date])
+         
+            date_range = st.date_input("Select Date Range", [min_date, max_date],key="filter_date_range")
 
         # Handle slider safely
         if min_supply == max_supply:
@@ -1017,7 +1017,7 @@ if selected == 'Filter':
             "Supply Range",
             min_value=min_supply,
             max_value=max_supply,
-            value=(min_supply, max_supply)
+            value=(min_supply, max_supply),key="filter_supply_range"
             )
 
         # Apply filters
@@ -1199,5 +1199,6 @@ if selected =='Delete':
 # Allow duplicates for the same item across different days
 
 # ❌ But no duplicates for the same item on the same day
+
 
 
