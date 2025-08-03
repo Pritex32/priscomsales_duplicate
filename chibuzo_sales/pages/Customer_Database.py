@@ -520,14 +520,14 @@ if customers_list:
         st.dataframe(df_customers.tail(10), use_container_width=True)
 
         # ✅ Convert DataFrame to CSV for download
-        csv = df_customers.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="📥 Download Customer List (CSV)",
-            data=csv,
-            file_name="customer_list.csv",
-            mime="text/csv",
-            key="download_customer_list"
-        )
+        if st.session_state.get("role") == "md":
+            csv = df_customers.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Download Customer List (CSV)",
+                data=csv,
+                file_name="customer_list.csv",
+                mime="text/csv",
+                key="download_customer_list")
 else:
     st.info("No customers found. Add your first customer above!")
 
@@ -585,14 +585,15 @@ if customers_list:
         st.dataframe(df_filtered, use_container_width=True)
 
         # ✅ Download filtered list as CSV
-        csv = df_filtered.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="📥 Download Customer List (CSV)",
-            data=csv,
-            file_name="customer_list.csv",
-            mime="text/csv",
-            key="download_customer_list_2025"  # ✅ Added unique key
-        )
+        if st.session_state.get("role") == "md":
+            csv = df_filtered.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Download Customer List (CSV)",
+                data=csv,
+                file_name="customer_list.csv",
+                mime="text/csv",
+                key="download_customer_list_2025"  # ✅ Added unique key
+            )
 
     
 else:
@@ -647,12 +648,15 @@ with col33:
                         if st.button("✏️ Edit", key=f"edit_{row['Customer ID']}"):
                             st.session_state["edit_customer_id"] = row['Customer ID']
                     with col3:
-                        if st.button("🗑️ Delete", key=f"delete_{row['Customer ID']}"):
-                            confirm = st.checkbox(f"Confirm delete {row['Name']}")
-                            if confirm:
-                                supabase.table("customers").delete().eq("customer_id", row['Customer ID']).eq(user_id,user_id).execute()
-                                st.success("✅ Customer deleted successfully!")
-                                st.rerun()
+                        if st.session_state.get("role") == "md":
+                            if st.button("🗑️ Delete", key=f"delete_{row['Customer ID']}"):
+                                confirm = st.checkbox(f"Confirm delete {row['Name']}")
+                                if confirm:
+                                    supabase.table("customers").delete().eq("customer_id", row['Customer ID']).eq(user_id,user_id).execute()
+                                    st.success("✅ Customer deleted successfully!")
+                                    st.rerun()
+                            else:
+                                st.caption("🔒 Delete (MD only)")
         st.caption(f"Showing {start_idx+1}-{min(end_idx, total_items)} of {total_items} customers.")
 
 # ✅ Edit Customer Form in Right Column
