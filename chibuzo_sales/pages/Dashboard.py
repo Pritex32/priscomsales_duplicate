@@ -1047,9 +1047,9 @@ elif choice == 'Login':
         user_role = st.session_state.get("role", "Employee")  # This comes from the JWT
 
         if user_role == "md":
-            user_name = st.session_state.get("user", {}).get("username", "Unknown User")
+            user_name = st.session_state.get("user", {}).get("username") or st.session_state.get("user_name", "Unknown User")
         else:  # Employee
-            user_name = st.session_state.get("employee_user", {}).get("name", "Unknown User")
+            user_name = st.session_state.get("employee_user", {}).get("name") or st.session_state.get("user_name", "Unknown User")
         
 
         st.markdown(f""" 
@@ -1416,6 +1416,7 @@ with st.sidebar.expander('Submit Feedback'):
 
 
     
+
 
 
 
