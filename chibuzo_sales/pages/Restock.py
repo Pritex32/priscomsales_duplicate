@@ -95,6 +95,10 @@ def decode_jwt(token):
        return None
    
 # Restore login from browser localStorage
+def handle_session_expiration():
+    st.session_state["logged_in"] = False
+    st.session_state["session_expired"] = True
+    
 
 # === Restore Login from JWT ===
 def restore_login_from_jwt():
@@ -123,16 +127,6 @@ def restore_login_from_jwt():
                 st.session_state.clear()
                 st_javascript("""localStorage.removeItem("login_token");""")
                 st.session_state.login_failed = True
-
-
-# Run this first
-
-# === Session Validation ===
-# === Session Validation === # this stops you when you are logged out
-def handle_session_expiration():
-    st.session_state["logged_in"] = False
-    st.session_state["session_expired"] = True
-    st.rerun()# or redirect logic
 
 restore_login_from_jwt()
 
@@ -1044,4 +1038,5 @@ with tab4:
                  data=csv.encode('utf-8'),
                  file_name="restock_records.csv",
                  mime="text/csv")
+
 
