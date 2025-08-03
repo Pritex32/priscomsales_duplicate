@@ -1946,6 +1946,7 @@ with tab3:
 
 
 with tab3:
+    st.markdown("___")
     st.subheader("📂 All Proforma Invoices")
 
     # ✅ Fetch all proformas for the user
@@ -2552,6 +2553,7 @@ with tab5:
             data=csv,
             file_name="sales_records.csv",
             mime="text/csv")
+
 
 
 
