@@ -1841,7 +1841,7 @@ with tab3:
             **Expiry:** {p['expiry_date']}
             """)
 
-        col2, col3 = st.columns([3 , 1])
+            col2, col3 = st.columns([3 , 1])
 
            
 
@@ -2489,6 +2489,7 @@ with tab5:
             data=csv,
             file_name="sales_records.csv",
             mime="text/csv")
+
 
 
 
