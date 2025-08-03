@@ -776,7 +776,7 @@ with tab1:
             "grand_total": grand_total,
             "status": "pending",
             "expiry_date": str(expiry_date),
-            "items": item_data,
+            "items": json.dumps(item_data),
             "notes": notes
         }
 
@@ -2499,6 +2499,7 @@ with tab5:
             data=csv,
             file_name="sales_records.csv",
             mime="text/csv")
+
 
 
 
