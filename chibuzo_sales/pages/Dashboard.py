@@ -152,8 +152,7 @@ if "username" not in st.session_state:
 if "page" not in st.session_state:
     st.session_state.page = "Login"
 
-if not st.session_state.logged_in:
-    restore_login_from_jwt()
+restore_login_from_jwt()
 
 def save_token_to_localstorage(token):
     st_javascript(f"""localStorage.setItem("login_token", "{token}");""",key="saved_token_login_token")
@@ -1416,6 +1415,7 @@ with st.sidebar.expander('Submit Feedback'):
 
 
     
+
 
 
 
