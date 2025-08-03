@@ -1040,7 +1040,7 @@ if selected == 'Filter':
 
 
         # Show filtered table
-        st.dataframe(filtered_df)
+        st.dataframe(filtered_df.head(50))
         # ✅ Add download button (CSV)
         csv_data = filtered_df.to_csv(index=False)
         st.download_button(
@@ -1210,6 +1210,7 @@ if selected =='Delete':
 # Allow duplicates for the same item across different days
 
 # ❌ But no duplicates for the same item on the same day
+
 
 
 
