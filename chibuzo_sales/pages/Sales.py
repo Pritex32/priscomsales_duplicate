@@ -634,12 +634,17 @@ except:
 tenant_name = "My Company"  # default fallback
 try:
     response = supabase.table("users").select("tenant_name").eq("user_id", user_id).single().execute()
-    if response.data and response.data.get("tenant_name"):
-        tenant_name = response.data["tenant_name"].strip()
+    if response.data:
+        db_tenant_name = response.data.get("tenant_name")
+        if db_tenant_name and db_tenant_name.strip():
+            tenant_name = db_tenant_name.strip()
+        else:
+            st.info("⚠️ Kindly set up your receipt invoice (tenant name is empty).")
     else:
-        st.info("⚠️ Kindly set up your receipt invoice.")
+        st.info("⚠️ No record found for this user.")
 except Exception as e:
-    st.error("❌ Failed to fetch tenant name {e}")
+    st.error(f"❌ Failed to fetch tenant name")
+
 
 
 # getting the employee id
@@ -2375,6 +2380,7 @@ with tab5:
             data=csv,
             file_name="sales_records.csv",
             mime="text/csv")
+
 
 
 
