@@ -189,7 +189,8 @@ if st.session_state.get("session_expired", False):
     st.session_state["session_expired"] = False
      # Redirect
     switch_page("Dasboard")
-
+if not st.session_state.get("logged_in"):
+    st.stop()
 # this makes all button green color
 st.markdown("""
     <style>
@@ -215,11 +216,10 @@ st.markdown("""
 
     
 
-if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
-    st.warning("Please log in first.")
-    st.stop()  # this stop the app from running after login expires
 
 
+
+user_name = st.session_state.get("username", "Unknown User")
 user_id = st.session_state.get("user_id")
 if not user_id:
     st.error("❌ No valid user ID in session. Please log in again.")
@@ -231,8 +231,9 @@ except Exception:
     st.error("❌ User ID is not a valid integer.")
     st.stop()
 
-
-# validate user
+if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
+    st.warning("Please log in first.")
+    st.stop()  # this stop the app from running after login expires
 
 
 
