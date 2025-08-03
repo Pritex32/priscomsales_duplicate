@@ -1951,7 +1951,7 @@ with tab3:
 
     st.markdown("___")                 
 
-
+    st.subheader('Pending partial/credit transactions')
     # Pagination setup
     transactions = get_pending_transactions(user_id)
     per_page = 5
@@ -2525,6 +2525,7 @@ with tab5:
             data=csv,
             file_name="sales_records.csv",
             mime="text/csv")
+
 
 
 
