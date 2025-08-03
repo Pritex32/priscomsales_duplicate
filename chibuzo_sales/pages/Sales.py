@@ -205,7 +205,7 @@ st.markdown("""
 
 # === Session Validation === # this stops you when you are logged out
  
- if not st.session_state.get("logged_in"):
+if not st.session_state.get("logged_in"):
     st.stop()  # this stop the app from running after login expires
 
 user_id = st.session_state.get("user_id")
@@ -2330,4 +2330,5 @@ with tab5:
             data=csv,
             file_name="sales_records.csv",
             mime="text/csv")
+
 
