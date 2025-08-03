@@ -188,9 +188,6 @@ st.markdown("""
 
     
 
-if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
-    st.warning("Please log in first.")
-    st.stop(
 
 
 user_id = st.session_state.get("user_id")
@@ -203,6 +200,9 @@ try:
 except Exception:
     st.error("❌ User ID is not a valid integer.")
     st.stop()
+if not st.session_state.get("logged_in") or not st.session_state.get("user_id"):
+    st.warning("Please log in first.")
+    st.stop(
 
 
 # validate user
