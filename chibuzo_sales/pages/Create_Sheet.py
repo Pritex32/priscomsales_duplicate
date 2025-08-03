@@ -45,6 +45,36 @@ import streamlit.components.v1 as components
 
 
 
+#Only show spinner on first load
+if "loaded" not in st.session_state:
+    st.markdown("""
+        <style>
+        .loader {
+          border: 4px solid #f3f3f3;
+          border-top: 4px solid #00FFC6;
+          border-radius: 50%;
+          width: 30px;
+          height: 30px;
+          animation: spin 1s linear infinite;
+          margin: auto;
+          position: relative;
+          top: 50px;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        </style>
+
+        <div class="loader"></div>
+        <h5 style="text-align:center;">Loading PriscomSales App...</h5>
+    """, unsafe_allow_html=True)
+    
+    time.sleep(2)  # Simulate loading time
+    st.session_state.loaded = True
+    st.rerun()  # 🔁 Rerun app to remove loader and show main content
+
 
 jwt_SECRET_KEY = "4606"  # Use env vars in production
 ALGORITHM = "HS256"
@@ -157,36 +187,6 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-
-#Only show spinner on first load
-if "loaded" not in st.session_state:
-    st.markdown("""
-        <style>
-        .loader {
-          border: 4px solid #f3f3f3;
-          border-top: 4px solid #00FFC6;
-          border-radius: 50%;
-          width: 30px;
-          height: 30px;
-          animation: spin 1s linear infinite;
-          margin: auto;
-          position: relative;
-          top: 50px;
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        </style>
-
-        <div class="loader"></div>
-        <h5 style="text-align:center;">Loading PriscomSales App...</h5>
-    """, unsafe_allow_html=True)
-    
-    time.sleep(2)  # Simulate loading time
-    st.session_state.loaded = True
-    st.rerun()  # 🔁 Rerun app to remove loader and show main content
 
 
 
